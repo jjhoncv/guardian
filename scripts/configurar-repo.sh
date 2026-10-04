@@ -19,4 +19,10 @@ JSON
 gh api -X POST "repos/$REPO/environments/production/deployment-branch-policies" \
   -f name=main -f type=branch >/dev/null 2>&1 || true
 
+echo "→ Merge: solo squash, con el título del PR como mensaje (ADR 0013); borra la rama al hacer merge"
+gh api -X PATCH "repos/$REPO" \
+  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
+  -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
+  -F delete_branch_on_merge=true >/dev/null
+
 echo "✓ Listo"
