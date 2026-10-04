@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/jjhoncv/guardian/compare/v0.1.0...v0.2.0) (2026-10-04)
+
+
+### Funcionalidades
+
+* **#7:** seguridad base ([#19](https://github.com/jjhoncv/guardian/issues/19)) ([6eeb551](https://github.com/jjhoncv/guardian/commit/6eeb5517342a5d6f026733718b21060e016c2fab))
+* **#8:** README de la plantilla ([#21](https://github.com/jjhoncv/guardian/issues/21)) ([dbff3ba](https://github.com/jjhoncv/guardian/commit/dbff3ba11160032e70ee4ee7b85b9d0ff3066e6a))
+
 ## 0.1.0 (2026-10-04)
 
 
