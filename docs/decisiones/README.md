@@ -16,3 +16,4 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 | [0010](0010-proyecto-md-y-ejemplo.md) | `PROYECTO.md` del Guardián + ejemplo para proyectos nuevos | Aceptada |
 | [0011](0011-pat-release-please.md) | PAT fine-grained para release-please | Aceptada |
 | [0012](0012-node-24-npm.md) | Node 24 LTS y npm | Aceptada |
+| [0013](0013-squash-merge.md) | Solo squash merge | Aceptada |

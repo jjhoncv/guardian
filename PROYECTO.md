@@ -261,3 +261,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | `PROYECTO.md` del repo es el del Guardián; la plantilla trae `docs/PROYECTO.ejemplo.md` | El Guardián se construye con sus propias reglas |
 | 2026-10-04 | release-please con **PAT fine-grained** (Contents + Pull requests, solo este repo, 90 días) | Los PRs creados con `GITHUB_TOKEN` no disparan el CI |
 | 2026-10-04 | Node 24 LTS + npm | Requisito de Next.js 16; sin herramientas extra |
+| 2026-10-04 | **Solo squash merge**; el título del PR es el mensaje del commit | Con merge commits el CHANGELOG sale duplicado |
