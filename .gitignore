@@ -1,0 +1,26 @@
+# dependencias
+node_modules/
+
+# Next.js / build
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# pruebas
+coverage/
+playwright-report/
+test-results/
+
+# Netlify
+.netlify/
+
+# entorno y secretos
+.env
+.env.*
+!.env.example
+
+# sistema
+.DS_Store
+*.log
