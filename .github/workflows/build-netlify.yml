@@ -1,0 +1,36 @@
+# Build para Netlify sin secretos (el código del repo no corre con tokens). Lo usan Deploy y Release.
+name: Build Netlify
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build para Netlify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx netlify build --offline
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sitio
+          include-hidden-files: true
+          retention-days: 1
+          path: |
+            netlify.toml
+            .next
+            !.next/cache
+            .netlify
+            !.netlify/plugins
+            !.netlify/functions-internal

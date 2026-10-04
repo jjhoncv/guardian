@@ -1,0 +1,56 @@
+# release-please mantiene el PR de release (CHANGELOG + versión). Al hacer merge se crea el release
+# y producción se despliega solo tras la aprobación del Environment `production`.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      creado: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+    steps:
+      # PAT fine-grained (ADR 0011): los PRs creados con GITHUB_TOKEN no disparan el CI.
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+  build:
+    needs: release-please
+    if: needs.release-please.outputs.creado == 'true'
+    uses: ./.github/workflows/build-netlify.yml
+
+  produccion:
+    name: deploy a producción
+    needs: [release-please, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: produccion
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sitio
+      - id: deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+        run: |
+          npx -y netlify-cli@27.10.2 deploy --no-build --dir .next --prod --message "$TAG" --json > deploy.json
+          echo "url=$(jq -r .url deploy.json)" >> "$GITHUB_OUTPUT"

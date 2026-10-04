@@ -16,35 +16,11 @@ concurrency:
 
 jobs:
   build:
-    name: build para Netlify
     # Los PRs de forks y de Dependabot no tienen acceso a los secretos.
     if: >-
       github.event_name == 'push' ||
       (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npx netlify build --offline
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: sitio
-          include-hidden-files: true
-          retention-days: 1
-          path: |
-            netlify.toml
-            .next
-            !.next/cache
-            .netlify
-            !.netlify/plugins
-            !.netlify/functions-internal
+    uses: ./.github/workflows/build-netlify.yml
 
   deploy:
     name: deploy a Netlify
