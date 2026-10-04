@@ -1,0 +1,52 @@
+name: Tarea
+description: Una tarea chica que pone en verde uno o más escenarios BDD del alcance.
+title: "<verbo> <qué>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Sin escenario no hay código.** Si la idea no está en `PROYECTO.md`, no es una tarea: va al Parking lot (sección 15).
+  - type: dropdown
+    id: fase
+    attributes:
+      label: Fase
+      options:
+        - Fase 1
+        - Fase 2
+        - Fase 3
+        - Fase 4
+        - Fase 5
+    validations:
+      required: true
+  - type: textarea
+    id: escenario
+    attributes:
+      label: Escenario BDD
+      description: El escenario del alcance que esta tarea pone en verde.
+      placeholder: |
+        Escenario: ...
+          Dado ...
+          Cuando ...
+          Entonces ...
+      render: gherkin
+    validations:
+      required: true
+  - type: textarea
+    id: que
+    attributes:
+      label: Qué se hace
+      description: Un solo cambio lógico; el PR debería quedar en menos de 300 líneas.
+    validations:
+      required: true
+  - type: textarea
+    id: hecho
+    attributes:
+      label: Criterio de hecho
+      description: Cómo se comprueba que está terminada.
+    validations:
+      required: true
+  - type: textarea
+    id: necesita
+    attributes:
+      label: Qué necesita del dueño
+      description: Cuentas, credenciales o decisiones. Vacío si nada.
