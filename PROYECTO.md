@@ -248,6 +248,8 @@ Escenario: El guardián me avisa
 - Interfaz web propia del guardián (el Sheet y el README alcanzan)
 - Migrar la BD de Sheets a una BD real
 - GitHub App propia para release-please (por ahora: PAT fine-grained limitado al repo, 90 días)
+- Dependabot: ignorar saltos mayores de ESLint hasta que `eslint-config-next` los soporte (2026-10-04: ESLint 10 rompe el lint, PR #23)
+- Script `nuevo-proyecto.sh` que automatice la limpieza de lo heredado al crear un proyecto desde la plantilla (paso 3 del README)
 
 ## 16. Decisiones tomadas
 
