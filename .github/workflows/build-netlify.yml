@@ -29,8 +29,5 @@ jobs:
           retention-days: 1
           path: |
             netlify.toml
-            .next
-            !.next/cache
             .netlify
             !.netlify/plugins
-            !.netlify/functions-internal

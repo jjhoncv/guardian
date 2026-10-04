@@ -47,8 +47,9 @@ jobs:
           ALIAS: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'staging' }}
           SHA: ${{ github.sha }}
         run: |
-          npx -y netlify-cli@27.10.2 deploy --no-build --dir .next --alias "$ALIAS" \
+          npx -y netlify-cli@27.10.2 deploy --no-build --dir .netlify/static --alias "$ALIAS" \
             --message "$ALIAS $SHA" --json > deploy.json
+          jq . deploy.json
           echo "url=$(jq -r .deploy_url deploy.json)" >> "$GITHUB_OUTPUT"
       - if: github.event_name == 'pull_request'
         env:

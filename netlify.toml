@@ -1,4 +1,5 @@
 # Deploys solo desde GitHub Actions (ADR 0008). El sitio no está conectado al repo.
+# Ojo: `netlify build` deja los estáticos en .netlify/static; eso es lo que se publica, no .next.
 [build]
   command = "npm run build"
   publish = ".next"
