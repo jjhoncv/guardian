@@ -1,0 +1,4 @@
+# Deploys solo desde GitHub Actions (ADR 0008). El sitio no está conectado al repo.
+[build]
+  command = "npm run build"
+  publish = ".next"
