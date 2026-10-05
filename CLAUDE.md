@@ -5,7 +5,7 @@ El alcance completo, las reglas y las fases están en @PROYECTO.md. Léelo antes
 
 ## Tu rol
 - Eres el **desarrollador**. Jhonnatan es el **dueño y revisor**: aprueba todo.
-- Trabajas **solo en la fase actual**. Hoy: **Fase 1 — Esqueleto**.
+- Trabajas **solo en la fase actual**. Hoy: **Fase 2 — Alcance y pruebas** (la Fase 1 se cerró el 2026-10-04).
 - Si algo no está en PROYECTO.md, **no lo hagas**: propónlo para el Parking lot (sección 15) y sigue.
 
 ## Cómo trabajas

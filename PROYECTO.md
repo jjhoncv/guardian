@@ -79,7 +79,7 @@ Cada proyecto nuevo se crea clonando esta plantilla.
 | Rama | `feat/12-login`, `fix/15-correo` |
 | Commit | Conventional Commits: `feat(#12): agrega formulario de login` |
 | PR | Plantilla con: ticket, escenario que pone en verde, link al preview, checklist |
-| CHANGELOG | Sección `Unreleased` que se actualiza con cada merge; se congela en cada versión (release-please) |
+| CHANGELOG | Los cambios sin publicar se acumulan en el **PR de release** abierto (hace de `Unreleased`); al fusionarlo se congelan como versión en `CHANGELOG.md` (release-please, ADR 0017) |
 | Release | Versión semántica `v0.3.0` + notas generadas |
 | Pase a producción | El PR de release; requiere tu aprobación |
 | Decisiones | `docs/decisiones/` — una ADR corta por decisión: qué se decidió y por qué |
@@ -168,7 +168,7 @@ El plan se arma con **esta capacidad real**, no con la ideal.
 
 El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mismo a producción, no sirve.
 
-### Fase 1 — Esqueleto
+### Fase 1 — Esqueleto ✅ cerrada el 2026-10-04 (v0.4.0; E1 y E4 en verde, E1 probado con `lista-de-lecturas`)
 - Repo plantilla con README, PROYECTO.md de ejemplo, plantillas de issue y PR, `docs/decisiones/`
 - Pipeline: lint + pruebas
 - Netlify: preview, staging y producción con aprobación
@@ -189,6 +189,8 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 - Claude Code Action: `@claude` en un issue → PR
 - Al hacer merge, Claude toma la siguiente tarea sola
 - Límite de 2 PRs en revisión
+- Claude con identidad y permisos mínimos: abre PRs, no hace merge ni toca producción; `main` pasa a exigir 1 aprobación (ADR 0009)
+- Tope de gasto en la API key de Claude
 
 **Valor:** el proyecto avanza mientras trabajas; tú solo apruebas.
 
@@ -196,6 +198,7 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 - Sincronización GitHub → Sheet del guardián
 - Cálculo diario de salud
 - README como dashboard
+- Service accounts separadas para el Sheet de pruebas y el de producción
 
 **Valor:** sabes en qué fase estás y qué tan sano está el proyecto sin abrir el código.
 
@@ -250,6 +253,7 @@ Escenario: El guardián me avisa
 - Interfaz web propia del guardián (el Sheet y el README alcanzan)
 - Migrar la BD de Sheets a una BD real
 - GitHub App propia para release-please (por ahora: PAT fine-grained limitado al repo, 90 días)
+- Crear el sitio de Netlify automáticamente al inicializar un proyecto (hoy: ~2 min a mano)
 
 ## 16. Decisiones tomadas
 
@@ -267,3 +271,5 @@ Escenario: El guardián me avisa
 | 2026-10-04 | La plantilla trae `docs/CLAUDE.ejemplo.md`; el `CLAUDE.md` del repo es el del Guardián | Un proyecto nuevo no debe heredar las instrucciones del Guardián |
 | 2026-10-04 | Smoke test de producción en la **Fase 2**; aviso de vencimiento de tokens en la **Fase 5** | El smoke test necesita Playwright; los tokens vencen en silencio y rompen releases y deploys |
 | 2026-10-04 | Workflow **Inicializar proyecto**: el repo nuevo arranca con su `PROYECTO.md`, `CLAUDE.md` y `README.md` y sin la historia del Guardián (sale del Parking lot `nuevo-proyecto.sh`) | La plantilla copia todo el repo; limpiar a mano confunde y va contra E1 |
+| 2026-10-04 | El PR de release hace de sección `Unreleased` del CHANGELOG | release-please no escribe esa sección; el PR abierto muestra lo pendiente (ADR 0017) |
+| 2026-10-04 | **Cierre de la Fase 1.** Los puntos de la sección 13 sin fase pasan a las Fases 3 y 4 | Revisión de cierre contra todo el alcance |
