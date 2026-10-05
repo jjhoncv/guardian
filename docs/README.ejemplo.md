@@ -15,7 +15,7 @@ Creado con la plantilla [Guardián](https://github.com/jjhoncv/guardian): alcanc
 
 ## Puesta en marcha (una vez)
 
-1. **Alcance:** completa `PROYECTO.md` y lo que está entre `< >` en `CLAUDE.md` y en este README.
+1. **Alcance:** en Claude Code, dentro de este repo, corre **`/planificar`**: te entrevista, redacta `PROYECTO.md` y abre un PR con los escenarios BDD (en rojo) y el plan de tareas. Al fusionarlo se crean los tickets. Completa también lo que está entre `< >` en `CLAUDE.md` y en este README.
 2. **Netlify:** crea un sitio con *Deploy manually* (sin conectarlo a GitHub) y un *Personal access token* con vencimiento.
 3. **Secretos y variables** (desde tu terminal, nunca en el código):
    ```sh

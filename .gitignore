@@ -27,3 +27,6 @@ test-results/
 
 # playwright-bdd
 .features-gen/
+
+# Claude Code: configuración local de cada persona (las skills sí se versionan)
+.claude/settings.local.json
