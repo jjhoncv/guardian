@@ -30,23 +30,9 @@ Rollback: en Netlify, *Deploys* → deploy anterior de producción → *Publish 
 
 ## Crear un proyecto desde la plantilla
 
-1. **Repo:** *Use this template → Create a new repository* (público: los rulesets y la aprobación de Environments son gratis solo en repos públicos, ADR 0007).
-2. **Alcance:** copia `docs/PROYECTO.ejemplo.md` sobre `PROYECTO.md` y complétalo. El `# título` es el nombre que muestra la página.
-3. **Instrucciones para Claude:** copia `docs/CLAUDE.ejemplo.md` sobre `CLAUDE.md` y completa lo que está entre `< >` (nombre, dueño, fase actual).
-4. **Limpia lo heredado del Guardián:**
-   - borra `CHANGELOG.md` y deja `.release-please-manifest.json` en `{ ".": "0.0.0" }`;
-   - en `package.json`, cambia `name` y deja `version` en `0.0.0`;
-   - en este README, cambia las URLs y los badges.
-5. **Netlify:** crea un sitio con *Deploy manually* (sin conectarlo a GitHub, ADR 0008) y un *Personal access token* con vencimiento.
-6. **Secretos y variables** (desde tu terminal, nunca en el código):
-   ```sh
-   gh variable set NETLIFY_SITE_ID -R <dueño/repo> --body <project-id>
-   gh secret set NETLIFY_AUTH_TOKEN -R <dueño/repo>
-   gh secret set RELEASE_PLEASE_TOKEN -R <dueño/repo>   # PAT fine-grained: solo este repo, Contents + Pull requests (RW), 90 días
-   ```
-7. **Protecciones y tablero:** `scripts/configurar-repo.sh <dueño/repo> <tu-usuario>` antes del primer release. Crea el Environment `production` con aprobación obligatoria, el ruleset de `main` y un tablero de GitHub Projects con el nombre del repo (Por hacer / En curso / En revisión / Hecho). Necesita `gh` con los permisos `repo`, `workflow` y `project` (`gh auth refresh -h github.com -s workflow,project`).
-   - **Paso manual, una vez:** en el tablero, *⋯ → Workflows → Auto-add to project* → filtro `is:issue is:open` → *Save and turn on*, para que cada issue nuevo entre solo (GitHub no permite activarlo por API). Cerrar un issue o fusionar su PR lo pasa solo a *Hecho*.
-8. **Push** de los cambios por PR → staging. Merge del PR de release → aprobación → producción.
+1. **Repo:** *Use this template → Create a new repository*, **público** (los rulesets y la aprobación de Environments son gratis solo en repos públicos, ADR 0007). Se puede hacer desde el celular.
+2. **Inicialización automática** (~1 min): el workflow *Inicializar proyecto* deja `PROYECTO.md`, `CLAUDE.md` y `README.md` propios con el nombre del repo, y borra el CHANGELOG, la versión y las ADRs del Guardián (ADR 0016). La página ya muestra el nombre del proyecto.
+3. **Puesta en marcha:** sigue la sección del mismo nombre en el README del proyecto nuevo: alcance, Netlify, secretos, `scripts/configurar-repo.sh` y primer PR. Mientras falten los secretos, Deploy y Release no hacen nada.
 
 ## Mantenimiento
 
@@ -74,6 +60,7 @@ npm run lint && npm run typecheck && npm test && npm run build
 | CI: lint, typecheck, pruebas, build | `.github/workflows/ci.yml` |
 | Deploy preview / staging (build sin secretos) | `.github/workflows/deploy.yml`, `build-netlify.yml` |
 | Releases + producción con aprobación | `.github/workflows/release.yml`, `release-please-config.json` |
+| Inicialización de un proyecto nuevo | `.github/workflows/inicializar.yml`, `scripts/inicializar-proyecto.sh`, `docs/*.ejemplo.md` |
 | Protecciones y seguridad del repo | `scripts/configurar-repo.sh`, `.github/dependabot.yml` |
 | Next.js 16 + TypeScript + Vitest | `app/`, `lib/` |
 | ADRs | `docs/decisiones/` |

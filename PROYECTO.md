@@ -251,7 +251,6 @@ Escenario: El guardián me avisa
 - Migrar la BD de Sheets a una BD real
 - GitHub App propia para release-please (por ahora: PAT fine-grained limitado al repo, 90 días)
 - Dependabot: ignorar saltos mayores de ESLint hasta que `eslint-config-next` los soporte (2026-10-04: ESLint 10 rompe el lint, PR #23)
-- Script `nuevo-proyecto.sh` que automatice la limpieza de lo heredado al crear un proyecto desde la plantilla (pasos 2 a 4 del README)
 
 ## 16. Decisiones tomadas
 
@@ -268,3 +267,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | **Solo squash merge**; el título del PR es el mensaje del commit | Con merge commits el CHANGELOG sale duplicado |
 | 2026-10-04 | La plantilla trae `docs/CLAUDE.ejemplo.md`; el `CLAUDE.md` del repo es el del Guardián | Un proyecto nuevo no debe heredar las instrucciones del Guardián |
 | 2026-10-04 | Smoke test de producción en la **Fase 2**; aviso de vencimiento de tokens en la **Fase 5** | El smoke test necesita Playwright; los tokens vencen en silencio y rompen releases y deploys |
+| 2026-10-04 | Workflow **Inicializar proyecto**: el repo nuevo arranca con su `PROYECTO.md`, `CLAUDE.md` y `README.md` y sin la historia del Guardián (sale del Parking lot `nuevo-proyecto.sh`) | La plantilla copia todo el repo; limpiar a mano confunde y va contra E1 |
