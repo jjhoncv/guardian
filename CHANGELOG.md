@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/jjhoncv/guardian/compare/v0.3.0...v0.4.0) (2026-10-05)
+
+
+### Funcionalidades
+
+* **#41:** inicializar proyectos nuevos sin la historia del Guardián ([#42](https://github.com/jjhoncv/guardian/issues/42)) ([9c29140](https://github.com/jjhoncv/guardian/commit/9c291406db74ff3d5e62ee5b49601601afa8e5d5))
+
+
+### Correcciones
+
+* **#43:** proyecto nuevo sin ruido el día 1 ([#44](https://github.com/jjhoncv/guardian/issues/44)) ([223044c](https://github.com/jjhoncv/guardian/commit/223044c218f84b719b30d2c68fce4f003031503b))
+* **#47:** ajustes de la prueba de E1 ([#48](https://github.com/jjhoncv/guardian/issues/48)) ([64a494c](https://github.com/jjhoncv/guardian/commit/64a494c106b607dcaafa3edd19fc7eb099abb53c))
+
 ## [0.3.0](https://github.com/jjhoncv/guardian/compare/v0.2.2...v0.3.0) (2026-10-05)
 
 
