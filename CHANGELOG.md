@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/jjhoncv/guardian/compare/v0.4.0...v0.5.0) (2026-10-05)
+
+
+### Funcionalidades
+
+* **#51:** pruebas E2E con Playwright ([#60](https://github.com/jjhoncv/guardian/issues/60)) ([c63f8c0](https://github.com/jjhoncv/guardian/commit/c63f8c08af65702f5e6ec5fa73c3d2cf845f402d))
+* **#52:** escenarios BDD y % de avance ([#62](https://github.com/jjhoncv/guardian/issues/62)) ([5c07d23](https://github.com/jjhoncv/guardian/commit/5c07d23b04dfd149ebd28a1fca23c5004ccd0c11))
+* **#53:** mocks con contratos, fixtures y MSW ([#63](https://github.com/jjhoncv/guardian/issues/63)) ([1ac5f4f](https://github.com/jjhoncv/guardian/commit/1ac5f4fe3468cf1d5ed7289e05b3f1426eab358a))
+* **#54:** chequeo del PR (ticket con escenario y tamaño) ([#64](https://github.com/jjhoncv/guardian/issues/64)) ([859a175](https://github.com/jjhoncv/guardian/commit/859a17552c85434fd0d2444ec7b89e19f2022341))
+* **#55:** smoke test de producción con rollback automático ([#65](https://github.com/jjhoncv/guardian/issues/65)) ([270a089](https://github.com/jjhoncv/guardian/commit/270a0894816e8e1b800c802cc65d58abe056248c))
+
 ## [0.4.0](https://github.com/jjhoncv/guardian/compare/v0.3.0...v0.4.0) (2026-10-05)
 
 
