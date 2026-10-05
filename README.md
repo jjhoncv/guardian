@@ -31,20 +31,20 @@ Rollback: en Netlify, *Deploys* → deploy anterior de producción → *Publish 
 
 1. **Repo:** *Use this template → Create a new repository* (público: los rulesets y la aprobación de Environments son gratis solo en repos públicos, ADR 0007).
 2. **Alcance:** copia `docs/PROYECTO.ejemplo.md` sobre `PROYECTO.md` y complétalo. El `# título` es el nombre que muestra la página.
-3. **Limpia lo heredado del Guardián:**
+3. **Instrucciones para Claude:** copia `docs/CLAUDE.ejemplo.md` sobre `CLAUDE.md` y completa lo que está entre `< >` (nombre, dueño, fase actual).
+4. **Limpia lo heredado del Guardián:**
    - borra `CHANGELOG.md` y deja `.release-please-manifest.json` en `{ ".": "0.0.0" }`;
    - en `package.json`, cambia `name` y deja `version` en `0.0.0`;
-   - en `CLAUDE.md`, ajusta el nombre del proyecto y la fase actual;
    - en este README, cambia las URLs y los badges.
-4. **Netlify:** crea un sitio con *Deploy manually* (sin conectarlo a GitHub, ADR 0008) y un *Personal access token* con vencimiento.
-5. **Secretos y variables** (desde tu terminal, nunca en el código):
+5. **Netlify:** crea un sitio con *Deploy manually* (sin conectarlo a GitHub, ADR 0008) y un *Personal access token* con vencimiento.
+6. **Secretos y variables** (desde tu terminal, nunca en el código):
    ```sh
    gh variable set NETLIFY_SITE_ID -R <dueño/repo> --body <project-id>
    gh secret set NETLIFY_AUTH_TOKEN -R <dueño/repo>
    gh secret set RELEASE_PLEASE_TOKEN -R <dueño/repo>   # PAT fine-grained: solo este repo, Contents + Pull requests (RW), 90 días
    ```
-6. **Protecciones:** `scripts/configurar-repo.sh <dueño/repo> <tu-usuario>` (antes del primer release: crea el Environment `production` con aprobación obligatoria).
-7. **Push** de los cambios por PR → staging. Merge del PR de release → aprobación → producción.
+7. **Protecciones:** `scripts/configurar-repo.sh <dueño/repo> <tu-usuario>` (antes del primer release: crea el Environment `production` con aprobación obligatoria).
+8. **Push** de los cambios por PR → staging. Merge del PR de release → aprobación → producción.
 
 ## Desarrollo local
 
