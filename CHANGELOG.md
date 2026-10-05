@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/jjhoncv/guardian/compare/v0.2.0...v0.2.1) (2026-10-05)
+
+
+### Correcciones
+
+* **#26:** quita netlify-cli de las dependencias ([#27](https://github.com/jjhoncv/guardian/issues/27)) ([37171d3](https://github.com/jjhoncv/guardian/commit/37171d31ba35a6752d6a4364341acd2749eb1b5a))
+
 ## [0.2.0](https://github.com/jjhoncv/guardian/compare/v0.1.0...v0.2.0) (2026-10-04)
 
 
