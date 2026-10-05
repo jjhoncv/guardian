@@ -65,4 +65,5 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | Protecciones y seguridad del repo | `scripts/configurar-repo.sh`, `.github/dependabot.yml` |
 | Next.js 16 + TypeScript + Vitest | `app/`, `lib/` |
 | Escenarios BDD (playwright-bdd) y % de avance | `features/`, `playwright.config.ts`, `scripts/avance.ts` |
+| Mocks: contratos (JSON Schema), fixtures y MSW | `mocks/` |
 | ADRs | `docs/decisiones/` |
