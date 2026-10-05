@@ -9,6 +9,7 @@ Plantilla de GitHub que mantiene el foco y el alcance de proyectos de software: 
 - **Fase actual:** 1 — Esqueleto
 - **Staging:** https://staging--guardian-jjhoncv.netlify.app
 - **Producción:** https://guardian-jjhoncv.netlify.app
+- **Tablero:** https://github.com/users/jjhoncv/projects/1
 - **Alcance y reglas:** [`PROYECTO.md`](PROYECTO.md) · **Decisiones:** [`docs/decisiones/`](docs/decisiones/README.md)
 
 ## Cómo fluye un cambio
@@ -43,7 +44,8 @@ Rollback: en Netlify, *Deploys* → deploy anterior de producción → *Publish 
    gh secret set NETLIFY_AUTH_TOKEN -R <dueño/repo>
    gh secret set RELEASE_PLEASE_TOKEN -R <dueño/repo>   # PAT fine-grained: solo este repo, Contents + Pull requests (RW), 90 días
    ```
-7. **Protecciones:** `scripts/configurar-repo.sh <dueño/repo> <tu-usuario>` (antes del primer release: crea el Environment `production` con aprobación obligatoria).
+7. **Protecciones y tablero:** `scripts/configurar-repo.sh <dueño/repo> <tu-usuario>` antes del primer release. Crea el Environment `production` con aprobación obligatoria, el ruleset de `main` y un tablero de GitHub Projects con el nombre del repo (Por hacer / En curso / En revisión / Hecho). Necesita `gh` con los permisos `repo`, `workflow` y `project` (`gh auth refresh -h github.com -s workflow,project`).
+   - **Paso manual, una vez:** en el tablero, *⋯ → Workflows → Auto-add to project* → filtro `is:issue is:open` → *Save and turn on*, para que cada issue nuevo entre solo (GitHub no permite activarlo por API). Cerrar un issue o fusionar su PR lo pasa solo a *Hecho*.
 8. **Push** de los cambios por PR → staging. Merge del PR de release → aprobación → producción.
 
 ## Mantenimiento

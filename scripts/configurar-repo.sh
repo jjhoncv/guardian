@@ -74,4 +74,31 @@ else
   echo "$RULESET" | gh api -X POST "repos/$REPO/rulesets" --input - >/dev/null
 fi
 
+echo "→ Tablero de GitHub Projects (requiere el permiso 'project' en gh)"
+OWNER="${REPO%%/*}"
+TITULO="${REPO#*/}"
+NUM=$(gh project list --owner "$OWNER" --format json --limit 100 --jq ".projects[] | select(.title == \"$TITULO\") | .number")
+if [ -z "$NUM" ]; then
+  NUM=$(gh project create --owner "$OWNER" --title "$TITULO" --format json --jq .number)
+fi
+gh project link "$NUM" --owner "$OWNER" --repo "$REPO" >/dev/null 2>&1 || true
+# Columnas en español. Se renombran las opciones por defecto conservando su id, para que las
+# automatizaciones de GitHub (issue cerrado / PR fusionado → "Done") sigan apuntando a "Hecho".
+CAMPOS=$(gh project field-list "$NUM" --owner "$OWNER" --format json)
+STATUS_ID=$(jq -r '.fields[] | select(.name == "Status") | .id' <<<"$CAMPOS")
+op() { jq -r --arg a "$1" --arg b "$2" '.fields[] | select(.name == "Status") | .options[] | select(.name == $a or .name == $b) | .id' <<<"$CAMPOS"; }
+TODO=$(op Todo "Por hacer"); CURSO=$(op "In Progress" "En curso"); REV=$(op "-" "En revisión"); HECHO=$(op Done Hecho)
+opcion() { [ -n "$1" ] && printf '{id: "%s", name: "%s", color: %s, description: "%s"}' "$1" "$2" "$3" "$4" \
+                      || printf '{name: "%s", color: %s, description: "%s"}' "$2" "$3" "$4"; }
+gh api graphql -f query="mutation { updateProjectV2Field(input: {fieldId: \"$STATUS_ID\", singleSelectOptions: [
+  $(opcion "$TODO" "Por hacer" GRAY "Backlog de la fase"),
+  $(opcion "$CURSO" "En curso" YELLOW "Rama abierta"),
+  $(opcion "$REV" "En revisión" BLUE "PR esperando al dueño"),
+  $(opcion "$HECHO" "Hecho" GREEN "Fusionado o cerrado")
+]}) { projectV2Field { ... on ProjectV2SingleSelectField { name } } } }" >/dev/null
+for ISSUE in $(gh issue list -R "$REPO" --state open --json url --jq '.[].url'); do
+  gh project item-add "$NUM" --owner "$OWNER" --url "$ISSUE" >/dev/null
+done
+echo "  Tablero: https://github.com/users/$OWNER/projects/$NUM"
+
 echo "✓ Listo"
