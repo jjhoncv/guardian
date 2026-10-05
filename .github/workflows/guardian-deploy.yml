@@ -1,0 +1,95 @@
+# Guardián · Deploy reutilizable: preview por PR (pr-N) y staging en main, en el sitio de Netlify del proyecto
+# (ADR 0008). El build (código del proyecto) corre sin secretos; el deploy usa el token y no ejecuta código del repo.
+name: Guardián · Deploy
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build para Netlify
+    # Sin NETLIFY_SITE_ID no hay a dónde desplegar. Forks y Dependabot no tienen acceso a los secretos.
+    if: >-
+      vars.NETLIFY_SITE_ID != '' && (
+        github.event_name == 'push' ||
+        (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # netlify-cli fijado por lockfile (#73), de una versión confiable del Guardián; se instala fuera del proyecto.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ (job.workflow_repository == github.repository && github.event.pull_request.base.sha) || job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: tools/netlify
+          path: .guardian
+      - run: mv .guardian/tools/netlify "$RUNNER_TEMP/netlify" && rm -rf .guardian && npm ci --prefix "$RUNNER_TEMP/netlify"
+      - run: '"$RUNNER_TEMP/netlify/node_modules/.bin/netlify" build --offline'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sitio
+          include-hidden-files: true
+          retention-days: 1
+          path: |
+            netlify.toml
+            .netlify
+            !.netlify/plugins
+
+  deploy:
+    name: deploy a Netlify
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    environment:
+      name: ${{ github.event_name == 'pull_request' && 'preview' || 'staging' }}
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      # netlify-cli fijado por lockfile (#73), de una versión confiable del Guardián; se instala fuera del proyecto.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ (job.workflow_repository == github.repository && github.event.pull_request.base.sha) || job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: tools/netlify
+          path: .guardian
+      - run: mv .guardian/tools/netlify "$RUNNER_TEMP/netlify" && rm -rf .guardian && npm ci --prefix "$RUNNER_TEMP/netlify"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sitio
+      - id: deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+          ALIAS: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'staging' }}
+          SHA: ${{ github.sha }}
+        run: |
+          "$RUNNER_TEMP/netlify/node_modules/.bin/netlify" deploy --no-build --dir .netlify/static --alias "$ALIAS" \
+            --message "$ALIAS $SHA" --json > deploy.json
+          jq . deploy.json
+          echo "url=$(jq -r .deploy_url deploy.json)" >> "$GITHUB_OUTPUT"
+      - if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.deploy.outputs.url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh pr comment ${{ github.event.number }} --repo "$GITHUB_REPOSITORY" --edit-last --create-if-none \
+            --body "**Preview:** $URL (commit \`${SHA::7}\`)"

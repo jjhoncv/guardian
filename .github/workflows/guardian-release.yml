@@ -1,0 +1,163 @@
+# Guardián · Release reutilizable: release-please mantiene el PR de versión; al fusionarlo se crea el release,
+# producción se despliega con la aprobación del Environment `production` (del proyecto) y corre el smoke test;
+# si falla, rollback automático y un issue `alerta` (sección 8).
+name: Guardián · Release
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    # Uno a la vez: release-please lee el main actual y dos merges seguidos se pisarían.
+    concurrency:
+      group: release-please
+      cancel-in-progress: false
+    timeout-minutes: 5
+    outputs:
+      creado: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+    steps:
+      # Proyecto sin el PAT: release-please espera en vez de fallar.
+      - id: token
+        env:
+          TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: echo "hay=$([ -n "$TOKEN" ] && echo si || echo no)" >> "$GITHUB_OUTPUT"
+      # PAT fine-grained (ADR 0011): los PRs creados con GITHUB_TOKEN no disparan el CI.
+      - id: release
+        if: steps.token.outputs.hay == 'si'
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+  build:
+    name: build para Netlify
+    needs: release-please
+    if: needs.release-please.outputs.creado == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Producción compila exactamente el tag del release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # netlify-cli fijado por lockfile (#73), de esta versión del Guardián; se instala fuera del proyecto.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: tools/netlify
+          path: .guardian
+      - run: mv .guardian/tools/netlify "$RUNNER_TEMP/netlify" && rm -rf .guardian && npm ci --prefix "$RUNNER_TEMP/netlify"
+      - run: '"$RUNNER_TEMP/netlify/node_modules/.bin/netlify" build --offline'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sitio
+          include-hidden-files: true
+          retention-days: 1
+          path: |
+            netlify.toml
+            .netlify
+            !.netlify/plugins
+
+  produccion:
+    name: deploy a producción
+    needs: [release-please, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: produccion
+      cancel-in-progress: false
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      # Este job tiene el token: solo baja tools/netlify (lockfile) de esta versión del Guardián, no código del proyecto.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: tools/netlify
+          path: .guardian
+      - run: mv .guardian/tools/netlify "$RUNNER_TEMP/netlify" && rm -rf .guardian && npm ci --prefix "$RUNNER_TEMP/netlify"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sitio
+      - id: deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+        run: |
+          "$RUNNER_TEMP/netlify/node_modules/.bin/netlify" deploy --no-build --dir .netlify/static --prod --message "$TAG" --json > deploy.json
+          jq . deploy.json
+          echo "url=$(jq -r .url deploy.json)" >> "$GITHUB_OUTPUT"
+
+  smoke:
+    name: smoke test
+    needs: [release-please, produccion]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - env:
+          BASE_URL: ${{ needs.produccion.outputs.url }}
+        run: npx bddgen && npx playwright test --grep @smoke --retries=2
+
+  rollback:
+    name: rollback y alerta
+    needs: [produccion, smoke]
+    if: failure() && needs.smoke.result == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      # Este job tiene el token: solo baja scripts y tools/netlify de esta versión del Guardián.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            tools/netlify
+          path: .guardian
+      - run: npm ci --prefix .guardian/tools/netlify
+      - env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_BIN: .guardian/tools/netlify/node_modules/.bin/netlify
+          SITIO: ${{ vars.NETLIFY_SITE_ID }}
+          URL: ${{ needs.produccion.outputs.url }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: .guardian/scripts/rollback.sh

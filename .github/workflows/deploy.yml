@@ -1,5 +1,3 @@
-# Preview por PR y staging en cada push a main, en un solo sitio de Netlify (ADR 0008).
-# El build (código del PR) corre sin secretos; el deploy usa el token y no ejecuta código del repo.
 name: Deploy
 
 on:
@@ -9,63 +7,13 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    # Sin NETLIFY_SITE_ID (proyecto recién creado) no hay a dónde desplegar.
-    # Los PRs de forks y de Dependabot no tienen acceso a los secretos.
-    if: >-
-      vars.NETLIFY_SITE_ID != '' && (
-        github.event_name == 'push' ||
-        (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
-    uses: ./.github/workflows/build-netlify.yml
-
   deploy:
-    name: deploy a Netlify
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pull-requests: write
-    environment:
-      name: ${{ github.event_name == 'pull_request' && 'preview' || 'staging' }}
-      url: ${{ steps.deploy.outputs.url }}
-    steps:
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-      # netlify-cli fijado por lockfile (#73), tomado de la rama base: un PR no puede cambiar lo que corre con el token.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.base.sha || github.sha }}
-          persist-credentials: false
-          sparse-checkout: tools/netlify
-          path: herramientas
-      - run: npm ci --prefix herramientas/tools/netlify
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: sitio
-      - id: deploy
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
-          ALIAS: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'staging' }}
-          SHA: ${{ github.sha }}
-        run: |
-          herramientas/tools/netlify/node_modules/.bin/netlify deploy --no-build --dir .netlify/static --alias "$ALIAS" \
-            --message "$ALIAS $SHA" --json > deploy.json
-          jq . deploy.json
-          echo "url=$(jq -r .deploy_url deploy.json)" >> "$GITHUB_OUTPUT"
-      - if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          URL: ${{ steps.deploy.outputs.url }}
-          SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          gh pr comment ${{ github.event.number }} --repo "$GITHUB_REPOSITORY" --edit-last --create-if-none \
-            --body "**Preview:** $URL (commit \`${SHA::7}\`)"
+    uses: ./.github/workflows/guardian-deploy.yml
+    secrets: inherit
