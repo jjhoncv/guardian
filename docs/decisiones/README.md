@@ -21,3 +21,6 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 | [0015](0015-smoke-test-y-aviso-de-tokens.md) | Smoke test en la Fase 2 y aviso de tokens en la Fase 5 | Aceptada |
 | [0016](0016-inicializar-proyecto.md) | Inicializar el proyecto con un workflow | Aceptada |
 | [0017](0017-unreleased-es-el-pr-de-release.md) | El PR de release hace de sección `Unreleased` | Aceptada |
+| [0018](0018-bdd-con-playwright-bdd.md) | BDD con playwright-bdd | Aceptada |
+| [0019](0019-plan-aprobado-por-pr.md) | Plan de tareas aprobado por PR, con entrevista | Aceptada |
+| [0020](0020-avance-del-guardian-a-mano.md) | % del Guardián a mano hasta la Fase 4 | Aceptada |
