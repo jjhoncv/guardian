@@ -46,6 +46,15 @@ Rollback: en Netlify, *Deploys* → deploy anterior de producción → *Publish 
 7. **Protecciones:** `scripts/configurar-repo.sh <dueño/repo> <tu-usuario>` (antes del primer release: crea el Environment `production` con aprobación obligatoria).
 8. **Push** de los cambios por PR → staging. Merge del PR de release → aprobación → producción.
 
+## Mantenimiento
+
+Los tokens vencen y nada avisa todavía (llega en la Fase 5). Anota las fechas al crearlos:
+
+| Secreto | Si vence | Renovar |
+|---|---|---|
+| `RELEASE_PLEASE_TOKEN` (90 días) | No se abre ni actualiza el PR de release | Nuevo PAT fine-grained con los mismos permisos → `gh secret set RELEASE_PLEASE_TOKEN` |
+| `NETLIFY_AUTH_TOKEN` | Fallan preview, staging y producción | Nuevo token en Netlify → `gh secret set NETLIFY_AUTH_TOKEN` |
+
 ## Desarrollo local
 
 ```sh

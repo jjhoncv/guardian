@@ -18,3 +18,4 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 | [0012](0012-node-24-npm.md) | Node 24 LTS y npm | Aceptada |
 | [0013](0013-squash-merge.md) | Solo squash merge | Aceptada |
 | [0014](0014-claude-md-de-ejemplo.md) | `CLAUDE.md` de ejemplo para proyectos nuevos | Aceptada |
+| [0015](0015-smoke-test-y-aviso-de-tokens.md) | Smoke test en la Fase 2 y aviso de tokens en la Fase 5 | Aceptada |
