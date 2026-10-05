@@ -63,8 +63,8 @@ RULESET=$(cat <<'JSON'
     { "type": "required_status_checks", "parameters": {
         "strict_required_status_checks_policy": false,
         "required_status_checks": [
-          { "context": "lint, typecheck, pruebas y build", "integration_id": 15368 },
-          { "context": "ticket y escenario", "integration_id": 15368 } ] } }
+          { "context": "ci / lint, typecheck, pruebas y build", "integration_id": 15368 },
+          { "context": "chequeo / ticket y escenario", "integration_id": 15368 } ] } }
   ]
 }
 JSON

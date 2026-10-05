@@ -1,0 +1,36 @@
+# Guardián · Tickets reutilizable: al fusionar el plan aprobado (plan/tareas.json) crea un issue por tarea
+# con su escenario y su fase (ADR 0019). Idempotente.
+name: Guardián · Tickets del plan
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  tickets:
+    name: crear tickets
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: plan
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: scripts
+          path: .guardian
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian/scripts/crear-tickets.ts plan/tareas.json

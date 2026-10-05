@@ -55,20 +55,24 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 
 ## Qué trae
 
+**Workflows reutilizables** (los proyectos los llaman con `uses: jjhoncv/guardian/.github/workflows/<archivo>@vX.Y.Z`; el Guardián se usa a sí mismo con los llamadores `ci.yml`, `chequeo-pr.yml`, `deploy.yml`, `release.yml`, `tickets.yml`):
+
+| Workflow | Qué hace |
+|---|---|
+| `guardian-ci.yml` | Lint, typecheck, pruebas, build, escenarios BDD en Chrome y % de avance |
+| `guardian-chequeo-pr.yml` | Ticket con escenario (bloquea), tamaño (avisa) y plan válido si el PR trae `plan/tareas.json` |
+| `guardian-deploy.yml` | Preview por PR y staging en `main` (build sin secretos; deploy sin código del proyecto) |
+| `guardian-release.yml` | release-please → producción con aprobación → smoke test → rollback y alerta si falla |
+| `guardian-tickets.yml` | Un issue por tarea del plan aprobado |
+
+Cada workflow toma sus scripts y herramientas de **su propia versión** del Guardián (`job.workflow_sha`).
+
 | Pieza | Dónde |
 |---|---|
-| Plantillas de issue (tarea con escenario BDD) y PR | `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md` |
-| CI: lint, typecheck, pruebas, build | `.github/workflows/ci.yml` |
-| Chequeo del PR: ticket con escenario (bloquea) y tamaño (avisa) | `.github/workflows/chequeo-pr.yml`, `scripts/chequeo-pr.ts` |
-| Tickets desde el plan aprobado (`plan/tareas.json` → un issue por tarea) | `.github/workflows/tickets.yml`, `scripts/crear-tickets.ts` |
-| Skill `/planificar`: entrevista, escenarios BDD y plan de tareas por PR | `.claude/skills/planificar/SKILL.md` |
-| Deploy preview / staging (build sin secretos) | `.github/workflows/deploy.yml`, `build-netlify.yml` |
-| Releases + producción con aprobación | `.github/workflows/release.yml`, `release-please-config.json` |
-| Smoke test de producción con rollback automático y alerta | `.github/workflows/smoke.yml` (escenarios `@smoke`) |
+| Scripts de los workflows | `scripts/` (`avance.ts`, `chequeo-pr.ts`, `crear-tickets.ts`, `rollback.sh`) |
 | netlify-cli del CI, fijado por lockfile | `tools/netlify/` |
-| Inicialización de un proyecto nuevo | `.github/workflows/inicializar.yml`, `scripts/inicializar-proyecto.sh`, `docs/*.ejemplo.md` |
-| Protecciones y seguridad del repo | `scripts/configurar-repo.sh`, `.github/dependabot.yml` |
-| Next.js 16 + TypeScript + Vitest | `app/`, `lib/` |
-| Escenarios BDD (playwright-bdd) y % de avance | `features/`, `playwright.config.ts`, `scripts/avance.ts` |
-| Mocks: contratos (JSON Schema), fixtures y MSW | `mocks/` |
+| Protecciones, seguridad y tablero de un repo | `scripts/configurar-repo.sh` |
+| Smoke test manual | `.github/workflows/smoke.yml` |
+| Skill `/planificar` | `.claude/skills/planificar/SKILL.md` |
+| Escenarios BDD y mocks del propio Guardián | `features/`, `mocks/` |
 | ADRs | `docs/decisiones/` |
