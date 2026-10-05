@@ -1,0 +1,44 @@
+# Prueba técnica de #76 (se borra): qué ve un workflow reutilizable llamado desde otro repo personal.
+name: Spike reutilizable
+on:
+  workflow_call:
+    secrets:
+      PRUEBA:
+        required: false
+permissions:
+  contents: read
+jobs:
+  info:
+    name: info
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - env:
+          SECRETO: ${{ secrets.PRUEBA }}
+          VAR: ${{ vars.PRUEBA_VAR }}
+          JOB_WREF: ${{ job.workflow_ref }}
+          JOB_WSHA: ${{ job.workflow_sha }}
+          JOB_WREPO: ${{ job.workflow_repository }}
+          GH_WREF: ${{ github.workflow_ref }}
+          GH_WSHA: ${{ github.workflow_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "secreto presente: $([ -n "$SECRETO" ] && echo si || echo no)"
+          echo "vars.PRUEBA_VAR: ${VAR:-<vacío>}"
+          echo "job.workflow_ref: ${JOB_WREF:-<vacío>}"
+          echo "job.workflow_sha: ${JOB_WSHA:-<vacío>}"
+          echo "job.workflow_repository: ${JOB_WREPO:-<vacío>}"
+          echo "github.workflow_ref: $GH_WREF"
+          echo "github.workflow_sha: $GH_WSHA"
+          echo "github.repository: $REPO"
+          T=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r .value)
+          echo "$T" | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null | jq -c '{job_workflow_ref, job_workflow_sha}' || true
+  entorno:
+    name: entorno
+    needs: info
+    runs-on: ubuntu-latest
+    environment: prueba-spike
+    steps:
+      - run: echo "corrió en el environment del caller"
