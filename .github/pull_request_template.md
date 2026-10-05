@@ -1,5 +1,6 @@
 ## Ticket
 
+<!-- El chequeo del PR exige `Closes #N` con un ticket que tenga escenario BDD (los PRs `docs(...)` están exentos). -->
 Closes #
 
 ## Escenario que pone en verde

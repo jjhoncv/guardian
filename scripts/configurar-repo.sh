@@ -41,7 +41,7 @@ echo "→ GITHUB_TOKEN de solo lectura por defecto; Actions no puede aprobar PRs
 gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=false >/dev/null
 
-echo "→ Ruleset de main: PR obligatorio (0 aprobaciones: el dueño hace el merge) + CI en verde; sin push directo, force push ni borrado"
+echo "→ Ruleset de main: PR obligatorio (0 aprobaciones: el dueño hace el merge) + CI y chequeo del PR en verde; sin push directo, force push ni borrado"
 RULESET_ID=$(gh api "repos/$REPO/rulesets" --jq '.[] | select(.name == "main") | .id')
 RULESET=$(cat <<'JSON'
 {
@@ -63,7 +63,8 @@ RULESET=$(cat <<'JSON'
     { "type": "required_status_checks", "parameters": {
         "strict_required_status_checks_policy": false,
         "required_status_checks": [
-          { "context": "lint, typecheck, pruebas y build", "integration_id": 15368 } ] } }
+          { "context": "lint, typecheck, pruebas y build", "integration_id": 15368 },
+          { "context": "ticket y escenario", "integration_id": 15368 } ] } }
   ]
 }
 JSON

@@ -1,0 +1,35 @@
+# Reglas 1 y 3 (PROYECTO.md): el PR apunta a un ticket con escenario BDD (bloquea) y es chico (avisa).
+name: Chequeo del PR
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  chequeo:
+    name: ticket y escenario
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # El chequeo corre con el código de la rama base: un PR no puede modificar su propio chequeo.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          sparse-checkout: scripts
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f scripts/chequeo-pr.ts ]; then
+            node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/chequeo-pr.ts
+          else
+            echo "La rama base aún no tiene scripts/chequeo-pr.ts; se omite."
+          fi

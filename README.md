@@ -59,6 +59,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 |---|---|
 | Plantillas de issue (tarea con escenario BDD) y PR | `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md` |
 | CI: lint, typecheck, pruebas, build | `.github/workflows/ci.yml` |
+| Chequeo del PR: ticket con escenario (bloquea) y tamaño (avisa) | `.github/workflows/chequeo-pr.yml`, `scripts/chequeo-pr.ts` |
 | Deploy preview / staging (build sin secretos) | `.github/workflows/deploy.yml`, `build-netlify.yml` |
 | Releases + producción con aprobación | `.github/workflows/release.yml`, `release-please-config.json` |
 | Inicialización de un proyecto nuevo | `.github/workflows/inicializar.yml`, `scripts/inicializar-proyecto.sh`, `docs/*.ejemplo.md` |
