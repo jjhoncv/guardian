@@ -3,15 +3,24 @@
 # recién con todo listo crea el sitio, el repo, los secretos, sube el esqueleto y configura protecciones.
 # Así ningún workflow corre sin llaves.
 #
-# Uso:  scripts/nuevo-proyecto.sh <nombre-del-repo> [--revisar]
+# Uso:  scripts/nuevo-proyecto.sh <slug> [--alcance <PROYECTO.md>] [--revisar]
+#   --alcance   el PROYECTO.md que dejó /guardian-idea: el proyecto nace con ese alcance y su título es el nombre.
 #   --revisar   solo el Paso 0: dice qué hay y qué falta, sin crear nada.
 # Se puede volver a correr: salta lo que ya existe.
 # Los tokens se escriben ocultos y van directo a GitHub Secrets; no se guardan en disco.
 set -euo pipefail
 
-SLUG="${1:-}"
-MODO="${2:-}"
-[[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "Uso: $0 <nombre-del-repo en minúsculas-con-guiones> [--revisar]"; exit 2; }
+SLUG="${1:-}"; shift || true
+MODO=""; ALCANCE=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --revisar) MODO=--revisar ;;
+    --alcance) ALCANCE="${2:-}"; shift ;;
+    *) echo "Opción desconocida: $1"; exit 2 ;;
+  esac
+  shift
+done
+[[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "Uso: $0 <slug en minúsculas-con-guiones> [--alcance <PROYECTO.md>] [--revisar]"; exit 2; }
 
 GUARDIAN=jjhoncv/guardian
 SKELETON=jjhoncv/guardian-skeleton
@@ -23,8 +32,12 @@ falta() { printf '  ❌ %s\n' "$1"; FALTAN=$((FALTAN + 1)); }
 info()  { printf '  •  %s\n' "$1"; }
 titulo(){ printf '\n== %s\n' "$1"; }
 
-# "lista-de-lecturas" → "Lista de lecturas"
+# El nombre sale del título del alcance; sin alcance, del slug ("lista-de-lecturas" → "Lista de lecturas").
 NOMBRE=$(echo "$SLUG" | tr '-' ' ' | awk '{ $1 = toupper(substr($1,1,1)) substr($1,2); print }')
+if [ -n "$ALCANCE" ] && [ -f "$ALCANCE" ]; then
+  TITULO=$(grep -m1 -E '^#[[:space:]]+' "$ALCANCE" | sed -E 's/^#[[:space:]]+//; s/[[:space:]]+$//')
+  [ -n "$TITULO" ] && NOMBRE="$TITULO"
+fi
 
 # ───────────────────────── Paso 0: qué hay y qué falta ─────────────────────────
 titulo "Paso 0 · Revisión (no crea nada)"
@@ -48,6 +61,17 @@ if [ -z "$VERSION" ]; then falta "no se encontró un release de $GUARDIAN"
 elif gh api "repos/$GUARDIAN/contents/.github/workflows/guardian-ci.yml?ref=$VERSION" >/dev/null 2>&1; then ok "versión del Guardián a usar: $VERSION"
 else falta "el último release del Guardián ($VERSION) no tiene los workflows reutilizables: publica uno nuevo"; fi
 gh repo view "$SKELETON" >/dev/null 2>&1 && ok "esqueleto disponible: $SKELETON" || falta "no existe $SKELETON"
+if [ -z "$ALCANCE" ]; then
+  info "sin --alcance: el proyecto nace con PROYECTO.md en blanco (lo recomendado es /guardian-idea antes)"
+elif [ ! -f "$ALCANCE" ]; then
+  falta "no existe el alcance: $ALCANCE"
+elif [ -z "${TITULO:-}" ]; then
+  falta "el alcance no tiene título (# Nombre del proyecto): $ALCANCE"
+elif grep -qE '<(nombre|entregable|idea)>|Qué duele hoy y a quién\.' "$ALCANCE"; then
+  falta "el alcance todavía tiene textos de plantilla: complétalo con /guardian-idea"
+else
+  ok "alcance: $ALCANCE → «${NOMBRE}»"
+fi
 
 EXISTE_REPO=no; VACIO=si; HAY_SITIO=no; HAY_TOKEN_NETLIFY=no; HAY_PAT=no
 if gh repo view "$REPO" >/dev/null 2>&1; then
@@ -153,6 +177,7 @@ else
     sed -i.bak -e "s|__NOMBRE__|$NOMBRE|g" -e "s|__SLUG__|$SLUG|g" -e "s|__REPO__|$REPO|g" \
                -e "s|__SITIO__|$SITIO|g" -e "s|__GUARDIAN__|$VERSION|g" "$f" && rm -f "$f.bak"
   done
+  [ -n "$ALCANCE" ] && cp "$ALCANCE" "$TMP/p/PROYECTO.md"
   git -C "$TMP/p" init -q -b main
   git -C "$TMP/p" add -A
   git -C "$TMP/p" commit -q -m "chore: crea $SLUG con el Guardián $VERSION (guardian-skeleton)"
@@ -187,5 +212,5 @@ cat <<TXT
 
   Siguientes pasos:
   1. Tablero (una vez): Projects → $SLUG → ⋯ → Workflows → Auto-add to project → filtro is:issue is:open → Save and turn on.
-  2. Abre Claude Code en $DESTINO y corre /planificar.
+  2. Abre Claude Code en $DESTINO y corre /guardian-planificar (y /guardian para ver el estado).
 TXT
