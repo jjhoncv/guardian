@@ -1,6 +1,7 @@
 // Crea un issue por tarea del plan aprobado (plan/tareas.json, ADR 0019). Idempotente: cada issue
 // lleva una marca con el id de la tarea y no se vuelve a crear.
 // En el CI: node scripts/crear-tickets.ts plan/tareas.json  (usa $GITHUB_REPOSITORY y $GITHUB_TOKEN)
+// Solo validar (sin tocar GitHub): node scripts/crear-tickets.ts plan/tareas.json --validar
 import { appendFileSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
@@ -64,6 +65,10 @@ async function main() {
   if (errores.length) {
     for (const e of errores) console.log(`::error title=Plan inválido::${e}`);
     process.exitCode = 1;
+    return;
+  }
+  if (process.argv.includes("--validar")) {
+    console.log(`Plan válido: ${plan.fases.length} fases, ${plan.tareas.length} tareas.`);
     return;
   }
   const existentes: string[] = [];
