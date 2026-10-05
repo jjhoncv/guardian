@@ -12,6 +12,10 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    # Uno a la vez: release-please lee el main actual y dos merges seguidos se pisarían.
+    concurrency:
+      group: release-please
+      cancel-in-progress: false
     timeout-minutes: 5
     outputs:
       creado: ${{ steps.release.outputs.release_created }}
@@ -27,6 +31,9 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.creado == 'true'
     uses: ./.github/workflows/build-netlify.yml
+    with:
+      # Producción compila exactamente el tag del release, no el commit que disparó este run.
+      ref: ${{ needs.release-please.outputs.tag }}
 
   produccion:
     name: deploy a producción
