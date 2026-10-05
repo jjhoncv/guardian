@@ -249,7 +249,7 @@ Escenario: El guardián me avisa
 - Migrar la BD de Sheets a una BD real
 - GitHub App propia para release-please (por ahora: PAT fine-grained limitado al repo, 90 días)
 - Dependabot: ignorar saltos mayores de ESLint hasta que `eslint-config-next` los soporte (2026-10-04: ESLint 10 rompe el lint, PR #23)
-- Script `nuevo-proyecto.sh` que automatice la limpieza de lo heredado al crear un proyecto desde la plantilla (paso 3 del README)
+- Script `nuevo-proyecto.sh` que automatice la limpieza de lo heredado al crear un proyecto desde la plantilla (pasos 2 a 4 del README)
 
 ## 16. Decisiones tomadas
 
@@ -264,3 +264,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | release-please con **PAT fine-grained** (Contents + Pull requests, solo este repo, 90 días) | Los PRs creados con `GITHUB_TOKEN` no disparan el CI |
 | 2026-10-04 | Node 24 LTS + npm | Requisito de Next.js 16; sin herramientas extra |
 | 2026-10-04 | **Solo squash merge**; el título del PR es el mensaje del commit | Con merge commits el CHANGELOG sale duplicado |
+| 2026-10-04 | La plantilla trae `docs/CLAUDE.ejemplo.md`; el `CLAUDE.md` del repo es el del Guardián | Un proyecto nuevo no debe heredar las instrucciones del Guardián |
