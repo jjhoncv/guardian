@@ -1,7 +1,7 @@
 # 0010. `PROYECTO.md` del Guardián + ejemplo para proyectos nuevos
 
 - **Fecha:** 2026-10-04
-- **Estado:** Aceptada
+- **Estado:** Reemplazada por 0021
 
 ## Contexto
 

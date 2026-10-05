@@ -1,7 +1,7 @@
 # 0016. Inicializar el proyecto con un workflow
 
 - **Fecha:** 2026-10-04
-- **Estado:** Aceptada (automatiza lo que 0010 y 0014 dejaban como paso manual)
+- **Estado:** Reemplazada por 0021
 
 ## Contexto
 

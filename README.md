@@ -28,11 +28,22 @@ Issue (escenario BDD) → rama feat/N-slug → PR chico → CI + preview pr-N
 
 Rollback: **automático** si falla el smoke test después de un release (abre un issue `alerta`). A mano: en Netlify, *Deploys* → deploy anterior de producción → *Publish deploy*.
 
-## Crear un proyecto desde la plantilla
+## Crear un proyecto
 
-1. **Repo:** *Use this template → Create a new repository*, **público** (los rulesets y la aprobación de Environments son gratis solo en repos públicos, ADR 0007). Se puede hacer desde el celular.
-2. **Inicialización automática** (~1 min): el workflow *Inicializar proyecto* deja `PROYECTO.md`, `CLAUDE.md` y `README.md` propios con el nombre del repo, y borra el CHANGELOG, la versión y las ADRs del Guardián (ADR 0016). La página ya muestra el nombre del proyecto.
-3. **Puesta en marcha:** sigue la sección del mismo nombre en el README del proyecto nuevo: alcance, Netlify, secretos, `scripts/configurar-repo.sh` y primer PR. Mientras falten los secretos, Deploy y Release no hacen nada.
+En tu terminal, desde este repo:
+
+```sh
+scripts/nuevo-proyecto.sh mi-proyecto --revisar   # Paso 0: revisa qué hay y qué falta, sin crear nada
+scripts/nuevo-proyecto.sh mi-proyecto             # crea todo
+```
+
+1. **Paso 0:** revisa `gh` y sus permisos (`repo`, `workflow`, `project`), la versión del Guardián y el esqueleto; te dice qué te va a pedir y dónde se saca.
+2. Pide el **token de Netlify** (oculto), lo valida y **crea el sitio** `mi-proyecto-<dueño>`.
+3. Crea el **repo**, guarda los secretos y pide un **PAT solo para ese repo** (lo valida).
+4. Recién entonces sube **[guardian-skeleton](https://github.com/jjhoncv/guardian-skeleton)** con el nombre del proyecto, configura protecciones y tablero, y verifica staging.
+5. Siguiente paso: activar *Auto-add* en el tablero (filtro `is:issue is:open`) y correr **`/planificar`** en Claude Code dentro del proyecto.
+
+El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjhoncv/guardian/.github/workflows/guardian-ci.yml@vX.Y.Z`); para recibir mejoras se sube la versión (Dependabot lo propone). Si se corta, vuelve a correr el script: salta lo hecho.
 
 ## Mantenimiento
 
@@ -71,6 +82,7 @@ Cada workflow toma sus scripts y herramientas de **su propia versión** del Guar
 |---|---|
 | Scripts de los workflows | `scripts/` (`avance.ts`, `chequeo-pr.ts`, `crear-tickets.ts`, `rollback.sh`) |
 | netlify-cli del CI, fijado por lockfile | `tools/netlify/` |
+| Crear un proyecto (Paso 0 + infraestructura + esqueleto) | `scripts/nuevo-proyecto.sh` |
 | Protecciones, seguridad y tablero de un repo | `scripts/configurar-repo.sh` |
 | Smoke test manual | `.github/workflows/smoke.yml` |
 | Skill `/planificar` | `.claude/skills/planificar/SKILL.md` |
