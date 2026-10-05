@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://github.com/jjhoncv/guardian/compare/v0.5.0...v0.6.0) (2026-10-05)
+
+
+### Funcionalidades
+
+* **#56:** skill /planificar ([#71](https://github.com/jjhoncv/guardian/issues/71)) ([66deb71](https://github.com/jjhoncv/guardian/commit/66deb71f8e841e4b663dccff4103b67da8db7363))
+* **#69:** tickets desde el plan aprobado ([#70](https://github.com/jjhoncv/guardian/issues/70)) ([172e20d](https://github.com/jjhoncv/guardian/commit/172e20de69c612c7fd477806b499413acc364e18))
+* **#76:** workflows reutilizables del Guardián ([#81](https://github.com/jjhoncv/guardian/issues/81)) ([df5233c](https://github.com/jjhoncv/guardian/commit/df5233c6589ab684f6ae413650b7fe8e93f62c09))
+
+
+### Correcciones
+
+* **#73:** netlify-cli y sus dependencias fijados por lockfile ([#74](https://github.com/jjhoncv/guardian/issues/74)) ([ad6816b](https://github.com/jjhoncv/guardian/commit/ad6816b238abb11567dd7394ede45efc48a3c499))
+* **#75:** quita .features-gen del repo ([#80](https://github.com/jjhoncv/guardian/issues/80)) ([60249ce](https://github.com/jjhoncv/guardian/commit/60249cef538a8fffc3251ab4dc0eaf5bb2f6e2b8))
+* **#82:** sharp parchado en tools/netlify ([#83](https://github.com/jjhoncv/guardian/issues/83)) ([8037296](https://github.com/jjhoncv/guardian/commit/8037296cc36442e35c2e2e1e0bdfeb05cf6ebfe4))
+
 ## [0.5.0](https://github.com/jjhoncv/guardian/compare/v0.4.0...v0.5.0) (2026-10-05)
 
 
