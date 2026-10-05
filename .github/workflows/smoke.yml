@@ -48,13 +48,21 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-      # Sin checkout: este job tiene el token de Netlify y no ejecuta código del repo.
+      # Este job tiene el token de Netlify: solo baja tools/netlify (lockfile), no el código del repo.
+      # netlify-cli fijado por lockfile (#73), tomado de main: un PR no puede cambiar lo que corre con el token.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: tools/netlify
+          path: herramientas
+      - run: npm ci --prefix herramientas/tools/netlify
       - id: rollback
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           SITIO: ${{ vars.NETLIFY_SITE_ID }}
         run: |
-          api() { npx -y netlify-cli@27.10.2 api "$1" --data "$2"; }
+          api() { herramientas/tools/netlify/node_modules/.bin/netlify api "$1" --data "$2"; }
           ACTUAL=$(api getSite "{\"site_id\":\"$SITIO\"}" | jq -r '.published_deploy.id')
           ANTERIOR=$(api listSiteDeploys "{\"site_id\":\"$SITIO\",\"production\":true,\"state\":\"ready\",\"per_page\":20}" \
             | jq -r --arg a "$ACTUAL" '[.[] | select(.id != $a)] | sort_by(.created_at) | reverse | .[0].id // empty')

@@ -58,6 +58,14 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
+      # netlify-cli fijado por lockfile (#73), tomado de main: un PR no puede cambiar lo que corre con el token.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: tools/netlify
+          path: herramientas
+      - run: npm ci --prefix herramientas/tools/netlify
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: sitio
@@ -67,7 +75,7 @@ jobs:
           NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
           TAG: ${{ needs.release-please.outputs.tag }}
         run: |
-          npx -y netlify-cli@27.10.2 deploy --no-build --dir .netlify/static --prod --message "$TAG" --json > deploy.json
+          herramientas/tools/netlify/node_modules/.bin/netlify deploy --no-build --dir .netlify/static --prod --message "$TAG" --json > deploy.json
           jq . deploy.json
           echo "url=$(jq -r .url deploy.json)" >> "$GITHUB_OUTPUT"
 
