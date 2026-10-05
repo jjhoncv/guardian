@@ -14,3 +14,9 @@ La Fase 2 necesita BDD (escenarios Gherkin) y E2E con Playwright. Las opciones e
 ## Por qué
 
 Un solo runner y un solo navegador en el CI. Cucumber.js sumaría otro runner, otra configuración y otra integración con el navegador.
+
+## Cómo se mide el avance
+
+- Un escenario cuyos pasos no existen se **salta** (`missingSteps: "skip-scenario"`): cuenta en rojo como *pendiente* y no bloquea el merge.
+- Un escenario con pasos implementados corre en el check obligatorio del CI: si falla, bloquea.
+- `scripts/avance.ts` publica en el resumen del CI «X de Y escenarios en verde (Z %)». Los escenarios `@plantilla` (base de la plantilla, no del alcance) no cuentan.

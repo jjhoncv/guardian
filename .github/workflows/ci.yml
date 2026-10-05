@@ -37,6 +37,9 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
+      # % de escenarios del alcance en verde, en el resumen del run (los pendientes no bloquean).
+      - if: always()
+        run: test -f test-results/resultados.json && npm run -s avance || echo "Sin reporte de escenarios."
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

@@ -24,3 +24,6 @@ test-results/
 # sistema
 .DS_Store
 *.log
+
+# playwright-bdd
+.features-gen/

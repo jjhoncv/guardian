@@ -1,11 +1,16 @@
 import { readFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { createBdd } from "playwright-bdd";
 
-// E1 — la página publicada muestra el nombre del PROYECTO.md, sea cual sea.
+const { Given, Then } = createBdd();
+
 const nombre = readFileSync("PROYECTO.md", "utf8").match(/^#[ \t]+(.+?)[ \t]*$/m)?.[1] ?? "";
 
-test("la página de inicio muestra el nombre del proyecto @smoke", async ({ page }) => {
+Given("que abro la página de inicio", async ({ page }) => {
   await page.goto("/");
+});
+
+Then("veo el nombre del proyecto como título", async ({ page }) => {
   await expect(page).toHaveTitle(nombre);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(nombre);
 });
