@@ -1,8 +1,11 @@
 {
   "name": "herramientas-netlify",
   "private": true,
-  "description": "netlify-cli con sus dependencias fijadas (lockfile) para el build y el deploy del CI (#73).",
+  "description": "netlify-cli con sus dependencias fijadas (lockfile) para el build y el deploy del CI (#73). sharp forzado a una versión parchada (alertas de Dependabot).",
   "dependencies": {
     "netlify-cli": "27.10.2"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
   }
 }
