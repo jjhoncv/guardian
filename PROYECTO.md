@@ -48,16 +48,19 @@ Cada proyecto nuevo se crea con `scripts/nuevo-proyecto.sh <nombre>`: primero re
 ## 5. Ciclo de vida de un proyecto
 
 ```
-0. Idea
-1. Alcance       → PROYECTO.md del proyecto: qué es, qué NO es, valor, criterios de aceptación
-2. Escenarios    → Criterios convertidos en BDD (Dado / Cuando / Entonces). Todos en rojo.
-3. Esqueleto     → Repo + pipeline + Netlify. Página vacía con el nombre del proyecto EN PRODUCCIÓN.
-4. Plan          → Máximo 5 fases. Cada fase = un entregable usable en producción.
-                   Cada tarea = un ticket que pone en verde uno o más escenarios.
+0. Idea          → /guardian-idea (en el Guardián): ¿prueba o real?, ficha de 1 página, nombre libre. No crea nada.
+1. Alcance       → /guardian-idea: PROYECTO.md con qué es, qué NO es, valor, cómo sé que funcionó, límites, fases y criterios.
+2. Esqueleto     → scripts/nuevo-proyecto.sh <slug> --alcance …: sitio, repo, secretos y protecciones;
+                   el proyecto nace con su alcance y su página EN STAGING.
+3. Escenarios    → /guardian-planificar (en el proyecto): criterios → BDD (Dado / Cuando / Entonces). Todos en rojo.
+4. Plan          → /guardian-planificar: máximo 5 fases; cada tarea pone en verde uno o más escenarios.
+                   El plan se aprueba por PR; al fusionarlo se crean los tickets.
 5. Ciclo diario  → Claude toma ticket → PR chico → pruebas → preview → tú apruebas → staging
-6. Release       → PR de release con CHANGELOG = ticket de pase → tú apruebas → producción
+6. Release       → PR de release con CHANGELOG = ticket de pase → tú apruebas → producción → smoke test
 7. Cierre        → Fase cerrada → revisión del Parking lot → siguiente fase o cierre consciente
 ```
+
+`/guardian` muestra en cualquier momento en qué paso estás, qué falta y el siguiente paso.
 
 **El avance del proyecto = % de escenarios BDD + E2E en verde.** No lo que digan los tickets.
 
@@ -280,3 +283,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | Chequeo de PR: **bloquea** sin ticket o sin escenario, **avisa** por tamaño; rollback automático + issue si falla el smoke test | Reglas 1 y 3 de la sección 6 y sección 8 |
 | 2026-10-04 | El % del propio Guardián se lleva a mano en PROYECTO.md hasta la Fase 4 | Sus escenarios son del flujo, no de una página (ADR 0020) |
 | 2026-10-05 | **Plataforma + esqueleto:** los proyectos llaman a los workflows reutilizables del Guardián (`@vX.Y.Z`) y nacen de `guardian-skeleton` con `nuevo-proyecto.sh` (Paso 0, sitio de Netlify automático, un PAT por proyecto) | La plantilla copiaba la maquinaria del Guardián y las copias quedaban congeladas (ADR 0021) |
+| 2026-10-05 | **Paso 0 antes de crear nada:** `/guardian-idea` (ficha + alcance + nombre) → `nuevo-proyecto.sh --alcance` → `/guardian-planificar`; comandos con prefijo `guardian` y `/guardian` como menú | Se estaba creando la infraestructura antes de saber de qué trataba el proyecto (ADR 0022) |
