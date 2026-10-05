@@ -50,6 +50,7 @@ nvm use        # Node 24 (.nvmrc)
 npm ci
 npm run dev    # http://localhost:3000
 npm run lint && npm run typecheck && npm test && npm run build
+npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en verde
 ```
 
 ## Qué trae
@@ -63,4 +64,5 @@ npm run lint && npm run typecheck && npm test && npm run build
 | Inicialización de un proyecto nuevo | `.github/workflows/inicializar.yml`, `scripts/inicializar-proyecto.sh`, `docs/*.ejemplo.md` |
 | Protecciones y seguridad del repo | `scripts/configurar-repo.sh`, `.github/dependabot.yml` |
 | Next.js 16 + TypeScript + Vitest | `app/`, `lib/` |
+| Escenarios BDD (playwright-bdd) y % de avance | `features/`, `playwright.config.ts`, `scripts/avance.ts` |
 | ADRs | `docs/decisiones/` |

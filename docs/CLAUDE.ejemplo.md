@@ -22,7 +22,8 @@ Se creó con la plantilla **Guardián**. El alcance, las fases y los criterios d
 
 ## Stack (heredado de la plantilla)
 - Next.js 16 + TypeScript, Node 24 (`.nvmrc`), npm
-- Vitest (TDD); BDD y E2E con Playwright cuando la plantilla los traiga
+- Vitest (TDD) para unidades; BDD + E2E con playwright-bdd: `features/*.feature` (Gherkin en español) y pasos en `features/steps/`
+- Un escenario sin pasos implementados queda **pendiente** (rojo, no bloquea el CI); al implementar sus pasos debe pasar. Avance: `npm run e2e && npm run avance`
 - GitHub Actions + Netlify: preview por PR, staging = `main`, producción = release aprobado
 - release-please para CHANGELOG y versiones
 
