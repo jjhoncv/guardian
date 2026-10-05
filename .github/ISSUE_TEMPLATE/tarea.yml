@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Sin escenario no hay código.** Si la idea no está en `PROYECTO.md`, no es una tarea: va al Parking lot (sección 15).
+        **Sin escenario no hay código.** Si la idea no está en `PROYECTO.md`, no es una tarea: va al Parking lot de `PROYECTO.md`.
   - type: dropdown
     id: fase
     attributes:
