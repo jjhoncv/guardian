@@ -26,7 +26,7 @@ Issue (escenario BDD) → rama feat/N-slug → PR chico → CI + preview pr-N
 | Staging | Cada merge a `main` | `https://staging--<sitio>.netlify.app` |
 | Producción | Release aprobado | `https://<sitio>.netlify.app` |
 
-Rollback: en Netlify, *Deploys* → deploy anterior de producción → *Publish deploy*.
+Rollback: **automático** si falla el smoke test después de un release (abre un issue `alerta`). A mano: en Netlify, *Deploys* → deploy anterior de producción → *Publish deploy*.
 
 ## Crear un proyecto desde la plantilla
 
@@ -62,6 +62,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | Chequeo del PR: ticket con escenario (bloquea) y tamaño (avisa) | `.github/workflows/chequeo-pr.yml`, `scripts/chequeo-pr.ts` |
 | Deploy preview / staging (build sin secretos) | `.github/workflows/deploy.yml`, `build-netlify.yml` |
 | Releases + producción con aprobación | `.github/workflows/release.yml`, `release-please-config.json` |
+| Smoke test de producción con rollback automático y alerta | `.github/workflows/smoke.yml` (escenarios `@smoke`) |
 | Inicialización de un proyecto nuevo | `.github/workflows/inicializar.yml`, `scripts/inicializar-proyecto.sh`, `docs/*.ejemplo.md` |
 | Protecciones y seguridad del repo | `scripts/configurar-repo.sh`, `.github/dependabot.yml` |
 | Next.js 16 + TypeScript + Vitest | `app/`, `lib/` |

@@ -49,6 +49,8 @@ jobs:
     concurrency:
       group: produccion
       cancel-in-progress: false
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
@@ -68,3 +70,15 @@ jobs:
           npx -y netlify-cli@27.10.2 deploy --no-build --dir .netlify/static --prod --message "$TAG" --json > deploy.json
           jq . deploy.json
           echo "url=$(jq -r .url deploy.json)" >> "$GITHUB_OUTPUT"
+
+  # Sección 8: smoke test contra producción; si falla, rollback automático y alerta.
+  smoke:
+    needs: produccion
+    uses: ./.github/workflows/smoke.yml
+    with:
+      url: ${{ needs.produccion.outputs.url }}
+      rollback: true
+    secrets: inherit
+    permissions:
+      contents: read
+      issues: write

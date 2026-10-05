@@ -1,0 +1,82 @@
+# Smoke test de producción (sección 8): los escenarios @smoke contra la URL publicada.
+# Si fallan: rollback al deploy de producción anterior en Netlify y un issue de alerta (D4).
+# Lo llama Release después de cada deploy; también se puede correr a mano (Actions → Smoke test).
+name: Smoke test
+
+on:
+  workflow_call:
+    inputs:
+      url: { type: string, required: true }
+      rollback: { type: boolean, default: true }
+  workflow_dispatch:
+    inputs:
+      url: { description: "URL a probar (p. ej. la de producción)", type: string, required: true }
+      rollback: { description: "Si falla, volver al deploy de producción anterior", type: boolean, default: false }
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - env:
+          BASE_URL: ${{ inputs.url }}
+        run: npx bddgen && npx playwright test --grep @smoke --retries=2
+
+  rollback:
+    name: rollback y alerta
+    needs: smoke
+    if: failure() && inputs.rollback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      # Sin checkout: este job tiene el token de Netlify y no ejecuta código del repo.
+      - id: rollback
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          SITIO: ${{ vars.NETLIFY_SITE_ID }}
+        run: |
+          api() { npx -y netlify-cli@27.10.2 api "$1" --data "$2"; }
+          ACTUAL=$(api getSite "{\"site_id\":\"$SITIO\"}" | jq -r '.published_deploy.id')
+          ANTERIOR=$(api listSiteDeploys "{\"site_id\":\"$SITIO\",\"production\":true,\"state\":\"ready\",\"per_page\":20}" \
+            | jq -r --arg a "$ACTUAL" '[.[] | select(.id != $a)] | sort_by(.created_at) | reverse | .[0].id // empty')
+          if [ -z "$ANTERIOR" ]; then echo "No hay deploy anterior al cual volver."; exit 1; fi
+          api restoreSiteDeploy "{\"site_id\":\"$SITIO\",\"deploy_id\":\"$ANTERIOR\"}" > /dev/null
+          echo "actual=$ACTUAL" >> "$GITHUB_OUTPUT"
+          echo "anterior=$ANTERIOR" >> "$GITHUB_OUTPUT"
+      - if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ inputs.url }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ACTUAL: ${{ steps.rollback.outputs.actual }}
+          ANTERIOR: ${{ steps.rollback.outputs.anterior }}
+          RESULTADO: ${{ steps.rollback.outcome }}
+        run: |
+          gh label create alerta --color B60205 --description "Alerta automática del Guardián" -R "$GITHUB_REPOSITORY" 2>/dev/null || true
+          if [ "$RESULTADO" = "success" ]; then
+            ESTADO="Producción **volvió al deploy anterior** (\`$ANTERIOR\`); el deploy que falló es \`$ACTUAL\`."
+          else
+            ESTADO="⚠️ **El rollback automático falló**: producción puede estar rota. Hazlo a mano en Netlify → Deploys → deploy anterior → *Publish deploy*."
+          fi
+          gh issue create -R "$GITHUB_REPOSITORY" --label alerta \
+            --title "Alerta: falló el smoke test de producción" \
+            --body "$(printf 'El smoke test falló contra %s.\n\n%s\n\nRun: %s\n\n**Escenario:** E1 — Proyecto nuevo en producción el día 1 (producción sana)' "$URL" "$ESTADO" "$RUN")"
