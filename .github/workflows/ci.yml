@@ -30,3 +30,16 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      # E2E en el mismo job (mismo check obligatorio de main): Chrome contra el build.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-trazas
+          path: test-results/
+          retention-days: 7
