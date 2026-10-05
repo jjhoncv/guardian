@@ -175,11 +175,11 @@ for _ in $(seq 1 60); do
   [ "$H1" = "<h1>$NOMBRE</h1>" ] && break
   sleep 15
 done
-[ "$H1" = "<h1>$NOMBRE</h1>" ] && ok "staging muestra «$NOMBRE»: $STAGING" || info "staging aún no responde; revisa Actions → Deploy en https://github.com/$REPO/actions"
+[ "$H1" = "<h1>$NOMBRE</h1>" ] && ok "staging muestra «${NOMBRE}»: $STAGING" || info "staging aún no responde; revisa Actions → Deploy en https://github.com/$REPO/actions"
 EN_ROJO=$(gh run list -R "$REPO" --limit 20 --json conclusion -q '[.[] | select(.conclusion=="failure")] | length')
 [ "$EN_ROJO" = 0 ] && ok "sin runs en rojo" || info "$EN_ROJO run(s) en rojo: https://github.com/$REPO/actions"
 
-titulo "Listo: «$NOMBRE»"
+titulo "Listo: «${NOMBRE}»"
 cat <<TXT
   Repo:       https://github.com/$REPO
   Staging:    $STAGING
