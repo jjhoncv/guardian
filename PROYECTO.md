@@ -11,7 +11,7 @@ Los proyectos personales de software se quedan a medias porque el alcance crece 
 
 ## 2. Qué es el Guardián
 
-Un **repositorio plantilla en GitHub** que trae todo lo necesario para que un proyecto:
+Una **plataforma en GitHub** (este repo: workflows reutilizables, scripts y reglas) más un **esqueleto mínimo** (`jjhoncv/guardian-skeleton`) para que un proyecto:
 
 1. Nazca con un **alcance fijo y medible**.
 2. Esté **en producción desde el día 1**, aunque sea vacío.
@@ -19,7 +19,7 @@ Un **repositorio plantilla en GitHub** que trae todo lo necesario para que un pr
 4. Muestre **en todo momento** en qué fase va, qué tan sano está y qué falta.
 5. Te **empuje** con avisos y no te deje salirte del alcance.
 
-Cada proyecto nuevo se crea clonando esta plantilla.
+Cada proyecto nuevo se crea con `scripts/nuevo-proyecto.sh <nombre>`: primero revisa y pide las llaves (Paso 0), después crea el sitio, el repo y las protecciones y sube el esqueleto. El proyecto **usa** los workflows del Guardián en una versión fija (`@vX.Y.Z`); no los copia.
 
 ## 3. Roles
 
@@ -214,8 +214,8 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 
 ```gherkin
 Escenario: Proyecto nuevo en producción el día 1
-  Dado un repo creado desde la plantilla Guardián
-  Cuando completo el PROYECTO.md y hago push
+  Dado un proyecto creado con nuevo-proyecto.sh
+  Cuando termina el script
   Entonces existe una página con el nombre del proyecto en staging y en producción
 
 Escenario: Alcance convertido en pruebas
@@ -253,7 +253,6 @@ Escenario: El guardián me avisa
 - Interfaz web propia del guardián (el Sheet y el README alcanzan)
 - Migrar la BD de Sheets a una BD real
 - GitHub App propia para release-please (por ahora: PAT fine-grained limitado al repo, 90 días)
-- Crear el sitio de Netlify automáticamente al inicializar un proyecto (hoy: ~2 min a mano)
 - Mailpit para probar correos: hasta que un proyecto envíe correos no hay nada que probar con él
 - Un solo workflow **Pipeline** en Actions (calidad ∥ chequeo ∥ build → preview/staging; release → producción → smoke) en vez de 7 separados — 2026-10-05 — candidato a la Fase 4 (Visibilidad)
 - CI: instalar Chrome sin `--with-deps` (solo el navegador, con caché) para no depender de los mirrors de Ubuntu en cada corrida — 2026-10-05 — un día de mirrors lentos el paso tardó ~7 min (lo normal: 15–30 s)
@@ -280,3 +279,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | `/planificar` entrevista al dueño si PROYECTO.md está en blanco; escenarios y plan se aprueban **por PR** y los tickets se crean al fusionarlo | Todo se aprueba por PR; el dueño decide el alcance (ADR 0019) |
 | 2026-10-04 | Chequeo de PR: **bloquea** sin ticket o sin escenario, **avisa** por tamaño; rollback automático + issue si falla el smoke test | Reglas 1 y 3 de la sección 6 y sección 8 |
 | 2026-10-04 | El % del propio Guardián se lleva a mano en PROYECTO.md hasta la Fase 4 | Sus escenarios son del flujo, no de una página (ADR 0020) |
+| 2026-10-05 | **Plataforma + esqueleto:** los proyectos llaman a los workflows reutilizables del Guardián (`@vX.Y.Z`) y nacen de `guardian-skeleton` con `nuevo-proyecto.sh` (Paso 0, sitio de Netlify automático, un PAT por proyecto) | La plantilla copiaba la maquinaria del Guardián y las copias quedaban congeladas (ADR 0021) |
