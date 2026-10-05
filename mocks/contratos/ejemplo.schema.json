@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ejemplo",
+  "description": "Contrato de ejemplo: lista de elementos. Cada API del proyecto tiene su contrato; de él salen los fixtures y los mocks.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "nombre"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "type": "string", "minLength": 1 },
+      "nombre": { "type": "string", "minLength": 1 }
+    }
+  }
+}
