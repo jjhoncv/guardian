@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/jjhoncv/guardian/compare/v0.2.1...v0.2.2) (2026-10-05)
+
+
+### Correcciones
+
+* **#33:** producción compila el tag del release ([#34](https://github.com/jjhoncv/guardian/issues/34)) ([f5da6c8](https://github.com/jjhoncv/guardian/commit/f5da6c8f3ecd5231558b6fbd589398cb6ac1e387))
+
 ## [0.2.1](https://github.com/jjhoncv/guardian/compare/v0.2.0...v0.2.1) (2026-10-05)
 
 
