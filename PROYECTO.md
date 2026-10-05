@@ -178,7 +178,7 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 **Valor:** un proyecto vacío en producción con todo el flujo funcionando.
 
 ### Fase 2 — Alcance y pruebas
-- Skill de Claude Code: del PROYECTO.md genera escenarios BDD y tickets
+- Skill de Claude Code `/planificar`: si PROYECTO.md está en blanco, entrevista al dueño y lo redacta (el dueño decide el alcance); del PROYECTO.md genera escenarios BDD en rojo y un plan de tareas en un PR; al fusionarlo se crean los tickets
 - Estructura de pruebas lista: TDD, BDD, E2E con Playwright, mocks
 - Chequeo en el PR: ¿apunta a un escenario del alcance? ¿es chico?
 - Smoke test E2E después de cada deploy a producción (sección 8)
@@ -254,6 +254,7 @@ Escenario: El guardián me avisa
 - Migrar la BD de Sheets a una BD real
 - GitHub App propia para release-please (por ahora: PAT fine-grained limitado al repo, 90 días)
 - Crear el sitio de Netlify automáticamente al inicializar un proyecto (hoy: ~2 min a mano)
+- Mailpit para probar correos: hasta que un proyecto envíe correos no hay nada que probar con él
 
 ## 16. Decisiones tomadas
 
@@ -273,3 +274,7 @@ Escenario: El guardián me avisa
 | 2026-10-04 | Workflow **Inicializar proyecto**: el repo nuevo arranca con su `PROYECTO.md`, `CLAUDE.md` y `README.md` y sin la historia del Guardián (sale del Parking lot `nuevo-proyecto.sh`) | La plantilla copia todo el repo; limpiar a mano confunde y va contra E1 |
 | 2026-10-04 | El PR de release hace de sección `Unreleased` del CHANGELOG | release-please no escribe esa sección; el PR abierto muestra lo pendiente (ADR 0017) |
 | 2026-10-04 | **Cierre de la Fase 1.** Los puntos de la sección 13 sin fase pasan a las Fases 3 y 4 | Revisión de cierre contra todo el alcance |
+| 2026-10-04 | BDD con **playwright-bdd**: los `.feature` corren sobre Playwright | Un solo runner para BDD y E2E (ADR 0018) |
+| 2026-10-04 | `/planificar` entrevista al dueño si PROYECTO.md está en blanco; escenarios y plan se aprueban **por PR** y los tickets se crean al fusionarlo | Todo se aprueba por PR; el dueño decide el alcance (ADR 0019) |
+| 2026-10-04 | Chequeo de PR: **bloquea** sin ticket o sin escenario, **avisa** por tamaño; rollback automático + issue si falla el smoke test | Reglas 1 y 3 de la sección 6 y sección 8 |
+| 2026-10-04 | El % del propio Guardián se lleva a mano en PROYECTO.md hasta la Fase 4 | Sus escenarios son del flujo, no de una página (ADR 0020) |
