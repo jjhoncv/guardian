@@ -181,6 +181,7 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 - Skill de Claude Code: del PROYECTO.md genera escenarios BDD y tickets
 - Estructura de pruebas lista: TDD, BDD, E2E con Playwright, mocks
 - Chequeo en el PR: ¿apunta a un escenario del alcance? ¿es chico?
+- Smoke test E2E después de cada deploy a producción (sección 8)
 
 **Valor:** el alcance se vuelve pruebas, y el % en verde es el avance real.
 
@@ -202,6 +203,7 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 - Resumen diario al mediodía
 - Alerta de cambio de color
 - Recordatorio de revisión semanal
+- Aviso antes de que venzan los tokens (PAT de release-please, token de Netlify)
 
 **Valor:** el guardián te empuja aunque no entres.
 
@@ -265,3 +267,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | Node 24 LTS + npm | Requisito de Next.js 16; sin herramientas extra |
 | 2026-10-04 | **Solo squash merge**; el título del PR es el mensaje del commit | Con merge commits el CHANGELOG sale duplicado |
 | 2026-10-04 | La plantilla trae `docs/CLAUDE.ejemplo.md`; el `CLAUDE.md` del repo es el del Guardián | Un proyecto nuevo no debe heredar las instrucciones del Guardián |
+| 2026-10-04 | Smoke test de producción en la **Fase 2**; aviso de vencimiento de tokens en la **Fase 5** | El smoke test necesita Playwright; los tokens vencen en silencio y rompen releases y deploys |
