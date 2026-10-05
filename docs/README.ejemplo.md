@@ -41,7 +41,7 @@ Issue (escenario BDD) → rama feat/N-slug → PR chico → CI + preview pr-N
   → PR de release (release-please) → merge (dueño) → aprobación del Environment (dueño) → producción
 ```
 
-Rollback: en Netlify, *Deploys* → deploy anterior de producción → *Publish deploy*.
+Rollback: **automático** si falla el smoke test después de un release (abre un issue `alerta`). A mano: en Netlify, *Deploys* → deploy anterior de producción → *Publish deploy*.
 
 ## Mantenimiento
 
