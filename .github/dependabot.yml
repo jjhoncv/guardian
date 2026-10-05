@@ -20,6 +20,24 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
+  # netlify-cli del CI (#73): mismas reglas que el resto de npm.
+  - package-ecosystem: npm
+    directory: /tools/netlify
+    schedule:
+      interval: weekly
+      day: saturday
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      netlify-cli:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

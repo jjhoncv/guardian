@@ -1,0 +1,8 @@
+{
+  "name": "herramientas-netlify",
+  "private": true,
+  "description": "netlify-cli con sus dependencias fijadas (lockfile) para el build y el deploy del CI (#73).",
+  "dependencies": {
+    "netlify-cli": "27.10.2"
+  }
+}

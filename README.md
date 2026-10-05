@@ -65,6 +65,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | Deploy preview / staging (build sin secretos) | `.github/workflows/deploy.yml`, `build-netlify.yml` |
 | Releases + producción con aprobación | `.github/workflows/release.yml`, `release-please-config.json` |
 | Smoke test de producción con rollback automático y alerta | `.github/workflows/smoke.yml` (escenarios `@smoke`) |
+| netlify-cli del CI, fijado por lockfile | `tools/netlify/` |
 | Inicialización de un proyecto nuevo | `.github/workflows/inicializar.yml`, `scripts/inicializar-proyecto.sh`, `docs/*.ejemplo.md` |
 | Protecciones y seguridad del repo | `scripts/configurar-repo.sh`, `.github/dependabot.yml` |
 | Next.js 16 + TypeScript + Vitest | `app/`, `lib/` |
