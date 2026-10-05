@@ -16,10 +16,12 @@ concurrency:
 
 jobs:
   build:
+    # Sin NETLIFY_SITE_ID (proyecto recién creado) no hay a dónde desplegar.
     # Los PRs de forks y de Dependabot no tienen acceso a los secretos.
     if: >-
-      github.event_name == 'push' ||
-      (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
+      vars.NETLIFY_SITE_ID != '' && (
+        github.event_name == 'push' ||
+        (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
     uses: ./.github/workflows/build-netlify.yml
 
   deploy:

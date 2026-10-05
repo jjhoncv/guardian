@@ -21,8 +21,14 @@ jobs:
       creado: ${{ steps.release.outputs.release_created }}
       tag: ${{ steps.release.outputs.tag_name }}
     steps:
+      # Proyecto recién creado: sin el PAT, release-please espera en vez de fallar.
+      - id: token
+        env:
+          TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: echo "hay=$([ -n "$TOKEN" ] && echo si || echo no)" >> "$GITHUB_OUTPUT"
       # PAT fine-grained (ADR 0011): los PRs creados con GITHUB_TOKEN no disparan el CI.
       - id: release
+        if: steps.token.outputs.hay == 'si'
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
