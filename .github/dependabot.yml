@@ -13,6 +13,13 @@ updates:
       dependencias:
         patterns: ["*"]
         update-types: [minor, patch]
+    ignore:
+      # Saltos mayores que rompen la base: ESLint los adopta eslint-config-next primero;
+      # @types/node sigue la versión de Node del proyecto (.nvmrc).
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
