@@ -14,11 +14,10 @@ updates:
         patterns: ["*"]
         update-types: [minor, patch]
     ignore:
-      # Saltos mayores que rompen la base: ESLint los adopta eslint-config-next primero;
-      # @types/node sigue la versión de Node del proyecto (.nvmrc).
-      - dependency-name: eslint
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@types/node"
+      # Los saltos mayores (TypeScript 7, ESLint 10, @types/node de otra versión de Node...) rompen
+      # la base: se actualizan como tarea consciente, con su issue y sus pruebas. Los parches de
+      # seguridad llegan igual (Dependabot security updates).
+      - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
