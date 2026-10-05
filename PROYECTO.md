@@ -256,6 +256,7 @@ Escenario: El guardián me avisa
 - Crear el sitio de Netlify automáticamente al inicializar un proyecto (hoy: ~2 min a mano)
 - Mailpit para probar correos: hasta que un proyecto envíe correos no hay nada que probar con él
 - Un solo workflow **Pipeline** en Actions (calidad ∥ chequeo ∥ build → preview/staging; release → producción → smoke) en vez de 7 separados — 2026-10-05 — candidato a la Fase 4 (Visibilidad)
+- CI: instalar Chrome sin `--with-deps` (solo el navegador, con caché) para no depender de los mirrors de Ubuntu en cada corrida — 2026-10-05 — un día de mirrors lentos el paso tardó ~7 min (lo normal: 15–30 s)
 
 ## 16. Decisiones tomadas
 
