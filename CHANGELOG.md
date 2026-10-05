@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/jjhoncv/guardian/compare/v0.2.2...v0.3.0) (2026-10-05)
+
+
+### Funcionalidades
+
+* **#38:** tablero de GitHub Projects por proyecto ([#39](https://github.com/jjhoncv/guardian/issues/39)) ([74b151c](https://github.com/jjhoncv/guardian/commit/74b151c0827f5d710639a17b78bc1f2882968cc7))
+
 ## [0.2.2](https://github.com/jjhoncv/guardian/compare/v0.2.1...v0.2.2) (2026-10-05)
 
 
