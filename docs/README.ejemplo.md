@@ -23,7 +23,13 @@ Creado con la plantilla [Guardián](https://github.com/jjhoncv/guardian): alcanc
    gh secret set NETLIFY_AUTH_TOKEN -R __REPO__
    gh secret set RELEASE_PLEASE_TOKEN -R __REPO__   # PAT fine-grained: solo este repo, Contents + Pull requests (RW), 90 días
    ```
-   Hasta que existan, Deploy y Release no hacen nada.
+   Hasta que existan, Deploy y Release no hacen nada. Qué va en cada uno:
+
+   | Nombre | Qué es | Dónde se saca | Empieza con |
+   |---|---|---|---|
+   | `NETLIFY_SITE_ID` (variable) | ID del sitio; no es secreto | Netlify → sitio → *Project configuration → General → Project ID* | `xxxxxxxx-xxxx-…` |
+   | `NETLIFY_AUTH_TOKEN` | Llave de tu cuenta de Netlify para publicar | Netlify → avatar → *User settings → Applications → Personal access tokens → New access token* | `nfp_` |
+   | `RELEASE_PLEASE_TOKEN` | Llave de GitHub, solo de este repo, para el PR de release | GitHub → avatar → *Settings → Developer settings → Fine-grained tokens → Generate new token*: solo este repo, **Contents** y **Pull requests** en *Read and write*, 90 días | `github_pat_` |
 4. **Protecciones y tablero:** `scripts/configurar-repo.sh __REPO__ <tu-usuario>` (necesita `gh` con permisos `repo`, `workflow` y `project`). Luego, en el tablero: *⋯ → Workflows → Auto-add to project* → filtro `is:issue is:open` → *Save and turn on*.
 5. **Primer PR** con el alcance → preview → merge → staging → merge del PR de release → aprobación → producción.
 

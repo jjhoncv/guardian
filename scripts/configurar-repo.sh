@@ -19,7 +19,7 @@ JSON
 gh api -X POST "repos/$REPO/environments/production/deployment-branch-policies" \
   -f name=main -f type=branch >/dev/null 2>&1 || true
 
-echo "→ Merge: solo squash, con el título del PR como mensaje (ADR 0013); borra la rama al hacer merge"
+echo "→ Merge: solo squash, con el título del PR como mensaje; borra la rama al hacer merge"
 gh api -X PATCH "repos/$REPO" \
   -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
   -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
@@ -41,7 +41,7 @@ echo "→ GITHUB_TOKEN de solo lectura por defecto; Actions no puede aprobar PRs
 gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=false >/dev/null
 
-echo "→ Ruleset de main: PR obligatorio (0 aprobaciones en Fase 1, ADR 0009) + CI en verde; sin push directo, force push ni borrado"
+echo "→ Ruleset de main: PR obligatorio (0 aprobaciones: el dueño hace el merge) + CI en verde; sin push directo, force push ni borrado"
 RULESET_ID=$(gh api "repos/$REPO/rulesets" --jq '.[] | select(.name == "main") | .id')
 RULESET=$(cat <<'JSON'
 {
