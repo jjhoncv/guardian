@@ -146,6 +146,8 @@ if [ "$VACIO" = no ]; then ok "el repo ya tiene código"
 else
   TMP=$(mktemp -d)
   git clone -q --depth 1 "https://github.com/$SKELETON.git" "$TMP/p" && rm -rf "$TMP/p/.git"
+  # Lo propio del esqueleto (su validación y su README) no va al proyecto.
+  rm -rf "$TMP/p/.github/workflows" "$TMP/p/ESQUELETO.md"
   mv "$TMP/p/.github/workflows-proyecto" "$TMP/p/.github/workflows"
   grep -rl '__\(NOMBRE\|SLUG\|REPO\|SITIO\|GUARDIAN\)__' "$TMP/p" | while read -r f; do
     sed -i.bak -e "s|__NOMBRE__|$NOMBRE|g" -e "s|__SLUG__|$SLUG|g" -e "s|__REPO__|$REPO|g" \
