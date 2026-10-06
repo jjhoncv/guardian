@@ -30,20 +30,25 @@ Rollback: **automático** si falla el smoke test después de un release (abre un
 
 ## Crear un proyecto
 
-En tu terminal, desde este repo:
+Tres pasos; `/guardian` te dice en cuál estás y qué falta.
 
-```sh
-scripts/nuevo-proyecto.sh mi-proyecto --revisar   # Paso 0: revisa qué hay y qué falta, sin crear nada
-scripts/nuevo-proyecto.sh mi-proyecto             # crea todo
-```
+1. **Idea → alcance** (no crea nada). En Claude Code, dentro de este repo: **`/guardian-idea`**. ¿Prueba o proyecto real?; una ficha corta (qué problema, para quién, la versión más chica, **cómo sabrás que funcionó**, límites); te propone un **nombre** libre y deja el `PROYECTO.md` en `~/Projects/ideas/<slug>/`.
+2. **Infraestructura con ese nombre.** En tu terminal, desde este repo:
+   ```sh
+   scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md --revisar   # Paso 0: qué falta
+   scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md             # crea todo
+   ```
+   Pide el token de Netlify (oculto) y crea el sitio; crea el repo; pide un PAT solo para ese repo; recién entonces sube **[guardian-skeleton](https://github.com/jjhoncv/guardian-skeleton)** con tu alcance, configura protecciones y tablero, y verifica staging. Si se corta, vuelve a correrlo: salta lo hecho.
+3. **Escenarios y tickets.** Activa *Auto-add* en el tablero (filtro `is:issue is:open`) y, en Claude Code dentro del proyecto, corre **`/guardian-planificar`**: abre un PR con los escenarios BDD (en rojo) y el plan; al fusionarlo se crean los tickets.
 
-1. **Paso 0:** revisa `gh` y sus permisos (`repo`, `workflow`, `project`), la versión del Guardián y el esqueleto; te dice qué te va a pedir y dónde se saca.
-2. Pide el **token de Netlify** (oculto), lo valida y **crea el sitio** `mi-proyecto-<dueño>`.
-3. Crea el **repo**, guarda los secretos y pide un **PAT solo para ese repo** (lo valida).
-4. Recién entonces sube **[guardian-skeleton](https://github.com/jjhoncv/guardian-skeleton)** con el nombre del proyecto, configura protecciones y tablero, y verifica staging.
-5. Siguiente paso: activar *Auto-add* en el tablero (filtro `is:issue is:open`) y correr **`/planificar`** en Claude Code dentro del proyecto.
+El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjhoncv/guardian/.github/workflows/guardian-ci.yml@vX.Y.Z`); para recibir mejoras se sube la versión (Dependabot lo propone).
 
-El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjhoncv/guardian/.github/workflows/guardian-ci.yml@vX.Y.Z`); para recibir mejoras se sube la versión (Dependabot lo propone). Si se corta, vuelve a correr el script: salta lo hecho.
+| Comando | Dónde | Para qué |
+|---|---|---|
+| `/guardian` | Guardián y proyectos | Menú: estado, qué falta y siguiente paso |
+| `/guardian-idea` | Este repo | Idea → ficha → alcance y nombre |
+| `scripts/nuevo-proyecto.sh` | Terminal, en este repo | Infraestructura + esqueleto con tu alcance |
+| `/guardian-planificar` | Proyecto | Alcance → escenarios + plan → tickets |
 
 ## Mantenimiento
 
@@ -85,6 +90,6 @@ Cada workflow toma sus scripts y herramientas de **su propia versión** del Guar
 | Crear un proyecto (Paso 0 + infraestructura + esqueleto) | `scripts/nuevo-proyecto.sh` |
 | Protecciones, seguridad y tablero de un repo | `scripts/configurar-repo.sh` |
 | Smoke test manual | `.github/workflows/smoke.yml` |
-| Skill `/planificar` | `.claude/skills/planificar/SKILL.md` |
+| Skills `/guardian`, `/guardian-idea`, `/guardian-planificar` | `.claude/skills/` |
 | Escenarios BDD y mocks del propio Guardián | `features/`, `mocks/` |
 | ADRs | `docs/decisiones/` |
