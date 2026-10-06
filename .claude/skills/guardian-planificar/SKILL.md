@@ -39,6 +39,8 @@ Muestra el `PROYECTO.md` completo y **espera el OK** antes de seguir. Lo que el 
 - Copia los escenarios de los criterios de `PROYECTO.md` **sin cambiar su sentido**. Si uno no se puede probar en la página, propón reescribirlo y pregunta.
 - **No escribas pasos** (`features/steps/`): un escenario sin pasos queda *pendiente* (rojo) y no rompe el CI (ADR 0018). Los pasos llegan con cada tarea.
 - No toques los escenarios `@plantilla`.
+- **Datos de prueba:** los escenarios usan datos inventados (fixtures, mocks o una hoja de pruebas), nunca los datos reales; los correos se simulan. Anótalo en **Decisiones** del `PROYECTO.md`.
+- **`@smoke`:** marca solo los escenarios que pueden correr contra **producción** sin depender de datos específicos (p. ej. «la portada carga», «una página inexistente muestra un error»). El smoke test corre después de cada release.
 
 **Tareas** — `plan/tareas.json`:
 
@@ -77,9 +79,8 @@ más el total: «N escenarios en rojo, M tareas, K fases». **Espera su OK.**
 
 1. Rama `docs/plan-<slug-de-la-fase>` desde `main`.
 2. Escribe los `.feature` y `plan/tareas.json` (y `PROYECTO.md` si hubo entrevista).
-3. Verifica:
-   - `node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/crear-tickets.ts plan/tareas.json --validar` → sin errores.
-   - `npm run build && npm run e2e && npm run avance` → los escenarios nuevos aparecen **pendientes** y el avance arranca en 0 %.
+3. Verifica en local: `npm run build && npm run e2e` → los escenarios nuevos aparecen **pendientes** (saltados) y nada falla.
+   La validación del plan (máximo 5 fases, cada tarea con escenario) la hace el check **«chequeo / ticket y escenario»** del PR, con el script del Guardián; el avance («0 de N») lo publica el CI. Los scripts del Guardián no están en el proyecto: no los busques.
 4. Commit y PR con título `docs(plan): <resumen>` (Conventional Commits). En el cuerpo: la tabla del Paso 4 y «Al fusionar este PR se crean M tickets (workflow *Tickets del plan*)».
 5. Dile al dueño qué revisar en el PR y que **fusionarlo = aprobar el plan**.
 
