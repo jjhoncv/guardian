@@ -80,6 +80,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | `guardian-deploy.yml` | Preview por PR y staging en `main` (build sin secretos; deploy sin código del proyecto) |
 | `guardian-release.yml` | release-please → producción con aprobación → smoke test → rollback y alerta si falla |
 | `guardian-tickets.yml` | Un issue por tarea del plan aprobado |
+| `guardian-claude.yml` | `@claude` del dueño en un ticket → Claude desarrolla en la nube y abre el PR (ADR 0024) |
 
 Cada workflow toma sus scripts y herramientas de **su propia versión** del Guardián (`job.workflow_sha`).
 

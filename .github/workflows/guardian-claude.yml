@@ -1,0 +1,53 @@
+# Guardián · Claude reutilizable (ADR 0024): un comentario «@claude» del dueño en un ticket (o en un PR, para
+# pedir ajustes) → Claude desarrolla en la nube siguiendo el CLAUDE.md del proyecto (pruebas primero) y abre
+# el PR con «Closes #N». Claude no puede aprobar ni fusionar: main exige la aprobación del dueño.
+name: Guardián · Claude
+
+on:
+  workflow_call:
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  claude:
+    name: claude
+    # Solo un @claude escrito por el dueño del repo: nadie más gasta la llave aunque el repo sea público.
+    if: >-
+      contains(github.event.comment.body, '@claude') &&
+      github.event.comment.user.login == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+      # Entorno del proyecto para que Claude corra lint, pruebas y escenarios antes de abrir el PR.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - uses: anthropics/claude-code-action@86d88e619d8e6caf07b5c3944dd14f441c533718 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          trigger_phrase: "@claude"
+          include_comments_by_actor: ${{ github.repository_owner }}
+          branch_prefix: "feat/"
+          additional_permissions: |
+            actions: read
+          # Sonnet 5.5, tope de turnos y solo las herramientas necesarias (ADR 0024).
+          claude_args: >-
+            --model claude-sonnet-5-5
+            --max-turns 60
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr view:*)"
