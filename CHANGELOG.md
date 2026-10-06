@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/jjhoncv/guardian/compare/v0.6.0...v0.7.0) (2026-10-06)
+
+
+### Funcionalidades
+
+* **#78:** scripts/nuevo-proyecto.sh con Paso 0 ([#86](https://github.com/jjhoncv/guardian/issues/86)) ([217d781](https://github.com/jjhoncv/guardian/commit/217d781032ab50f91c93fd7dd4560c0979df9653))
+* **#79:** retira el modelo copia (plataforma + esqueleto) ([#90](https://github.com/jjhoncv/guardian/issues/90)) ([2c3db69](https://github.com/jjhoncv/guardian/commit/2c3db6923c64cfed6bc43c691761e60c47e9e0f4))
+* **#91:** comandos del Guardián: /guardian y /guardian-idea ([#93](https://github.com/jjhoncv/guardian/issues/93)) ([cd02fb2](https://github.com/jjhoncv/guardian/commit/cd02fb2d5d897af1e7d866c126360e13cbe9bccd))
+* **#92:** nuevo-proyecto.sh --alcance (el proyecto nace con su alcance) ([#94](https://github.com/jjhoncv/guardian/issues/94)) ([ed3530c](https://github.com/jjhoncv/guardian/commit/ed3530c4ba1f0cc686837b7bca0a2c2619c542dd))
+
+
+### Correcciones
+
+* **#88:** el paso 7 de nuevo-proyecto.sh no se corta ([#89](https://github.com/jjhoncv/guardian/issues/89)) ([dc54abd](https://github.com/jjhoncv/guardian/commit/dc54abdc31fafa93765696e1a9d899018988b22c))
+* **#95:** /guardian-planificar no pide scripts del Guardián ([#96](https://github.com/jjhoncv/guardian/issues/96)) ([8c4d4d1](https://github.com/jjhoncv/guardian/commit/8c4d4d1435dcf6ba9d16cb73ad885f583258b1dd))
+* **#99:** nuevo-proyecto.sh completa CLAUDE.md y README ([#100](https://github.com/jjhoncv/guardian/issues/100)) ([72848b1](https://github.com/jjhoncv/guardian/commit/72848b1e3a3c68b1d6e04a80800c9b9e26169b77))
+
 ## [0.6.0](https://github.com/jjhoncv/guardian/compare/v0.5.0...v0.6.0) (2026-10-05)
 
 
