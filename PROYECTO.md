@@ -180,7 +180,7 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 
 **Valor:** un proyecto vacío en producción con todo el flujo funcionando.
 
-### Fase 2 — Alcance y pruebas
+### Fase 2 — Alcance y pruebas ✅ cerrada el 2026-10-05 (v0.7.0; E2 en verde, probado con el proyecto real Vitrina)
 - Skill de Claude Code `/planificar`: si PROYECTO.md está en blanco, entrevista al dueño y lo redacta (el dueño decide el alcance); del PROYECTO.md genera escenarios BDD en rojo y un plan de tareas en un PR; al fusionarlo se crean los tickets
 - Estructura de pruebas lista: TDD, BDD, E2E con Playwright, mocks
 - Chequeo en el PR: ¿apunta a un escenario del alcance? ¿es chico?
@@ -212,6 +212,19 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 - Aviso antes de que venzan los tokens (PAT de release-please, token de Netlify)
 
 **Valor:** el guardián te empuja aunque no entres.
+
+### Avance del Guardián (a mano hasta la Fase 4, ADR 0020)
+
+| Escenario | Estado |
+|---|---|
+| E1 Proyecto nuevo en producción el día 1 | ✅ (Fase 1; con `nuevo-proyecto.sh` desde la Fase 2) |
+| E2 Alcance convertido en pruebas | ✅ (Fase 2; Vitrina: 14 escenarios en rojo y 8 tickets en 3 fases) |
+| E3 Claude entrega un PR chico | ⬜ Fase 3 |
+| E4 Nada sube a producción sin mí | ✅ (Fase 1) |
+| E5 Veo la salud desde el celular | ⬜ Fase 4 |
+| E6 El guardián me avisa | ⬜ Fase 5 |
+
+**3 de 6 escenarios en verde (50 %).**
 
 ### Criterios de aceptación del Guardián
 
@@ -285,3 +298,4 @@ Escenario: El guardián me avisa
 | 2026-10-04 | El % del propio Guardián se lleva a mano en PROYECTO.md hasta la Fase 4 | Sus escenarios son del flujo, no de una página (ADR 0020) |
 | 2026-10-05 | **Plataforma + esqueleto:** los proyectos llaman a los workflows reutilizables del Guardián (`@vX.Y.Z`) y nacen de `guardian-skeleton` con `nuevo-proyecto.sh` (Paso 0, sitio de Netlify automático, un PAT por proyecto) | La plantilla copiaba la maquinaria del Guardián y las copias quedaban congeladas (ADR 0021) |
 | 2026-10-05 | **Paso 0 antes de crear nada:** `/guardian-idea` (ficha + alcance + nombre) → `nuevo-proyecto.sh --alcance` → `/guardian-planificar`; comandos con prefijo `guardian` y `/guardian` como menú | Se estaba creando la infraestructura antes de saber de qué trataba el proyecto (ADR 0022) |
+| 2026-10-05 | **Cierre de la Fase 2.** E2 probado de punta a punta con el proyecto real Vitrina | Avance del Guardián: 3 de 6 escenarios (50 %) |
