@@ -279,6 +279,7 @@ Escenario: El guardián me avisa
 - **Smoke del preview**: el deploy de cada PR verifica que la página responda 200 y, si no, el check queda en rojo — 2026-10-06 — en Vitrina #12 el deploy salió verde aunque el preview respondía 500 (faltaban las variables de Google)
 - Cuando Claude falla en la nube, el Guardián **comenta en el ticket** el motivo (p. ej. «sin crédito en la API») — 2026-10-06 — el error quedó escondido en el log de Actions y no se veía desde el celular
 - `@claude` también en **comentarios sobre líneas de código** y en reviews de PR (`pull_request_review_comment`, `pull_request_review`), no solo en la conversación — 2026-10-06 — hoy un comentario en una línea del diff no despierta a Claude
+- Al arrancar, Claude **comenta en el ticket** «Estoy trabajando en esto» con el link al run (y el tablero lo pasa a *En curso*) — 2026-10-06 — mientras Claude trabaja no se ve nada en el tablero ni en el issue hasta que abre el PR
 
 ## 16. Decisiones tomadas
 
