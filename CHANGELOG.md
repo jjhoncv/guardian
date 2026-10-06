@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/jjhoncv/guardian/compare/v0.7.0...v0.8.0) (2026-10-06)
+
+
+### Funcionalidades
+
+* **#105:** las fases se ven en GitHub como milestones ([#106](https://github.com/jjhoncv/guardian/issues/106)) ([a956d08](https://github.com/jjhoncv/guardian/commit/a956d084722355348810734eb65cbcc27da8cf11))
+
 ## [0.7.0](https://github.com/jjhoncv/guardian/compare/v0.6.0...v0.7.0) (2026-10-06)
 
 
