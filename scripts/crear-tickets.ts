@@ -20,6 +20,9 @@ export type Plan = { fases: Fase[]; tareas: Tarea[] };
 
 export const marca = (id: string) => `<!-- guardian:tarea=${id} -->`;
 
+/** Cada fase es un milestone de GitHub: barra de % por fase (ADR 0023). */
+export const tituloMilestone = (f: Fase) => `Fase ${f.numero} — ${f.nombre}`;
+
 export function validarPlan(plan: Plan): string[] {
   const errores: string[] = [];
   if (plan.fases.length > 5) errores.push(`El plan tiene ${plan.fases.length} fases: máximo 5 fases (regla 7).`);
@@ -71,23 +74,40 @@ async function main() {
     console.log(`Plan válido: ${plan.fases.length} fases, ${plan.tareas.length} tareas.`);
     return;
   }
-  const existentes: string[] = [];
+  type Issue = { number: number; body?: string; milestone?: { number: number } | null; pull_request?: unknown };
+  const issues: Issue[] = [];
   for (let pagina = 1; ; pagina++) {
-    const lote = await api<{ body?: string }[]>(`issues?state=all&per_page=100&page=${pagina}`);
-    existentes.push(...lote.map((i) => i.body ?? ""));
+    const lote = await api<Issue[]>(`issues?state=all&per_page=100&page=${pagina}`);
+    issues.push(...lote.filter((i) => !i.pull_request));
     if (lote.length < 100) break;
   }
+  const existentes = issues.map((i) => i.body ?? "");
   const lineas = ["## Tickets del plan"];
+  const milestones = new Map<number, number>();
+  const actuales = await api<{ number: number; title: string }[]>("milestones?state=all&per_page=100");
   for (const f of plan.fases) {
     // 422 = la etiqueta ya existe.
     await api("labels", { method: "POST", body: JSON.stringify({ name: `fase-${f.numero}`, color: "1D76DB", description: `Fase ${f.numero} — ${f.nombre}` }) });
+    const titulo = tituloMilestone(f);
+    const m =
+      actuales.find((x) => x.title === titulo) ??
+      (await api<{ number: number }>("milestones", { method: "POST", body: JSON.stringify({ title: titulo, description: `Entregable: ${f.entregable}` }) }));
+    milestones.set(f.numero, m.number);
+  }
+  // Tickets que ya existían sin fase asignada: se les asigna su milestone.
+  for (const t of plan.tareas) {
+    const issue = issues.find((i) => (i.body ?? "").includes(marca(t.id)));
+    const ms = milestones.get(t.fase);
+    if (issue && ms && issue.milestone?.number !== ms) {
+      await api(`issues/${issue.number}`, { method: "PATCH", body: JSON.stringify({ milestone: ms }) });
+    }
   }
   const nuevas = pendientes(plan.tareas, existentes);
   for (const t of nuevas) {
     const fase = plan.fases.find((f) => f.numero === t.fase)!;
     const issue = await api<{ number: number }>("issues", {
       method: "POST",
-      body: JSON.stringify({ title: t.titulo, body: cuerpoTicket(t, fase), labels: [`fase-${t.fase}`] }),
+      body: JSON.stringify({ title: t.titulo, body: cuerpoTicket(t, fase), labels: [`fase-${t.fase}`], milestone: milestones.get(t.fase) }),
     });
     lineas.push(`- #${issue.number} ${t.id} — ${t.titulo}`);
   }

@@ -41,7 +41,8 @@ y una tabla de **qué está definido y qué falta**:
 | Alcance | `PROYECTO.md` completo (mismas secciones que en modo ideas) |
 | Escenarios | `features/fase-*.feature` (cuenta escenarios; los `@plantilla` no cuentan) |
 | Plan | `plan/tareas.json` (fases y tareas) |
-| Tickets | `gh issue list --state all --json labels,state` agrupados por `fase-N`: abiertos / cerrados |
+| Fases | `gh api repos/{dueño}/{repo}/milestones?state=all` → por milestone «Fase N — nombre»: cerrados / total (% de la fase) |
+| Tickets | `gh issue list --state all --json labels,state,milestone` agrupados por fase: abiertos / cerrados |
 | En revisión | `gh pr list --json title,author` (máximo 2 PRs de Claude esperando al dueño) |
 | Avance | último run de CI en `main`: `gh run list --workflow CI --branch main --limit 1` y en su log la línea «Avance: X de Y» |
 | Fase actual | `CLAUDE.md` («Hoy: Fase N») |

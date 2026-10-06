@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cuerpoTicket, marca, pendientes, validarPlan, type Plan } from "./crear-tickets";
+import { cuerpoTicket, marca, pendientes, tituloMilestone, validarPlan, type Plan } from "./crear-tickets";
 
 const plan: Plan = {
   fases: [{ numero: 1, nombre: "Lista básica", entregable: "Agregar y marcar libros" }],
@@ -51,5 +51,11 @@ describe("pendientes", () => {
     const otra = { ...plan.tareas[0], id: "T2" };
     const existentes = [`algo\n${marca("T1")}`, "issue sin marca"];
     expect(pendientes([plan.tareas[0], otra], existentes).map((t) => t.id)).toEqual(["T2"]);
+  });
+});
+
+describe("tituloMilestone", () => {
+  it("cada fase es un milestone «Fase N — nombre»", () => {
+    expect(tituloMilestone(plan.fases[0])).toBe("Fase 1 — Lista básica");
   });
 });
