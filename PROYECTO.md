@@ -276,6 +276,8 @@ Escenario: El guardián me avisa
 - Skills del Guardián (`/guardian`, `/guardian-planificar`) como **plugin de Claude Code versionado**, en vez de copiarlas a cada proyecto — 2026-10-05 — una corrección hoy no llega sola a los proyectos ya creados (los workflows sí)
 - El check «validar esqueleto» verifica que existan los marcadores que completa `nuevo-proyecto.sh` (`<Dueño>`, `Fase <N> — <nombre>`, …) — 2026-10-05 — si cambian en el esqueleto, el completado falla sin avisar
 - Fecha objetivo en cada milestone de fase, calculada desde los **Límites** del `PROYECTO.md` — 2026-10-05 — GitHub marca el atraso y alimenta la barra de salud; candidato a la Fase 4
+- **Smoke del preview**: el deploy de cada PR verifica que la página responda 200 y, si no, el check queda en rojo — 2026-10-06 — en Vitrina #12 el deploy salió verde aunque el preview respondía 500 (faltaban las variables de Google)
+- Cuando Claude falla en la nube, el Guardián **comenta en el ticket** el motivo (p. ej. «sin crédito en la API») — 2026-10-06 — el error quedó escondido en el log de Actions y no se veía desde el celular
 
 ## 16. Decisiones tomadas
 
