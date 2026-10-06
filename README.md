@@ -58,6 +58,7 @@ Los tokens vencen y nada avisa todavía (llega en la Fase 5). Anota las fechas a
 |---|---|---|
 | `RELEASE_PLEASE_TOKEN` (90 días) | No se abre ni actualiza el PR de release | Nuevo PAT fine-grained con los mismos permisos → `gh secret set RELEASE_PLEASE_TOKEN` |
 | `NETLIFY_AUTH_TOKEN` | Fallan preview, staging y producción | Nuevo token en Netlify → `gh secret set NETLIFY_AUTH_TOKEN` |
+| `ANTHROPIC_API_KEY` (cada proyecto) | `@claude` y la siguiente tarea automática no corren | Nueva key en el workspace con tope → `gh secret set ANTHROPIC_API_KEY -R <repo>` |
 
 ## Desarrollo local
 
