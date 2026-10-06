@@ -12,7 +12,7 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 | [0006](0006-nextjs-16.md) | Next.js 16 + TypeScript como base | Aceptada |
 | [0007](0007-repo-publico.md) | Repo público | Aceptada |
 | [0008](0008-un-solo-sitio-netlify.md) | Un solo sitio de Netlify con deploys desde Actions | Aceptada |
-| [0009](0009-cero-aprobaciones-fase-1.md) | Fase 1: `main` con 0 aprobaciones obligatorias | Aceptada |
+| [0009](0009-cero-aprobaciones-fase-1.md) | Fase 1: `main` con 0 aprobaciones obligatorias | Reemplazada (Fase 3) |
 | [0010](0010-proyecto-md-y-ejemplo.md) | `PROYECTO.md` del Guardián + ejemplo para proyectos nuevos | Reemplazada por 0021 |
 | [0011](0011-pat-release-please.md) | PAT fine-grained para release-please | Aceptada |
 | [0012](0012-node-24-npm.md) | Node 24 LTS y npm | Aceptada |
