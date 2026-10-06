@@ -39,6 +39,31 @@ if [ -n "$ALCANCE" ] && [ -f "$ALCANCE" ]; then
   [ -n "$TITULO" ] && NOMBRE="$TITULO"
 fi
 
+# Completa CLAUDE.md y README del proyecto con el alcance (qué es, fase 1) y el perfil del dueño.
+# Usa perl con variables de entorno para no romperse con caracteres especiales en los textos.
+completar_marcadores() {
+  local dir="$1"
+  if [ -f "$dir/PROYECTO.md" ]; then
+    QUE_ES=$(awk '/^## [0-9]+\. Qué es/{f=1; next} /^## /{f=0} f && NF {print; exit}' "$dir/PROYECTO.md" | sed -E 's/^([^.]*\.).*/\1/')
+    FASE1=$(grep -m1 -E '^### Fase 1' "$dir/PROYECTO.md" | sed -E 's/^### //')
+  fi
+  export QUE_ES="${QUE_ES:-}" FASE1="${FASE1:-}" DUENO="${DUENO:-}" EXPERIENCIA="${EXPERIENCIA:-}" \
+         DISPONIBILIDAD="${DISPONIBILIDAD:-}" IDIOMA="${IDIOMA:-}"
+  for f in "$dir/CLAUDE.md" "$dir/README.md"; do
+    [ -f "$f" ] || continue
+    perl -pi -e '
+      if ($ENV{QUE_ES} ne "") { (my $q = $ENV{QUE_ES}) =~ s/\.$//;
+        s/<qué es, en una frase>/\l$q/g; s/<Qué es, en una frase\.>/$ENV{QUE_ES}/g; }
+      s/Fase <N> — <nombre>/$ENV{FASE1}/g if $ENV{FASE1} ne "";
+      s/<Dueño>/$ENV{DUENO}/g if $ENV{DUENO} ne "";
+      s/<Experiencia, para no explicarle lo básico\.>/$ENV{EXPERIENCIA}/g if $ENV{EXPERIENCIA} ne "";
+      s/<Disponibilidad real: cuándo revisa y aprueba\.>/$ENV{DISPONIBILIDAD}/g if $ENV{DISPONIBILIDAD} ne "";
+      s/<Idioma>/$ENV{IDIOMA}/g if $ENV{IDIOMA} ne "";
+      s/— \(corre `\/guardian`\)/$ENV{FASE1}/ if $ENV{FASE1} ne "";
+    ' "$f"
+  done
+}
+
 # ───────────────────────── Paso 0: qué hay y qué falta ─────────────────────────
 titulo "Paso 0 · Revisión (no crea nada)"
 FALTAN=0
@@ -61,6 +86,8 @@ if [ -z "$VERSION" ]; then falta "no se encontró un release de $GUARDIAN"
 elif gh api "repos/$GUARDIAN/contents/.github/workflows/guardian-ci.yml?ref=$VERSION" >/dev/null 2>&1; then ok "versión del Guardián a usar: $VERSION"
 else falta "el último release del Guardián ($VERSION) no tiene los workflows reutilizables: publica uno nuevo"; fi
 gh repo view "$SKELETON" >/dev/null 2>&1 && ok "esqueleto disponible: $SKELETON" || falta "no existe $SKELETON"
+PERFIL="${XDG_CONFIG_HOME:-$HOME/.config}/guardian/perfil"
+[ -f "$PERFIL" ] && ok "perfil del dueño: $PERFIL" || info "sin perfil del dueño: te lo pregunto una vez y lo guardo en $PERFIL (sin secretos)"
 if [ -z "$ALCANCE" ]; then
   info "sin --alcance: el proyecto nace con PROYECTO.md en blanco (lo recomendado es /guardian-idea antes)"
 elif [ ! -f "$ALCANCE" ]; then
@@ -108,6 +135,24 @@ fi
 
 printf '\nSe va a crear «%s» en %s, con el Guardián %s. ¿Seguimos? [s/N] ' "$NOMBRE" "$REPO" "$VERSION"
 read -r RESP; [[ "$RESP" =~ ^[sS]$ ]] || { echo "Cancelado."; exit 0; }
+
+# ───────────────────────── Perfil del dueño (una sola vez) ─────────────────────────
+# Completa CLAUDE.md del proyecto: quién aprueba, su experiencia, su disponibilidad y el idioma.
+if [ ! -f "$PERFIL" ]; then
+  titulo "Perfil del dueño (una sola vez; se guarda en $PERFIL)"
+  NOMBRE_GH=$(gh api user -q '.name // .login' | awk '{print $1}')
+  read -rp "  Tu nombre [$NOMBRE_GH]: " DUENO; DUENO="${DUENO:-$NOMBRE_GH}"
+  read -rp "  Tu experiencia, para que Claude no te explique lo básico: " EXPERIENCIA
+  read -rp "  Cuándo revisas y apruebas (p. ej. 15 min al mediodía entre semana): " DISPONIBILIDAD
+  read -rp "  Idioma [Español]: " IDIOMA; IDIOMA="${IDIOMA:-Español}"
+  mkdir -p "$(dirname "$PERFIL")"
+  { printf 'DUENO=%q\n' "$DUENO"; printf 'EXPERIENCIA=%q\n' "$EXPERIENCIA"
+    printf 'DISPONIBILIDAD=%q\n' "$DISPONIBILIDAD"; printf 'IDIOMA=%q\n' "$IDIOMA"; } > "$PERFIL"
+  chmod 600 "$PERFIL"
+  ok "perfil guardado"
+fi
+# shellcheck source=/dev/null
+source "$PERFIL"
 
 # ───────────────────────── 1. Netlify: token y sitio ─────────────────────────
 if [ "$HAY_SITIO" = si ] && [ "$HAY_TOKEN_NETLIFY" = si ]; then
@@ -178,6 +223,7 @@ else
                -e "s|__SITIO__|$SITIO|g" -e "s|__GUARDIAN__|$VERSION|g" "$f" && rm -f "$f.bak"
   done
   [ -n "$ALCANCE" ] && cp "$ALCANCE" "$TMP/p/PROYECTO.md"
+  completar_marcadores "$TMP/p"
   git -C "$TMP/p" init -q -b main
   git -C "$TMP/p" add -A
   git -C "$TMP/p" commit -q -m "chore: crea $SLUG con el Guardián $VERSION (guardian-skeleton)"
