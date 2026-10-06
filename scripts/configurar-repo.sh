@@ -41,20 +41,20 @@ echo "→ GITHUB_TOKEN de solo lectura por defecto; Actions no puede aprobar PRs
 gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=false >/dev/null
 
-echo "→ Ruleset de main: PR obligatorio (0 aprobaciones: el dueño hace el merge) + CI y chequeo del PR en verde; sin push directo, force push ni borrado"
+echo "→ Ruleset de main: PR + CI y chequeo en verde + 1 aprobación (los PRs de Claude esperan al dueño; el dueño, admin, puede fusionar los suyos); sin push directo, force push ni borrado"
 RULESET_ID=$(gh api "repos/$REPO/rulesets" --jq '.[] | select(.name == "main") | .id')
 RULESET=$(cat <<'JSON'
 {
   "name": "main",
   "target": "branch",
   "enforcement": "active",
-  "bypass_actors": [],
+  "bypass_actors": [ { "actor_type": "RepositoryRole", "actor_id": 5, "bypass_mode": "pull_request" } ],
   "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
   "rules": [
     { "type": "deletion" },
     { "type": "non_fast_forward" },
     { "type": "pull_request", "parameters": {
-        "required_approving_review_count": 0,
+        "required_approving_review_count": 1,
         "dismiss_stale_reviews_on_push": true,
         "require_code_owner_review": false,
         "require_last_push_approval": false,

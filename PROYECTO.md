@@ -304,3 +304,4 @@ Escenario: El guardián me avisa
 | 2026-10-05 | **Cierre de la Fase 2.** E2 probado de punta a punta con el proyecto real Vitrina | Avance del Guardián: 3 de 6 escenarios (50 %) |
 | 2026-10-05 | Cada fase es un **milestone** de GitHub (Guardián y proyectos); el workflow de tickets los crea y asigna | Las fases solo existían en PROYECTO.md; así se ve el % por fase, también desde el celular (ADR 0023) |
 | 2026-10-06 | Fase 3: API key con tope mensual, `@claude` solo del dueño + siguiente tarea automática (máx. 2 PRs), Sonnet 5.5, Claude abre el PR y no puede fusionar | ADR 0024 |
+| 2026-10-06 | `main` exige **1 aprobación**: los PRs de `claude[bot]` esperan al dueño; el dueño (admin) puede fusionar los suyos sin auto-aprobarse | Cierra la ADR 0009; Claude no puede fusionar ni saltarse la regla |

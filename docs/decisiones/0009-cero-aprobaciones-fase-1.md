@@ -1,7 +1,7 @@
 # 0009. Fase 1: `main` con 0 aprobaciones obligatorias
 
 - **Fecha:** 2026-10-04
-- **Estado:** Aceptada
+- **Estado:** Reemplazada en la Fase 3 (ADR 0024): `main` exige 1 aprobación; el dueño (admin) puede fusionar sus propios PRs
 
 ## Contexto
 
