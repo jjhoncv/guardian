@@ -100,13 +100,14 @@ else
   ok "alcance: $ALCANCE → «${NOMBRE}»"
 fi
 
-EXISTE_REPO=no; VACIO=si; HAY_SITIO=no; HAY_TOKEN_NETLIFY=no; HAY_PAT=no
+EXISTE_REPO=no; VACIO=si; HAY_SITIO=no; HAY_TOKEN_NETLIFY=no; HAY_PAT=no; HAY_CLAUDE=no
 if gh repo view "$REPO" >/dev/null 2>&1; then
   EXISTE_REPO=si
   gh api "repos/$REPO/commits?per_page=1" >/dev/null 2>&1 && VACIO=no
   SECRETOS=$(gh secret list -R "$REPO" 2>/dev/null | cut -f1)
   echo "$SECRETOS" | grep -qx NETLIFY_AUTH_TOKEN && HAY_TOKEN_NETLIFY=si
   echo "$SECRETOS" | grep -qx RELEASE_PLEASE_TOKEN && HAY_PAT=si
+  echo "$SECRETOS" | grep -qx ANTHROPIC_API_KEY && HAY_CLAUDE=si
   SITE_ID=$(gh variable get NETLIFY_SITE_ID -R "$REPO" 2>/dev/null || true)
   [ -n "$SITE_ID" ] && HAY_SITIO=si
   if [ "$VACIO" = no ] && ! gh api "repos/$REPO/contents/.github/workflows/ci.yml" -q .content 2>/dev/null | base64 -d 2>/dev/null | grep -q "$GUARDIAN/.github/workflows/"; then
@@ -126,7 +127,11 @@ printf '  %-22s %-46s %s\n' "Qué" "Dónde se saca" "Empieza con"
 [ "$HAY_PAT" = si ] \
   && info "PAT de release-please: ya está en el repo" \
   || printf '  %-22s %-46s %s\n' "PAT (solo este repo)" "GitHub → Settings → Developer settings → Fine-grained" "github_pat_"
+[ "$HAY_CLAUDE" = si ] \
+  && info "Llave de Claude: ya está en el repo" \
+  || printf '  %-22s %-46s %s\n' "Llave de Claude (API)" "console.anthropic.com → workspace con tope → API Keys" "sk-ant-"
 info "El sitio de Netlify ($SITIO) lo crea el script con tu token."
+info "Claude en la nube necesita la GitHub App de Claude con acceso al repo: github.com/apps/claude (te lo recuerdo al final)."
 
 if [ "$FALTAN" -gt 0 ]; then
   printf '\nFaltan %s requisito(s). Resuélvelos y vuelve a correr el script.\n' "$FALTAN"; exit 1
@@ -209,6 +214,26 @@ TXT
   unset PAT
 fi
 
+# ───────────────────────── 4b. Llave de Claude (ADR 0024) ─────────────────────────
+titulo "4b · Llave de Claude en la nube (ADR 0024)"
+if [ "$HAY_CLAUDE" = si ]; then ok "ya estaba"
+else
+  cat <<TXT
+  Usa una API key de un workspace con tope de gasto mensual (console.anthropic.com → Workspaces → Limits).
+  Puede ser la misma key en todos tus proyectos: el tope es del workspace.
+TXT
+  while :; do
+    read -rsp "  Pega la API key de Claude (sk-ant-…, no se ve al escribir; Enter vacío para saltar): " CLAUDE_KEY; echo
+    [ -z "$CLAUDE_KEY" ] && { info "sin llave: @claude no funcionará hasta que guardes ANTHROPIC_API_KEY en el repo"; break; }
+    CODIGO=$(curl -s -o /dev/null -w '%{http_code}' -H "x-api-key: $CLAUDE_KEY" -H "anthropic-version: 2023-06-01" https://api.anthropic.com/v1/models)
+    if [ "$CODIGO" = 200 ]; then
+      printf '%s' "$CLAUDE_KEY" | gh secret set ANTHROPIC_API_KEY -R "$REPO" && ok "ANTHROPIC_API_KEY guardada (válida)"; break
+    fi
+    echo "  ❌ Anthropic rechazó esa llave (HTTP $CODIGO). Prueba de nuevo."
+  done
+  unset CLAUDE_KEY
+fi
+
 # ───────────────────────── 5. Código: el esqueleto ─────────────────────────
 titulo "5 · Código"
 if [ "$VACIO" = no ]; then ok "el repo ya tiene código"
@@ -258,5 +283,6 @@ cat <<TXT
 
   Siguientes pasos:
   1. Tablero (una vez): Projects → $SLUG → ⋯ → Workflows → Auto-add to project → filtro is:issue is:open → Save and turn on.
+  ·  Claude en la nube: la GitHub App de Claude debe tener acceso a $SLUG (github.com/settings/installations → Claude → Configure).
   2. Abre Claude Code en $DESTINO y corre /guardian-planificar (y /guardian para ver el estado).
 TXT
