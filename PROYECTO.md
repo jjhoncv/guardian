@@ -273,6 +273,7 @@ Escenario: El guardián me avisa
 - Un solo workflow **Pipeline** en Actions (calidad ∥ chequeo ∥ build → preview/staging; release → producción → smoke) en vez de 7 separados — 2026-10-05 — candidato a la Fase 4 (Visibilidad)
 - CI: instalar Chrome sin `--with-deps` (solo el navegador, con caché) para no depender de los mirrors de Ubuntu en cada corrida — 2026-10-05 — un día de mirrors lentos el paso tardó ~7 min (lo normal: 15–30 s)
 - Skills del Guardián (`/guardian`, `/guardian-planificar`) como **plugin de Claude Code versionado**, en vez de copiarlas a cada proyecto — 2026-10-05 — una corrección hoy no llega sola a los proyectos ya creados (los workflows sí)
+- El check «validar esqueleto» verifica que existan los marcadores que completa `nuevo-proyecto.sh` (`<Dueño>`, `Fase <N> — <nombre>`, …) — 2026-10-05 — si cambian en el esqueleto, el completado falla sin avisar
 
 ## 16. Decisiones tomadas
 
