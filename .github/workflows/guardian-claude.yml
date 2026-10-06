@@ -35,6 +35,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
+          # Sin el GITHUB_TOKEN en git: así Claude empuja con el token de la App y sus commits disparan CI.
+          persist-credentials: false
       # Entorno del proyecto para que Claude corra lint, pruebas y escenarios antes de abrir el PR.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -101,6 +103,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+          persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
@@ -110,6 +113,7 @@ jobs:
       - uses: anthropics/claude-code-action@86d88e619d8e6caf07b5c3944dd14f441c533718 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          branch_prefix: "feat/"
           prompt: |
             Desarrolla el ticket #${{ needs.elegir.outputs.ticket }} de este repo, siguiendo CLAUDE.md:
             1. Léelo con `gh issue view ${{ needs.elegir.outputs.ticket }}` (escenario BDD, qué se hace, criterio de hecho).
