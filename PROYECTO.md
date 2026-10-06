@@ -275,6 +275,7 @@ Escenario: El guardián me avisa
 - CI: instalar Chrome sin `--with-deps` (solo el navegador, con caché) para no depender de los mirrors de Ubuntu en cada corrida — 2026-10-05 — un día de mirrors lentos el paso tardó ~7 min (lo normal: 15–30 s)
 - Skills del Guardián (`/guardian`, `/guardian-planificar`) como **plugin de Claude Code versionado**, en vez de copiarlas a cada proyecto — 2026-10-05 — una corrección hoy no llega sola a los proyectos ya creados (los workflows sí)
 - El check «validar esqueleto» verifica que existan los marcadores que completa `nuevo-proyecto.sh` (`<Dueño>`, `Fase <N> — <nombre>`, …) — 2026-10-05 — si cambian en el esqueleto, el completado falla sin avisar
+- Fecha objetivo en cada milestone de fase, calculada desde los **Límites** del `PROYECTO.md` — 2026-10-05 — GitHub marca el atraso y alimenta la barra de salud; candidato a la Fase 4
 
 ## 16. Decisiones tomadas
 
