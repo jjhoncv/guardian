@@ -78,6 +78,7 @@ Cada proyecto nuevo se crea con `scripts/nuevo-proyecto.sh <nombre>`: primero re
 
 | Elemento | Convención |
 |---|---|
+| Fase (épica) | **Milestone** «Fase N — nombre» con sus entregables; GitHub muestra el % de tickets cerrados (ADR 0023) |
 | Ticket | GitHub Issue `#12`, con escenario BDD vinculado y criterio de "hecho" |
 | Rama | `feat/12-login`, `fix/15-correo` |
 | Commit | Conventional Commits: `feat(#12): agrega formulario de login` |
@@ -300,3 +301,4 @@ Escenario: El guardián me avisa
 | 2026-10-05 | **Plataforma + esqueleto:** los proyectos llaman a los workflows reutilizables del Guardián (`@vX.Y.Z`) y nacen de `guardian-skeleton` con `nuevo-proyecto.sh` (Paso 0, sitio de Netlify automático, un PAT por proyecto) | La plantilla copiaba la maquinaria del Guardián y las copias quedaban congeladas (ADR 0021) |
 | 2026-10-05 | **Paso 0 antes de crear nada:** `/guardian-idea` (ficha + alcance + nombre) → `nuevo-proyecto.sh --alcance` → `/guardian-planificar`; comandos con prefijo `guardian` y `/guardian` como menú | Se estaba creando la infraestructura antes de saber de qué trataba el proyecto (ADR 0022) |
 | 2026-10-05 | **Cierre de la Fase 2.** E2 probado de punta a punta con el proyecto real Vitrina | Avance del Guardián: 3 de 6 escenarios (50 %) |
+| 2026-10-05 | Cada fase es un **milestone** de GitHub (Guardián y proyectos); el workflow de tickets los crea y asigna | Las fases solo existían en PROYECTO.md; así se ve el % por fase, también desde el celular (ADR 0023) |

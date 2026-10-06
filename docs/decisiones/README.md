@@ -26,3 +26,4 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 | [0020](0020-avance-del-guardian-a-mano.md) | % del Guardián a mano hasta la Fase 4 | Aceptada |
 | [0021](0021-plataforma-y-esqueleto.md) | El Guardián es una plataforma; los proyectos nacen de `guardian-skeleton` | Aceptada |
 | [0022](0022-idea-antes-de-crear.md) | La idea y el alcance van antes de crear nada; comandos `guardian` | Aceptada |
+| [0023](0023-fases-como-milestones.md) | Cada fase es un milestone de GitHub | Aceptada |
