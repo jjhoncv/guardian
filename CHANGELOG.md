@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0](https://github.com/jjhoncv/guardian/compare/v0.8.0...v0.9.0) (2026-10-06)
+
+
+### Funcionalidades
+
+* **#111:** [@claude](https://github.com/claude) en un ticket → Claude abre el PR ([#118](https://github.com/jjhoncv/guardian/issues/118)) ([a1a8894](https://github.com/jjhoncv/guardian/commit/a1a889479d87ed20dca86cd54370a69772937006))
+* **#112:** al fusionar un PR, Claude toma el siguiente ticket ([#120](https://github.com/jjhoncv/guardian/issues/120)) ([905d7ca](https://github.com/jjhoncv/guardian/commit/905d7cadd0657b6d5080ce040bac6eb45fb8f576))
+* **#113:** main exige 1 aprobación; los PRs de Claude esperan al dueño ([#121](https://github.com/jjhoncv/guardian/issues/121)) ([2a17ea2](https://github.com/jjhoncv/guardian/commit/2a17ea26cfb55fcf15da73cb1d0378d1e839aa6a))
+* **#116:** nuevo-proyecto.sh pide la llave de Claude ([#122](https://github.com/jjhoncv/guardian/issues/122)) ([625ddce](https://github.com/jjhoncv/guardian/commit/625ddcee05493a0990c1109dfa8bfbc0e28ee61c))
+
 ## [0.8.0](https://github.com/jjhoncv/guardian/compare/v0.7.0...v0.8.0) (2026-10-06)
 
 
