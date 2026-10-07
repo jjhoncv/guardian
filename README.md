@@ -39,7 +39,7 @@ Tres pasos; `/guardian` te dice en cuál estás y qué falta.
    scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md             # crea todo
    ```
    Pide el token de Netlify (oculto) y crea el sitio; crea el repo; pide un PAT solo para ese repo; recién entonces sube **[guardian-skeleton](https://github.com/jjhoncv/guardian-skeleton)** con tu alcance, configura protecciones y tablero, y verifica staging. Si se corta, vuelve a correrlo: salta lo hecho.
-3. **Escenarios y tickets.** Activa *Auto-add* en el tablero (filtro `is:issue is:open`) y, en Claude Code dentro del proyecto, corre **`/guardian-planificar`**: abre un PR con los escenarios BDD (en rojo) y el plan; al fusionarlo se crean los tickets.
+3. **Escenarios y tickets.** En el tablero, *Workflows*: activa *Auto-add* (filtro `is:issue is:open`) y cambia *Pull request linked to issue* a **En revisión**. Luego, en Claude Code dentro del proyecto, corre **`/guardian-planificar`**: abre un PR con los escenarios BDD (en rojo) y el plan; al fusionarlo se crean los tickets.
 
 El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjhoncv/guardian/.github/workflows/guardian-ci.yml@vX.Y.Z`); para recibir mejoras se sube la versión (Dependabot lo propone).
 
