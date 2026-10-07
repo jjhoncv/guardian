@@ -35,6 +35,13 @@ describe("elegirSiguiente", () => {
     expect(elegirSiguiente(e)).toEqual({ motivo: "Los tickets abiertos de «Fase 1 — Catálogo» ya tienen PR; falta tu revisión." });
   });
 
+  it("no abre la fase siguiente sola: si la actual está completa, pide cerrarla", () => {
+    const e = { ...base, milestones: [{ ...base.milestones[0], abiertos: 0 }, base.milestones[1]], issues: [{ numero: 5, milestone: 2 }] };
+    expect(elegirSiguiente(e)).toEqual({
+      motivo: "«Fase 1 — Catálogo» está completa: ciérrala (milestone y CLAUDE.md) para que Claude pase a la siguiente fase.",
+    });
+  });
+
   it("no hay nada que hacer si no quedan tickets abiertos", () => {
     expect(elegirSiguiente({ ...base, milestones: [], issues: [] })).toEqual({ motivo: "No quedan tickets abiertos en ninguna fase." });
   });

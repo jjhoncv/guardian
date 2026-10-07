@@ -1,6 +1,6 @@
-// Elige el siguiente ticket para Claude (ADR 0024): el de número más bajo de la fase actual (el primer
-// milestone «Fase N» con tickets abiertos) que todavía no tenga un PR de Claude; nunca más de 2 PRs de Claude
-// esperando revisión. En el CI: node scripts/siguiente-ticket.ts → escribe ticket=<N> en $GITHUB_OUTPUT.
+// Elige el siguiente ticket para Claude (ADR 0024): el de número más bajo de la fase actual (el milestone
+// «Fase N» abierto de número más bajo) que todavía no tenga un PR de Claude; nunca más de 2 PRs de Claude
+// esperando revisión. No abre la fase siguiente: cerrar una fase es decisión del dueño. En el CI: node scripts/siguiente-ticket.ts → escribe ticket=<N> en $GITHUB_OUTPUT.
 import { appendFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
@@ -17,9 +17,12 @@ export function elegirSiguiente(e: Estado): Eleccion {
     return { motivo: `Hay ${e.prsDeClaude.length} PRs de Claude esperando revisión (límite ${e.limite}).` };
   }
   const faseActual = e.milestones
-    .filter((m) => /^Fase \d+/.test(m.titulo) && m.abiertos > 0)
+    .filter((m) => /^Fase \d+/.test(m.titulo))
     .sort((a, b) => Number(a.titulo.match(/\d+/)![0]) - Number(b.titulo.match(/\d+/)![0]))[0];
   if (!faseActual) return { motivo: "No quedan tickets abiertos en ninguna fase." };
+  if (faseActual.abiertos === 0) {
+    return { motivo: `«${faseActual.titulo}» está completa: ciérrala (milestone y CLAUDE.md) para que Claude pase a la siguiente fase.` };
+  }
   const enCurso = new Set(e.prsDeClaude.flatMap((p) => p.cierra));
   const libre = e.issues
     .filter((i) => i.milestone === faseActual.numero && !enCurso.has(i.numero))
