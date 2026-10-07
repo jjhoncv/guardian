@@ -220,12 +220,12 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 |---|---|
 | E1 Proyecto nuevo en producción el día 1 | ✅ (Fase 1; con `nuevo-proyecto.sh` desde la Fase 2) |
 | E2 Alcance convertido en pruebas | ✅ (Fase 2; Vitrina: 14 escenarios en rojo y 8 tickets en 3 fases) |
-| E3 Claude entrega un PR chico | ⬜ Fase 3 |
+| E3 Claude entrega un PR chico | ✅ (Fase 3; Vitrina: #12, #14 y #15 hechos por Claude, aprobados y fusionados) |
 | E4 Nada sube a producción sin mí | ✅ (Fase 1) |
 | E5 Veo la salud desde el celular | ⬜ Fase 4 |
 | E6 El guardián me avisa | ⬜ Fase 5 |
 
-**3 de 6 escenarios en verde (50 %).**
+**4 de 6 escenarios en verde (67 %).**
 
 ### Criterios de aceptación del Guardián
 
@@ -308,4 +308,7 @@ Escenario: El guardián me avisa
 | 2026-10-05 | **Cierre de la Fase 2.** E2 probado de punta a punta con el proyecto real Vitrina | Avance del Guardián: 3 de 6 escenarios (50 %) |
 | 2026-10-05 | Cada fase es un **milestone** de GitHub (Guardián y proyectos); el workflow de tickets los crea y asigna | Las fases solo existían en PROYECTO.md; así se ve el % por fase, también desde el celular (ADR 0023) |
 | 2026-10-06 | Fase 3: API key con tope mensual, `@claude` solo del dueño + siguiente tarea automática (máx. 2 PRs), Sonnet 5.5, Claude abre el PR y no puede fusionar | ADR 0024 |
+| 2026-10-06 | La API de Claude se paga **aparte** del plan Pro: crédito prepagado (USD 10) sin recarga automática + tope del workspace `guardian-ci` | Sin crédito, Claude falla en el primer turno sin gastar nada; el tope corta cualquier loop |
+| 2026-10-06 | Claude no abre la fase siguiente solo: con la fase actual sin tickets, avisa y espera que el dueño la cierre (milestone + CLAUDE.md) | Cerrar una fase es decisión del dueño (paso 7 del ciclo); evita gastar crédito en tickets que aún no tocan |
+| 2026-10-06 | **Cierre de la Fase 3.** E3 probado en Vitrina: Claude hizo #2, #3 y #4; el dueño aprobó cada PR y la siguiente tarea arrancó sola | Avance del Guardián: 4 de 6 escenarios (67 %) |
 | 2026-10-06 | `main` exige **1 aprobación**: los PRs de `claude[bot]` esperan al dueño; el dueño (admin) puede fusionar los suyos sin auto-aprobarse | Cierra la ADR 0009; Claude no puede fusionar ni saltarse la regla |

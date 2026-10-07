@@ -6,7 +6,7 @@
 
 Plantilla de GitHub que mantiene el foco y el alcance de proyectos de software: alcance fijo y medible, producción desde el día 1, tareas chicas que tú apruebas.
 
-- **Fase actual:** 3 — Claude en la nube (Fase 2 cerrada: v0.7.0 · avance 3 de 6 escenarios, 50 %)
+- **Fase actual:** 4 — Visibilidad (Fase 3 cerrada: v0.9.1 · avance 4 de 6 escenarios, 67 %)
 - **Staging:** https://staging--guardian-jjhoncv.netlify.app
 - **Producción:** https://guardian-jjhoncv.netlify.app
 - **Tablero:** https://github.com/users/jjhoncv/projects/1
