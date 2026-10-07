@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.1](https://github.com/jjhoncv/guardian/compare/v0.9.0...v0.9.1) (2026-10-07)
+
+
+### Correcciones
+
+* **#125:** los commits de [@claude](https://github.com/claude) disparan CI ([#126](https://github.com/jjhoncv/guardian/issues/126)) ([878dbac](https://github.com/jjhoncv/guardian/commit/878dbacd41c7aad26ad35a76f134c6e8671a69f0))
+* **#128:** Claude no salta de fase solo ([#129](https://github.com/jjhoncv/guardian/issues/129)) ([123f359](https://github.com/jjhoncv/guardian/commit/123f35933f49ba4c57bacaad8de5bfbc6f34b9d3))
+
 ## [0.9.0](https://github.com/jjhoncv/guardian/compare/v0.8.0...v0.9.0) (2026-10-06)
 
 
