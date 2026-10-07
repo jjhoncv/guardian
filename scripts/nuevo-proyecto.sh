@@ -282,7 +282,9 @@ cat <<TXT
   Producción: https://$SITIO.netlify.app  (con el primer release que apruebes)
 
   Siguientes pasos:
-  1. Tablero (una vez): Projects → $SLUG → ⋯ → Workflows → Auto-add to project → filtro is:issue is:open → Save and turn on.
+  1. Tablero (una vez): Projects → $SLUG → Workflows:
+     · Auto-add to project → filtro is:issue is:open → Save and turn on.
+     · Pull request linked to issue → Edit → Status: En revisión → Save and turn on.
   ·  Claude en la nube: la GitHub App de Claude debe tener acceso a $SLUG (github.com/settings/installations → Claude → Configure).
   2. Abre Claude Code en $DESTINO y corre /guardian-planificar (y /guardian para ver el estado).
 TXT
