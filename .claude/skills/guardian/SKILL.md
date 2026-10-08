@@ -60,5 +60,6 @@ Termina siempre con esta lista (marca dónde se usa cada uno):
 | `/guardian-idea` | Repo del Guardián | Idea → ficha → alcance (`PROYECTO.md`) y nombre. No crea nada |
 | `scripts/nuevo-proyecto.sh <slug> --alcance …` | Terminal, en el Guardián | Crea sitio, repo, secretos y protecciones; sube el esqueleto con tu alcance |
 | `/guardian-planificar` | Proyecto | Alcance → escenarios BDD en rojo + plan de tareas por PR → tickets al fusionar |
+| `/guardian-consultor` | Repo del Guardián | Revisa un PR de Claude desarrollador: corrige con commit `(consultor)` y lo vuelve lección |
 
 Responde en el idioma del dueño, en corto: estado, qué falta, **un** siguiente paso.

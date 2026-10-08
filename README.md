@@ -91,6 +91,7 @@ Cada workflow toma sus scripts y herramientas de **su propia versión** del Guar
 | netlify-cli del CI, fijado por lockfile | `tools/netlify/` |
 | Crear un proyecto (Paso 0 + infraestructura + esqueleto) | `scripts/nuevo-proyecto.sh` |
 | Protecciones, seguridad y tablero de un repo | `scripts/configurar-repo.sh` |
+| Manual del consultor (lo que el dueño le enseñó) y su skill `/guardian-consultor` | `docs/consultor.md`, `.claude/skills/guardian-consultor/` |
 | Smoke test manual | `.github/workflows/smoke.yml` |
 | Skills `/guardian`, `/guardian-idea`, `/guardian-planificar` | `.claude/skills/` |
 | Escenarios BDD y mocks del propio Guardián | `features/`, `mocks/` |
