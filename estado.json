@@ -1,8 +1,8 @@
 {
   "proyecto": "guardian",
   "fase": {
-    "titulo": "Fase 4 — Visibilidad",
-    "vence": "2026-10-11T00:00:00Z"
+    "titulo": "Fase 5 — Empuje",
+    "vence": "2026-10-14T00:00:00Z"
   },
   "avance": {
     "verdes": 5,
@@ -17,5 +17,5 @@
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-08T22:53:39.742Z"
+  "actualizado": "2026-10-08T23:40:30.496Z"
 }
