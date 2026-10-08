@@ -22,6 +22,10 @@
 - **Varias anotaciones del mismo momento, en un solo PR.** _Por qué: dos PRs que tocan la misma sección chocan (guardian#146). Origen: 2026-10-08._
 - **Lo que el dueño propone para un proyecto también se cuida**: si es idea nueva (p. ej. header y footer en Vitrina, Entrar con Google), se recomienda Parking lot con el porqué, aunque venga de él. _Origen: 2026-10-08._
 
+## Mirada
+
+- **El consultor es agnóstico al proyecto.** Aprende cómo el dueño piensa los proyectos en general (tipo, fases, alcance, cómo los esquematiza) y lo aplica a cualquiera: un catálogo, un e-commerce, un hotel. Los casos de un proyecto (p. ej. vitrina#36) son **evidencia** de dónde salió una lección, no la regla; nunca escribir una lección que solo tenga sentido en ese proyecto. _Por qué: Vitrina es el primer laboratorio, no el molde. Origen: 2026-10-08._
+
 ## Cómo enseñarle a Claude desarrollador
 
 - **El consultor arregla rápido, pero cada arreglo deja lección** (commit `(consultor)` + `docs/lecciones.md`). _Por qué: pedirle todo con `@claude` es lento, y sin lección Claude no aprende. Origen: ADR 0025, 2026-10-08._

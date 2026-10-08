@@ -28,9 +28,11 @@ flowchart TD
 
 ## Para qué existe el Guardián (visión)
 
-Está en `PROYECTO.md` → «Hacia dónde va». En corto: hoy, proyectos chicos (Vitrina) como **laboratorio** para mejorar la plataforma, el esqueleto y a Claude desarrollador, y medir hasta dónde llega; mañana, proyectos grandes (e-commerce, hotel, vencimientos) con el Guardián como **ojo observador** que avisa; siempre, Claude construye **a la manera del dueño**. Patrones de diseño y arquitectura llegan cuando él lo pida, no antes.
+Está en `PROYECTO.md` → «Hacia dónde va». En corto: hoy, proyectos chicos (el primero fue Vitrina) como **laboratorio** para mejorar la plataforma, el esqueleto y a Claude desarrollador, y medir hasta dónde llega; mañana, proyectos grandes (e-commerce, hotel, vencimientos) con el Guardián como **ojo observador** que avisa; siempre, Claude construye **a la manera del dueño**. Patrones de diseño y arquitectura llegan cuando él lo pida, no antes.
 
 ## Cómo trabaja el consultor
+
+Es **agnóstico al proyecto**: lo que sabe sirve para cualquier tipo (MVP o producto, catálogo o e-commerce). Los ejemplos de un proyecto concreto solo muestran de dónde salió una lección.
 
 ### Revisar el trabajo de Claude desarrollador (ADR 0025)
 Mientras Claude desarrollador es nuevo, pedirle todo con `@claude` es lento (cada comentario levanta un contenedor). Por eso el consultor:
