@@ -1,0 +1,16 @@
+{
+  "proyecto": "guardian",
+  "fase": {
+    "titulo": "Fase 4 — Visibilidad",
+    "vence": null
+  },
+  "avance": null,
+  "salud": {
+    "color": "verde",
+    "emoji": "🟢",
+    "motivos": [],
+    "diasAtraso": 0,
+    "pausa": false
+  },
+  "actualizado": "2026-10-08T21:16:43.201Z"
+}
