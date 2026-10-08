@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { filasSimulacion, simular } from "./simulacion";
+import { filasSimulacion, serieSimulacion, simular } from "./simulacion";
 
 it("el proyecto-x pasa por todos los colores en el orden esperado", () => {
   const colores = simular().map((m) => m.datos.estado!.salud.color);
@@ -16,4 +16,12 @@ it("en las semanas grises lo primero es decidir pausa o cierre, y el atraso se s
   const fila = filasSimulacion(simular())[7];
   expect(fila[7]).toMatch(/^⚫ 29 días sin actividad/);
   expect(Number(fila[3])).toBeGreaterThan(20);
+});
+
+it("serie numérica para el gráfico: avance real de la fase, tiempo del plan, avance del proyecto y días de atraso", () => {
+  const serie = serieSimulacion(simular());
+  expect(serie[0]).toEqual(["fecha", "avance real de la fase (%)", "tiempo del plan (%)", "avance del proyecto (%)", "días de atraso"]);
+  expect(serie[1]).toEqual(["2026-11-04", 25, 30, 0, 0]);
+  expect(serie[7]).toEqual(["2026-12-14", 50, 100, 18, 35]);
+  expect(serie).toHaveLength(11);
 });

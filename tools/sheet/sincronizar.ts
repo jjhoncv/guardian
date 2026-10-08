@@ -5,7 +5,7 @@
 import { JWT } from "google-auth-library";
 import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
 import type { Estado } from "../../scripts/estado.ts";
-import { filasSimulacion, simular } from "../../scripts/simulacion.ts";
+import { filasSimulacion, serieSimulacion, simular } from "../../scripts/simulacion.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
 if (!GITHUB_TOKEN || !DUENO || !SHEET_ID || !SHEET_SA) throw new Error("Faltan GITHUB_TOKEN, DUENO, SHEET_ID o SHEET_SA");
@@ -205,16 +205,51 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
 /** Simulación (solo Sheet de pruebas): un proyecto inventado en 10 momentos, con el mismo cálculo que el tablero real. */
 async function escribirSimulacion(existe: boolean) {
   if (!existe) await sheets(":batchUpdate", { method: "POST", body: { requests: [{ addSheet: { properties: { title: "Simulación" } } }] } });
-  const filas = filasSimulacion(simular());
+  const momentos = simular();
+  const filas = filasSimulacion(momentos);
+  const serie = serieSimulacion(momentos);
   await sheets("/values:batchClear", { method: "POST", body: { ranges: ["Simulación!A:Z"] } });
-  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }] } });
-  const { sheets: hojas } = await sheets<{ sheets: { properties: { sheetId: number; title: string } }[] }>("?fields=sheets.properties(sheetId,title)");
-  const sheetId = hojas.find((h) => h.properties.title === "Simulación")!.properties.sheetId;
+  // La tabla a la izquierda; los números del gráfico, a la derecha (desde la columna L).
+  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }, { range: "Simulación!L1", values: serie }] } });
+  type Hoja = { properties: { sheetId: number; title: string }; charts?: { chartId: number }[] };
+  const { sheets: hojas } = await sheets<{ sheets: Hoja[] }>("?fields=sheets(properties(sheetId,title),charts(chartId))");
+  const hojaSim = hojas.find((h) => h.properties.title === "Simulación")!;
+  const sheetId = hojaSim.properties.sheetId;
+  const col = (c: number) => ({ sourceRange: { sources: [{ sheetId, startRowIndex: 0, endRowIndex: serie.length, startColumnIndex: 11 + c, endColumnIndex: 12 + c }] } });
+  const linea = (c: number, rgb: [number, number, number], punteada = false) => ({ series: col(c), targetAxis: "LEFT_AXIS", type: "LINE", color: { red: rgb[0], green: rgb[1], blue: rgb[2] }, lineStyle: { width: 3, ...(punteada ? { type: "MEDIUM_DASHED" } : {}) }, pointStyle: { shape: "CIRCLE", size: 6 } });
+  const grafico = {
+    addChart: {
+      chart: {
+        spec: {
+          title: "proyecto-x en el tiempo: avance vs. plan y días de atraso",
+          basicChart: {
+            chartType: "COMBO",
+            legendPosition: "BOTTOM_LEGEND",
+            headerCount: 1,
+            axis: [
+              { position: "LEFT_AXIS", title: "%", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } },
+              { position: "RIGHT_AXIS", title: "días de atraso" },
+            ],
+            domains: [{ domain: col(0) }],
+            series: [
+              linea(1, [0.26, 0.52, 0.96]),
+              linea(2, [0.6, 0.63, 0.65], true),
+              linea(3, [0.2, 0.66, 0.33]),
+              { series: col(4), targetAxis: "RIGHT_AXIS", type: "COLUMN", color: { red: 0.92, green: 0.26, blue: 0.21 } },
+            ],
+          },
+        },
+        position: { overlayPosition: { anchorCell: { sheetId, rowIndex: filas.length + 2, columnIndex: 0 }, widthPixels: 900, heightPixels: 380 } },
+      },
+    },
+  };
   const requests: unknown[] = [
     { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 1 } }, fields: "gridProperties.frozenRowCount" } },
     { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1 }, cell: { userEnteredFormat: { textFormat: { bold: true }, backgroundColor: { red: 0.93, green: 0.93, blue: 0.93 } } }, fields: "userEnteredFormat(textFormat,backgroundColor)" } },
     ...anchos(filas).map((px, c) => ({ updateDimensionProperties: { range: { sheetId, dimension: "COLUMNS", startIndex: c, endIndex: c + 1 }, properties: { pixelSize: px }, fields: "pixelSize" } })),
-    ...filas.slice(1).map((f, i) => ({ repeatCell: { range: { sheetId, startRowIndex: i + 1, endRowIndex: i + 2 }, cell: { userEnteredFormat: { backgroundColor: FONDO[f[2].split(" ")[1]] ?? FONDO.verde } }, fields: "userEnteredFormat.backgroundColor" } })),
+    ...filas.slice(1).map((f, i) => ({ repeatCell: { range: { sheetId, startRowIndex: i + 1, endRowIndex: i + 2, startColumnIndex: 0, endColumnIndex: filas[0].length }, cell: { userEnteredFormat: { backgroundColor: FONDO[f[2].split(" ")[1]] ?? FONDO.verde } }, fields: "userEnteredFormat.backgroundColor" } })),
+    ...(hojaSim.charts ?? []).map((c) => ({ deleteEmbeddedObject: { objectId: c.chartId } })),
+    grafico,
   ];
   await sheets(":batchUpdate", { method: "POST", body: { requests } });
   console.log(`Simulación escrita: ${filas.length - 1} momentos del proyecto-x (datos inventados).`);

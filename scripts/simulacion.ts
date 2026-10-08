@@ -102,3 +102,15 @@ export function filasSimulacion(momentos: Momento[]): string[][] {
     }),
   ];
 }
+
+/** Los mismos momentos en números, para el gráfico de la pestaña Simulación. */
+export function serieSimulacion(momentos: Momento[]): (string | number)[][] {
+  return [
+    ["fecha", "avance real de la fase (%)", "tiempo del plan (%)", "avance del proyecto (%)", "días de atraso"],
+    ...momentos.map(({ fecha, datos }) => {
+      const f = faseEnCurso(datos, fecha + MEDIODIA);
+      const e = datos.estado!;
+      return [fecha, f?.trabajo ?? 0, Math.min(f?.tiempo ?? 0, 100), e.avance!.porcentaje, e.salud.diasAtraso];
+    }),
+  ];
+}
