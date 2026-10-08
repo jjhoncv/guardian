@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.0](https://github.com/jjhoncv/guardian/compare/v0.12.0...v0.13.0) (2026-10-08)
+
+
+### Funcionalidades
+
+* **#163:** cálculo de salud del proyecto ([#172](https://github.com/jjhoncv/guardian/issues/172)) ([41c2cea](https://github.com/jjhoncv/guardian/commit/41c2ceab3cd5d411a13a510d975e62dcdeb3cb83))
+* **#164:** workflow de estado (fase, avance y salud) ([#174](https://github.com/jjhoncv/guardian/issues/174)) ([343b505](https://github.com/jjhoncv/guardian/commit/343b50589bc5020608536b2d6e19b3f3bbeef7cd))
+* **#165:** README con badges vivos de fase, avance y salud ([#175](https://github.com/jjhoncv/guardian/issues/175)) ([d73ca8c](https://github.com/jjhoncv/guardian/commit/d73ca8c6662aa237859694bf4b9e913c162bb92f))
+
 ## [0.12.0](https://github.com/jjhoncv/guardian/compare/v0.11.0...v0.12.0) (2026-10-08)
 
 
