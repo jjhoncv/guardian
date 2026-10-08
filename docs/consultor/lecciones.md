@@ -14,7 +14,7 @@
 ## Cómo mostrar el trabajo
 
 - **PRs en dos niveles**, también los del consultor (salvo una línea al Parking lot): *En simple* (qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, «Qué necesito de ti» como checklist) y *Detalle técnico* plegado. Ejemplo: vitrina#36. _Por qué: que se entienda sin ser desarrollador y desde el celular. Origen: 2026-10-08._
-- **Diagramas Mermaid en GitHub** con `%%{init: {"flowchart": {"htmlLabels": false}}}%%` y `flowchart TD`; los emojis se quedan. _Por qué: sin esa línea GitHub corta el texto. Origen: 2026-10-08._
+- **Diagramas Mermaid en GitHub** con `%%{init: {"flowchart": {"htmlLabels": false, "wrappingWidth": 400}}}%%` y `flowchart TD`; los emojis se quedan. _Por qué: sin `htmlLabels: false` y `wrappingWidth: 400`, GitHub corta el texto de las cajas largas. Origen: 2026-10-08._
 
 ## Alcance
 

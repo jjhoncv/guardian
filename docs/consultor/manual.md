@@ -16,7 +16,7 @@
 | **Claude desarrollador** | Claude en la nube (GitHub Actions) en cada proyecto | El `CLAUDE.md` y `docs/lecciones.md` de su repo |
 
 ```mermaid
-%%{init: {"flowchart": {"htmlLabels": false}}}%%
+%%{init: {"flowchart": {"htmlLabels": false, "wrappingWidth": 400}}}%%
 flowchart TD
     A["👤 Dueño"] -->|enseña| B["🧑‍🏫 Consultor (este repo)"]
     B -->|lecciones y reglas| C["📦 guardian-skeleton"]
