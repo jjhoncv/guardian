@@ -40,4 +40,8 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
-        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/telegram.ts "🛡️ <b>Guardián conectado</b> · los avisos de la Fase 5 llegarán aquí.${{ github.event_name == 'pull_request' && format(' (prueba del PR #{0})', github.event.pull_request.number) || '' }}"
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          texto="🛡️ <b>Guardián conectado</b> · los avisos de la Fase 5 llegarán aquí."
+          if [ -n "$PR" ]; then texto="$texto (prueba del PR #$PR)"; fi
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/telegram.ts "$texto"
