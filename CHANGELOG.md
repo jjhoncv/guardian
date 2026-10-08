@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/jjhoncv/guardian/compare/v0.11.0...v0.12.0) (2026-10-08)
+
+
+### Funcionalidades
+
+* **#162:** fecha objetivo por fase ([#170](https://github.com/jjhoncv/guardian/issues/170)) ([d00dafa](https://github.com/jjhoncv/guardian/commit/d00dafab702a5c6942b9191949ce245518f021fa))
+
 ## [0.11.0](https://github.com/jjhoncv/guardian/compare/v0.10.0...v0.11.0) (2026-10-08)
 
 
