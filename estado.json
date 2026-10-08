@@ -5,9 +5,9 @@
     "vence": "2026-10-11T00:00:00Z"
   },
   "avance": {
-    "verdes": 4,
+    "verdes": 5,
     "total": 6,
-    "porcentaje": 67
+    "porcentaje": 83
   },
   "salud": {
     "color": "verde",
@@ -17,5 +17,5 @@
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-08T22:36:07.457Z"
+  "actualizado": "2026-10-08T22:53:39.742Z"
 }
