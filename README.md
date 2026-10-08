@@ -36,7 +36,7 @@
 Idea: **«Vencimientos»**, una página donde ves qué etiquetas de producto están activas y cuáles vencen esta semana, leídas de una hoja de Google. Tipo: **prueba / MVP rápido**.
 
 ```mermaid
-%%{init: {"flowchart": {"htmlLabels": false}}}%%
+%%{init: {"flowchart": {"htmlLabels": false, "wrappingWidth": 400}}}%%
 flowchart TD
     A["💡 1. /guardian-idea"] --> B["🏗️ 2. nuevo-proyecto.sh"]
     B --> C["🗺️ 3. /guardian-planificar"]
