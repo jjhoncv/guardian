@@ -27,20 +27,20 @@ const PLAN_ORIGINAL = ["2026-11-09", "2026-11-16", "2026-11-23"];
 const PLAN_NUEVO = ["2026-12-18", "2026-12-25", "2027-01-08"]; // reprogramado al retomar
 const CIERRE_FASE = ["2026-12-18", "2026-12-24", null];
 
-const MOMENTOS: { fecha: string; evento: string; actividad: string; mainRojo?: string; reprogramado?: boolean; escenarios: number }[] = [
-  { fecha: "2026-11-04", evento: "Arranca: Claude hace los primeros tickets", actividad: "2026-11-04", escenarios: 0 },
-  { fecha: "2026-11-06", evento: "Un PR te espera hace más de un día", actividad: "2026-11-06", escenarios: 1 },
-  { fecha: "2026-11-12", evento: "La Fase 1 se demora: 3 días de atraso", actividad: "2026-11-11", escenarios: 2 },
-  { fecha: "2026-11-14", evento: "Sigue demorada: 5 días de atraso", actividad: "2026-11-13", escenarios: 2 },
-  { fecha: "2026-11-15", evento: "Además se rompe main (CI en rojo desde ayer)", actividad: "2026-11-15", mainRojo: "2026-11-14T06:00:00Z", escenarios: 2 },
-  { fecha: "2026-11-29", evento: "Dos semanas sin tocar el proyecto", actividad: "2026-11-15", mainRojo: "2026-11-14T06:00:00Z", escenarios: 2 },
-  { fecha: "2026-12-14", evento: "Un mes parado", actividad: "2026-11-15", mainRojo: "2026-11-14T06:00:00Z", escenarios: 2 },
-  { fecha: "2026-12-15", evento: "Se retoma: main arreglado y fechas reprogramadas", actividad: "2026-12-15", reprogramado: true, escenarios: 2 },
-  { fecha: "2026-12-22", evento: "Una semana después: Fase 1 cerrada, Fase 2 avanza", actividad: "2026-12-22", reprogramado: true, escenarios: 6 },
-  { fecha: "2027-01-05", evento: "Tres semanas después: Fase 3 casi lista, un PR te espera", actividad: "2027-01-05", reprogramado: true, escenarios: 9 },
+const MOMENTOS: { fecha: string; evento: string; corto: string; actividad: string; mainRojo?: string; reprogramado?: boolean; escenarios: number }[] = [
+  { fecha: "2026-11-04", corto: "arranca", evento: "Arranca: Claude hace los primeros tickets", actividad: "2026-11-04", escenarios: 0 },
+  { fecha: "2026-11-06", corto: "un PR te espera", evento: "Un PR te espera hace más de un día", actividad: "2026-11-06", escenarios: 1 },
+  { fecha: "2026-11-12", corto: "3 días tarde", evento: "La Fase 1 se demora: 3 días de atraso", actividad: "2026-11-11", escenarios: 2 },
+  { fecha: "2026-11-14", corto: "5 días tarde", evento: "Sigue demorada: 5 días de atraso", actividad: "2026-11-13", escenarios: 2 },
+  { fecha: "2026-11-15", corto: "main roto", evento: "Además se rompe main (CI en rojo desde ayer)", actividad: "2026-11-15", mainRojo: "2026-11-14T06:00:00Z", escenarios: 2 },
+  { fecha: "2026-11-29", corto: "2 semanas parado", evento: "Dos semanas sin tocar el proyecto", actividad: "2026-11-15", mainRojo: "2026-11-14T06:00:00Z", escenarios: 2 },
+  { fecha: "2026-12-14", corto: "1 mes parado", evento: "Un mes parado", actividad: "2026-11-15", mainRojo: "2026-11-14T06:00:00Z", escenarios: 2 },
+  { fecha: "2026-12-15", corto: "se retoma y reprograma", evento: "Se retoma: main arreglado y fechas reprogramadas", actividad: "2026-12-15", reprogramado: true, escenarios: 2 },
+  { fecha: "2026-12-22", corto: "+1 semana: Fase 2", evento: "Una semana después: Fase 1 cerrada, Fase 2 avanza", actividad: "2026-12-22", reprogramado: true, escenarios: 6 },
+  { fecha: "2027-01-05", corto: "+3 semanas: Fase 3", evento: "Tres semanas después: Fase 3 casi lista, un PR te espera", actividad: "2027-01-05", reprogramado: true, escenarios: 9 },
 ];
 
-export type Momento = { fecha: string; evento: string; datos: DatosProyecto };
+export type Momento = { fecha: string; evento: string; corto: string; datos: DatosProyecto };
 
 export function simular(): Momento[] {
   return MOMENTOS.map((m) => {
@@ -72,7 +72,7 @@ export function simular(): Momento[] {
       pausa: false,
     });
     const estado: Estado = { proyecto: "proyecto-x", fase, avance: { verdes: m.escenarios, total: 11, porcentaje: Math.round((m.escenarios / 11) * 100) }, salud, actualizado: hoy };
-    return { fecha: m.fecha, evento: m.evento, datos: { repo: REPO, estado, milestones, tareas } };
+    return { fecha: m.fecha, evento: m.evento, corto: m.corto, datos: { repo: REPO, estado, milestones, tareas } };
   });
 }
 
@@ -103,14 +103,17 @@ export function filasSimulacion(momentos: Momento[]): string[][] {
   ];
 }
 
-/** Los mismos momentos en números, para el gráfico de la pestaña Simulación. */
+const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const diaCorto = (fecha: string) => `${Number(fecha.slice(8, 10))} ${MESES[Number(fecha.slice(5, 7)) - 1]}`;
+
+/** Los mismos momentos en números, para el gráfico de la pestaña Simulación. La etiqueta dice color, día y qué pasó. */
 export function serieSimulacion(momentos: Momento[]): (string | number)[][] {
   return [
-    ["fecha", "avance real de la fase (%)", "tiempo del plan (%)", "avance del proyecto (%)", "días de atraso"],
-    ...momentos.map(({ fecha, datos }) => {
+    ["momento", "avance real de la fase (%)", "tiempo del plan (%)", "avance del proyecto (%)", "días de atraso"],
+    ...momentos.map(({ fecha, corto, datos }) => {
       const f = faseEnCurso(datos, fecha + MEDIODIA);
       const e = datos.estado!;
-      return [fecha, f?.trabajo ?? 0, Math.min(f?.tiempo ?? 0, 100), e.avance!.porcentaje, e.salud.diasAtraso];
+      return [`${e.salud.emoji} ${diaCorto(fecha)} · ${corto}`, f?.trabajo ?? 0, Math.min(f?.tiempo ?? 0, 100), e.avance!.porcentaje, e.salud.diasAtraso];
     }),
   ];
 }

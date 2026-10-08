@@ -210,7 +210,8 @@ async function escribirSimulacion(existe: boolean) {
   const serie = serieSimulacion(momentos);
   await sheets("/values:batchClear", { method: "POST", body: { ranges: ["Simulación!A:Z"] } });
   // La tabla a la izquierda; los números del gráfico, a la derecha (desde la columna L).
-  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }, { range: "Simulación!L1", values: serie }] } });
+  const leer = [["Cómo leerlo: si la línea azul (trabajo) queda por debajo de la gris (plazo), vas atrasado aunque la fecha no haya vencido. Las barras rojas crecen con cada día de atraso; la etiqueta de abajo dice el color de salud y qué pasó ese día."]];
+  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }, { range: "Simulación!L1", values: serie }, { range: `Simulación!A${filas.length + 2}`, values: leer }] } });
   type Hoja = { properties: { sheetId: number; title: string }; charts?: { chartId: number }[] };
   const { sheets: hojas } = await sheets<{ sheets: Hoja[] }>("?fields=sheets(properties(sheetId,title),charts(chartId))");
   const hojaSim = hojas.find((h) => h.properties.title === "Simulación")!;
@@ -221,7 +222,8 @@ async function escribirSimulacion(existe: boolean) {
     addChart: {
       chart: {
         spec: {
-          title: "proyecto-x en el tiempo: avance vs. plan y días de atraso",
+          title: "proyecto-x en el tiempo (datos inventados)",
+          subtitle: "Azul: % de tickets de la fase hechos · Gris punteado: % del plazo que ya pasó · Verde: % del proyecto en verde · Barras rojas: días de atraso",
           basicChart: {
             chartType: "COMBO",
             legendPosition: "BOTTOM_LEGEND",
@@ -235,11 +237,11 @@ async function escribirSimulacion(existe: boolean) {
               linea(1, [0.26, 0.52, 0.96]),
               linea(2, [0.6, 0.63, 0.65], true),
               linea(3, [0.2, 0.66, 0.33]),
-              { series: col(4), targetAxis: "RIGHT_AXIS", type: "COLUMN", color: { red: 0.92, green: 0.26, blue: 0.21 } },
+              { series: col(4), targetAxis: "RIGHT_AXIS", type: "COLUMN", color: { red: 0.92, green: 0.26, blue: 0.21 }, dataLabel: { type: "DATA", placement: "OUTSIDE_END" } },
             ],
           },
         },
-        position: { overlayPosition: { anchorCell: { sheetId, rowIndex: filas.length + 2, columnIndex: 0 }, widthPixels: 900, heightPixels: 380 } },
+        position: { overlayPosition: { anchorCell: { sheetId, rowIndex: filas.length + 3, columnIndex: 0 }, widthPixels: 1100, heightPixels: 460 } },
       },
     },
   };
