@@ -51,7 +51,7 @@ flowchart TD
 
 | Paso | Quién | Qué haces o qué pasa | Qué ves al final |
 |---|---|---|---|
-| **1. Idea** | Tú + `/guardian-idea` | Respondes 5 preguntas (es una prueba): qué quieres probar, para quién, cómo sabrás que funcionó («el equipo revisa los vencimientos aquí y no en la hoja»), cuántas semanas, nombre. Fases: **1 · Lista de etiquetas**, **2 · Aviso de las que vencen** | `~/Projects/ideas/vencimientos/PROYECTO.md` |
+| **1. Idea** | Tú + `/guardian-idea` | Respondes 5 preguntas (es una prueba): qué quieres probar, para quién, cómo sabrás que funcionó («el equipo revisa los vencimientos aquí y no en la hoja»), cuántas semanas, nombre. Fases: **1 · Lista de etiquetas**, **2 · Aviso de las que vencen**; 4 semanas (cada fase recibe su fecha objetivo) | `~/Projects/ideas/vencimientos/PROYECTO.md` |
 | **2. Crear** | Tú, en la terminal | `scripts/nuevo-proyecto.sh vencimientos --alcance ~/Projects/ideas/vencimientos/PROYECTO.md`: te pide los tokens ocultos y crea todo | Repo `vencimientos`, staging en línea con el título «Vencimientos» |
 | **3. Planificar** | Tú + `/guardian-planificar` en el proyecto | Convierte el alcance en escenarios («Dado que la hoja tiene la etiqueta X que vence mañana… entonces la veo en rojo») y tickets por fase | Un PR de plan; al fusionarlo, los tickets en el tablero |
 | **4. Desarrollar** | Claude desarrollador | Toma solo el primer ticket de la fase: pruebas primero, código, preview. Abre el PR en dos niveles (**En simple** + detalle técnico). Si le falta algo tuyo (una cuenta, un permiso), te lo pide en el ticket y espera | PR con preview y checks en verde |
@@ -136,7 +136,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | `guardian-chequeo-pr.yml` | Ticket con escenario (bloquea), tamaño (avisa) y plan válido si el PR trae `plan/tareas.json` |
 | `guardian-deploy.yml` | Preview por PR y staging en `main` (build sin secretos; deploy sin código del proyecto) |
 | `guardian-release.yml` | release-please → producción con aprobación (el build se guarda 14 días) → smoke test → rollback y alerta si falla |
-| `guardian-tickets.yml` | Un issue por tarea del plan aprobado |
+| `guardian-tickets.yml` | Un issue por tarea del plan aprobado y una **fecha objetivo por fase** (las semanas de Límites repartidas entre las fases) |
 | `guardian-claude.yml` | `@claude` del dueño → Claude desarrolla en la nube y abre el PR en dos niveles; al fusionar un PR toma solo el siguiente ticket de la fase actual (máx. 2 PRs suyos en revisión; no abre la fase siguiente; ADR 0024) |
 
 Cada workflow toma sus scripts y herramientas de **su propia versión** del Guardián (`job.workflow_sha`).

@@ -2,8 +2,9 @@
 // lleva una marca con el id de la tarea y no se vuelve a crear.
 // En el CI: node scripts/crear-tickets.ts plan/tareas.json  (usa $GITHUB_REPOSITORY y $GITHUB_TOKEN)
 // Solo validar (sin tocar GitHub): node scripts/crear-tickets.ts plan/tareas.json --validar
-import { appendFileSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { fechasObjetivo, semanasDisponibles } from "./fechas-fases.ts";
 
 export type Fase = { numero: number; nombre: string; entregable: string };
 export type Escenario = { archivo: string; gherkin: string };
@@ -49,6 +50,15 @@ export function cuerpoTicket(t: Tarea, f: Fase): string {
   ].join("\n\n");
 }
 
+/** Fecha objetivo de cada fase (ADR 0026), repartiendo las semanas de PROYECTO.md → Límites. */
+export function fechasPorFase(fases: Fase[], proyecto: string | null, inicio: Date): Map<number, string> {
+  const semanas = proyecto ? semanasDisponibles(proyecto) : null;
+  if (!semanas) return new Map();
+  const orden = [...fases].sort((a, b) => a.numero - b.numero);
+  const fechas = fechasObjetivo(orden.length, semanas, inicio);
+  return new Map(orden.map((f, i) => [f.numero, fechas[i]]));
+}
+
 export function pendientes(tareas: Tarea[], cuerposExistentes: string[]): Tarea[] {
   return tareas.filter((t) => !cuerposExistentes.some((c) => c.includes(marca(t.id))));
 }
@@ -84,16 +94,28 @@ async function main() {
   const existentes = issues.map((i) => i.body ?? "");
   const lineas = ["## Tickets del plan"];
   const milestones = new Map<number, number>();
-  const actuales = await api<{ number: number; title: string }[]>("milestones?state=all&per_page=100");
+  type Milestone = { number: number; title: string; created_at: string; due_on: string | null };
+  const actuales = await api<Milestone[]>("milestones?state=all&per_page=100");
+  // Las fechas se cuentan desde que nació el plan (el milestone de fase más antiguo) o desde hoy.
+  const propios = actuales.filter((m) => plan.fases.some((f) => tituloMilestone(f) === m.title));
+  const inicio = new Date(Math.min(Date.now(), ...propios.map((m) => Date.parse(m.created_at))));
+  const proyecto = existsSync("PROYECTO.md") ? readFileSync("PROYECTO.md", "utf8") : null;
+  const fechas = fechasPorFase(plan.fases, proyecto, inicio);
   for (const f of plan.fases) {
     // 422 = la etiqueta ya existe.
     await api("labels", { method: "POST", body: JSON.stringify({ name: `fase-${f.numero}`, color: "1D76DB", description: `Fase ${f.numero} — ${f.nombre}` }) });
     const titulo = tituloMilestone(f);
+    const due_on = fechas.get(f.numero);
+    const existente = actuales.find((x) => x.title === titulo);
     const m =
-      actuales.find((x) => x.title === titulo) ??
-      (await api<{ number: number }>("milestones", { method: "POST", body: JSON.stringify({ title: titulo, description: `Entregable: ${f.entregable}` }) }));
+      existente ??
+      (await api<{ number: number }>("milestones", { method: "POST", body: JSON.stringify({ title: titulo, description: `Entregable: ${f.entregable}`, due_on }) }));
+    if (existente && due_on && !existente.due_on) {
+      await api(`milestones/${existente.number}`, { method: "PATCH", body: JSON.stringify({ due_on }) });
+    }
     milestones.set(f.numero, m.number);
   }
+  if (fechas.size) lineas.push(`Fechas objetivo: ${[...fechas].map(([n, d]) => `Fase ${n} → ${d.slice(0, 10)}`).join(" · ")}`);
   // Tickets que ya existían sin fase asignada: se les asigna su milestone.
   for (const t of plan.tareas) {
     const issue = issues.find((i) => (i.body ?? "").includes(marca(t.id)));
