@@ -1,0 +1,52 @@
+# Sheet del Guardián (ADR 0026): copia el estado de todos los proyectos (topic `guardian-proyecto`) a un solo Sheet.
+# Producción: todos los días y a mano. Pruebas: a mano y en los PRs que tocan la sincronización.
+name: Sheet
+
+on:
+  schedule:
+    - cron: "30 11 * * *" # 6:30 en Lima, después del estado de cada proyecto
+  workflow_dispatch:
+    inputs:
+      destino:
+        description: Sheet a actualizar
+        type: choice
+        options: [pruebas, produccion]
+        default: pruebas
+  pull_request:
+    paths:
+      - tools/sheet/**
+      - scripts/hoja.ts
+      - scripts/estado.ts
+      - .github/workflows/sheet.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sheet-${{ github.event_name == 'pull_request' && 'pruebas' || inputs.destino || 'produccion' }}
+  cancel-in-progress: false
+
+jobs:
+  sheet:
+    name: sincronizar Sheet
+    # Los PRs de forks no reciben secretos; aquí solo corren los PRs del propio repo.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PRODUCCION: ${{ github.event_name == 'schedule' || inputs.destino == 'produccion' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - run: npm ci --prefix tools/sheet --ignore-scripts
+      - name: Sincronizar (${{ env.PRODUCCION == 'true' && 'producción' || 'pruebas' }})
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DUENO: ${{ github.repository_owner }}
+          SHEET_ID: ${{ env.PRODUCCION == 'true' && vars.GUARDIAN_SHEET_PRODUCCION || vars.GUARDIAN_SHEET_PRUEBAS }}
+          SHEET_SA: ${{ env.PRODUCCION == 'true' && secrets.GUARDIAN_SHEET_SA_PRODUCCION || secrets.GUARDIAN_SHEET_SA_PRUEBAS }}
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/sheet/sincronizar.ts

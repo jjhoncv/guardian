@@ -25,6 +25,9 @@ gh api -X PATCH "repos/$REPO" \
   -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
   -F delete_branch_on_merge=true >/dev/null
 
+echo "→ Topic guardian-proyecto: el Sheet del Guardián sincroniza los repos que lo tienen (ADR 0026)"
+gh repo edit "$REPO" --add-topic guardian-proyecto >/dev/null
+
 echo "→ Seguridad: secret scanning, push protection, alertas y parches de Dependabot"
 gh api -X PATCH "repos/$REPO" --input - >/dev/null <<'JSON'
 {

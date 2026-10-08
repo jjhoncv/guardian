@@ -1,0 +1,9 @@
+{
+  "name": "herramientas-sheet",
+  "private": true,
+  "type": "module",
+  "description": "Sincroniza el estado de los proyectos con el Sheet del Guardián (ADR 0026). google-auth-library fijada por lockfile: la autenticación de Google no se escribe a mano.",
+  "dependencies": {
+    "google-auth-library": "11.2.0"
+  }
+}
