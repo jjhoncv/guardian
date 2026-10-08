@@ -228,10 +228,10 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 | E2 Alcance convertido en pruebas | ✅ (Fase 2; Vitrina: 14 escenarios en rojo y 8 tickets en 3 fases) |
 | E3 Claude entrega un PR chico | ✅ (Fase 3; Vitrina: #12, #14 y #15 hechos por Claude, aprobados y fusionados) |
 | E4 Nada sube a producción sin mí | ✅ (Fase 1) |
-| E5 Veo la salud desde el celular | ⬜ Fase 4 |
+| E5 Veo la salud desde el celular | ✅ (Fase 4; Sheet del Guardián con Foco, Resumen y curva vs. plan original, y badges vivos en el README del Guardián y de Vitrina) |
 | E6 El guardián me avisa | ⬜ Fase 5 |
 
-**4 de 6 escenarios en verde (67 %).**
+**5 de 6 escenarios en verde (83 %).**
 
 ### Criterios de aceptación del Guardián
 
@@ -299,6 +299,7 @@ Escenario: El guardián me avisa
 - **Datos separados por ambiente** en los proyectos: `nuevo-proyecto.sh` pregunta si staging usa sus propios datos (otra hoja, otro remitente) y deja las variables de Netlify por contexto — 2026-10-08 — en Vitrina los comentarios de prueba en staging aparecieron en producción
 - **Etapa de medición** después de la última fase: el Guardián guarda la fecha y el criterio de «Cómo sé que funcionó», recuerda revisarlo y abre el issue de decisión (seguir / achicar / parar) — 2026-10-08 — en Vitrina el desarrollo terminó y nada marca cuándo medir; candidato a la Fase 4 o 5
 - **Pronóstico y «qué pasa si» por proyecto real:** con la velocidad real (tickets cerrados por día) el tablero dice «a este ritmo terminas la fase el …» y permite simular «si paro N días» o «si saco estos tickets», antes de reprogramar — 2026-10-08 — la simulación de la Fase 4 usa un proyecto inventado para probar el tablero; el dueño preguntó si sirve para sus proyectos reales: para eso hace falta este pronóstico
+- **Prueba de punta a punta con un proyecto nuevo desde cero:** `/guardian-idea` → `nuevo-proyecto.sh` → `/guardian-planificar` → Claude desarrolla → el proyecto aparece solo en el Sheet con su Foco, su curva vs. plan original y sus badges, sin pasos a mano — 2026-10-08 — Vitrina se adaptó a mano a la Fase 4; hay que confirmar que un proyecto nuevo nace con todo el seguimiento
 - **Candidata a Fase 6 — Guardián desde el navegador:** crear y guiar un proyecto sin Claude Code en la terminal. Repo desde la plantilla `guardian-skeleton` → secretos en *Settings* (incluye un PAT con permiso de *Administration*, porque `GITHUB_TOKEN` no crea rulesets ni environments) → issue «Iniciar proyecto» donde Claude Guardián hace el Paso 0, crea el sitio y configura → la idea como **formulario en un issue** (no chat: cada respuesta levanta un contenedor) → PR con `PROYECTO.md` → planificar → tickets → Claude desarrollador; y el consultor revisando cada PR en la nube — 2026-10-08 — hoy solo la creación del proyecto y el consultor necesitan la terminal; se decide al cerrar la Fase 4 si va antes que la Fase 5
 
 ## 16. Decisiones tomadas
@@ -334,4 +335,5 @@ Escenario: El guardián me avisa
 | 2026-10-08 | Roles: Claude de la nube desarrolla, el dueño aprueba, el Claude del Guardián es **consultor**: mientras el desarrollador es nuevo, arregla directo en sus PRs (commit `(consultor)`) y cada arreglo se vuelve lección de su `CLAUDE.md` | Pedirle todo con `@claude` es lento; así es rápido y Claude aprende (ADR 0025) |
 | 2026-10-08 | Fase 4: un solo Sheet del Guardián para todos los proyectos; README con badges vivos desde la rama `estado`; fecha objetivo por fase | ADR 0026 |
 | 2026-10-08 | Fechas tentativas del Guardián: unos **3 días por fase** (Fase 4 → 2026-10-11, Fase 5 → 2026-10-14). La fecha es tentativa; el avance real son los tickets y escenarios, y el tablero compara los dos | El dueño quiere ver tiempo vs. trabajo en un caso real |
+| 2026-10-08 | **Cierre de la Fase 4.** E5 probado con el Guardián y Vitrina en el Sheet de producción. Sigue la Fase 5 (Empuje); la Fase 6 (navegador) queda candidata | Avance del Guardián: 5 de 6 escenarios (83 %) |
 | 2026-10-06 | `main` exige **1 aprobación**: los PRs de `claude[bot]` esperan al dueño; el dueño (admin) puede fusionar los suyos sin auto-aprobarse | Cierra la ADR 0009; Claude no puede fusionar ni saltarse la regla |
