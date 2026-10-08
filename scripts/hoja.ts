@@ -5,7 +5,7 @@ import type { Estado } from "./estado.ts";
 export type DatosProyecto = {
   repo: string;
   estado: Estado | null;
-  milestones: { title: string; due_on: string | null; open_issues: number; closed_issues: number; state: string; created_at: string }[];
+  milestones: { title: string; due_on: string | null; open_issues: number; closed_issues: number; state: string; created_at: string; closed_at?: string | null }[];
   tareas: { numero: number; titulo: string; fase: string; estado: "abierto" | "en revisión" | "hecho"; creado: string; cerrado: string | null }[];
 };
 
@@ -92,7 +92,7 @@ export type FaseEnCurso = {
   alerta: string | null;
 };
 
-/** La fase abierta de número más bajo: % de tickets hechos vs. % del plazo gastado (desde la fecha de la fase anterior). */
+/** La fase abierta de número más bajo: % de tickets hechos (avance real) vs. % del plazo gastado (contra la fecha tentativa). */
 export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
   const fases = d.milestones.filter((m) => /^Fase \d+/.test(m.title)).sort((a, b) => numeroFase(a.title) - numeroFase(b.title));
   const i = fases.findIndex((m) => m.state === "open");
@@ -105,7 +105,8 @@ export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
   let tiempo: number | null = null;
   let diasRestantes: number | null = null;
   if (f.due_on) {
-    const inicio = Date.parse(fases[i - 1]?.due_on ?? f.created_at);
+    // La fase empieza cuando se cerró la anterior (fecha real); si no, en su fecha tentativa; si no, al crearse.
+    const inicio = Date.parse(fases[i - 1]?.closed_at ?? fases[i - 1]?.due_on ?? f.created_at);
     const fin = Date.parse(f.due_on);
     tiempo = Math.max(0, Math.round(((Date.parse(hoy) - inicio) / Math.max(fin - inicio, DIA)) * 100));
     diasRestantes = Math.ceil((fin - Date.parse(hoy)) / DIA);

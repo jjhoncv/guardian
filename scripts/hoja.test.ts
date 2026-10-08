@@ -99,6 +99,11 @@ describe("Resumen: el tablero para leer en 10 segundos", () => {
     expect(barrasResumen([conFase], hoy)).toEqual([[barra(80, "avance"), barra(33, "trabajo"), barra(80, "alerta")]]);
   });
 
+  it("si la fase anterior ya se cerró, el tiempo cuenta desde su cierre real (no desde su fecha tentativa)", () => {
+    const cerrada = { ...conFase, milestones: [{ ...conFase.milestones[0], closed_at: "2026-10-17T12:00:00Z" }, conFase.milestones[1]] };
+    expect(faseEnCurso(cerrada, hoy)).toMatchObject({ tiempo: 60 });
+  });
+
   it("sin fecha objetivo no hay barra de tiempo ni alerta; sin estado se dice", () => {
     const sinFecha = { ...conFase, milestones: [{ ...conFase.milestones[1], due_on: null }] };
     expect(faseEnCurso(sinFecha, hoy)).toMatchObject({ tiempo: null, alerta: null });
