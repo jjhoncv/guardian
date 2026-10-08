@@ -56,8 +56,8 @@ jobs:
           claude_args: >-
             --model claude-sonnet-5-5
             --max-turns 60
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr view:*)"
-            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y en el cuerpo Closes #N, el escenario y cómo probarlo. No dejes solo un enlace para crearlo."
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*)"
+            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit."
 
   # Siguiente tarea sola: al fusionar un PR, elige el ticket con el script de esta versión del Guardián.
   elegir:
@@ -121,9 +121,9 @@ jobs:
             2. Crea la rama `feat/${{ needs.elegir.outputs.ticket }}-<slug>` desde main.
             3. Pruebas primero; implementa lo mínimo para poner su escenario en verde. Corre `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` y `npm run e2e`.
             4. Un solo cambio lógico, idealmente menos de 300 líneas.
-            5. Abre el PR con `gh pr create`: título `feat(#${{ needs.elegir.outputs.ticket }}): …` y en el cuerpo `Closes #${{ needs.elegir.outputs.ticket }}`, el escenario y cómo probarlo.
+            5. Abre el PR con `gh pr create`: título `feat(#${{ needs.elegir.outputs.ticket }}): …` y el cuerpo en dos niveles según `.github/pull_request_template.md`: `Closes #${{ needs.elegir.outputs.ticket }}`; **En simple** (qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo en el preview, qué necesitas del dueño, escenarios en verde) y el **Detalle técnico** plegado.
             Si el ticket necesita algo del dueño (cuentas, credenciales, decisiones) que no está, no lo inventes: comenta en el ticket qué falta y termina sin PR.
           claude_args: >-
             --model claude-sonnet-5-5
             --max-turns 60
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr view:*)"
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*)"
