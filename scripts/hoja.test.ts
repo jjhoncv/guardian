@@ -1,0 +1,241 @@
+import { describe, expect, it } from "vitest";
+import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, curvaProyecto, filasCurva, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, planVsReal, type DatosProyecto } from "./hoja";
+
+const vitrina: DatosProyecto = {
+  repo: "jjhoncv/vitrina",
+  estado: {
+    proyecto: "vitrina",
+    fase: { titulo: "Fase 3 — Comentarios", vence: "2026-11-16T12:00:00Z" },
+    avance: { verdes: 12, total: 15, porcentaje: 80 },
+    salud: { color: "amarillo", emoji: "🟡", motivos: ["El PR #36 espera tu revisión hace más de 24 h"], diasAtraso: 0, pausa: false },
+    actualizado: "2026-10-20T11:00:05Z",
+  },
+  milestones: [
+    { title: "Fase 1 — Catálogo", due_on: "2026-10-19T12:00:00Z", open_issues: 0, closed_issues: 3, state: "closed", created_at: "2026-10-05T00:00:00Z" },
+    { title: "Fase 3 — Comentarios", due_on: "2026-11-16T12:00:00Z", open_issues: 1, closed_issues: 1, state: "open", created_at: "2026-10-05T00:00:00Z" },
+    { title: "Otro", due_on: null, open_issues: 0, closed_issues: 0, state: "open", created_at: "2026-10-05T00:00:00Z" },
+  ],
+  tareas: [
+    { numero: 9, titulo: "Guardar comentario", fase: "Fase 3 — Comentarios", estado: "en revisión", creado: "2026-10-08T10:00:00Z", cerrado: null },
+    { numero: 2, titulo: "Portada", fase: "Fase 1 — Catálogo", estado: "hecho", creado: "2026-10-05T10:00:00Z", cerrado: "2026-10-06T10:00:00Z" },
+  ],
+};
+const sinEstado: DatosProyecto = { repo: "jjhoncv/nuevo", estado: null, milestones: [], tareas: [] };
+
+describe("hoja del Guardián (ADR 0026): una fila por proyecto, espejo de GitHub", () => {
+  it("Proyecto: fase, avance, salud con motivo y links", () => {
+    const [enc, fila, vacia] = filasProyecto([vitrina, sinEstado]);
+    expect(enc).toEqual(ENCABEZADOS.Proyecto);
+    expect(fila).toEqual([
+      "vitrina", "Fase 3 — Comentarios", "2026-11-16", "12 de 15 (80 %)", "🟡 amarillo",
+      "El PR #36 espera tu revisión hace más de 24 h", "2026-10-20 11:00", "https://github.com/jjhoncv/vitrina",
+    ]);
+    expect(vacia.slice(0, 5)).toEqual(["nuevo", "", "", "", "sin estado todavía"]);
+  });
+
+  it("Fases: solo los milestones «Fase N», en orden, con su avance de tickets", () => {
+    const [, f1, f3, ...resto] = filasFases([vitrina]);
+    expect(f1).toEqual(["vitrina", "Fase 1 — Catálogo", "2026-10-19", "3 de 3", "cerrada"]);
+    expect(f3).toEqual(["vitrina", "Fase 3 — Comentarios", "2026-11-16", "1 de 2", "abierta"]);
+    expect(resto).toEqual([]);
+  });
+
+  it("Tareas: por número de ticket, con link", () => {
+    const [, t2, t9] = filasTareas([vitrina]);
+    expect(t2).toEqual(["vitrina", "#2", "Portada", "Fase 1 — Catálogo", "hecho", "2026-10-05", "2026-10-06", "https://github.com/jjhoncv/vitrina/issues/2"]);
+    expect(t9[4]).toBe("en revisión");
+  });
+
+  it("Salud: agrega la fila de hoy y reemplaza la de hoy si ya estaba, sin tocar el historial", () => {
+    const existentes = [[...ENCABEZADOS.Salud], ["2026-10-19", "vitrina", "🟢 verde", "70 %", "0", ""], ["2026-10-20", "vitrina", "🟢 verde", "75 %", "0", ""]];
+    const filas = filasSalud(existentes, [vitrina, sinEstado], "2026-10-20");
+    expect(filas).toEqual([
+      ENCABEZADOS.Salud,
+      ["2026-10-19", "vitrina", "🟢 verde", "70 %", "0", ""],
+      ["2026-10-20", "vitrina", "🟡 amarillo", "80 %", "0", "El PR #36 espera tu revisión hace más de 24 h"],
+    ]);
+  });
+
+  it("la pausa se ve en Proyecto y en Salud", () => {
+    const pausado = { ...vitrina, estado: { ...vitrina.estado!, salud: { ...vitrina.estado!.salud, pausa: true, motivos: ["En pausa: la barra está congelada"] } } };
+    expect(filasProyecto([pausado])[1][4]).toBe("⏸️ en pausa (🟡 amarillo)");
+  });
+});
+
+describe("Resumen: el tablero para leer en 10 segundos", () => {
+  const conFase: DatosProyecto = {
+    ...vitrina,
+    milestones: [
+      { title: "Fase 2 — Entrar", due_on: "2026-10-12T12:00:00Z", open_issues: 0, closed_issues: 3, state: "closed", created_at: "2026-10-01T00:00:00Z" },
+      { title: "Fase 3 — Comentarios", due_on: "2026-10-22T12:00:00Z", open_issues: 2, closed_issues: 1, state: "open", created_at: "2026-10-01T00:00:00Z" },
+    ],
+    tareas: [
+      { numero: 8, titulo: "a", fase: "Fase 3 — Comentarios", estado: "hecho", creado: "2026-10-12T00:00:00Z", cerrado: "2026-10-13T00:00:00Z" },
+      { numero: 9, titulo: "b", fase: "Fase 3 — Comentarios", estado: "en revisión", creado: "2026-10-12T00:00:00Z", cerrado: null },
+      { numero: 10, titulo: "c", fase: "Fase 3 — Comentarios", estado: "abierto", creado: "2026-10-12T00:00:00Z", cerrado: null },
+    ],
+  };
+  const hoy = "2026-10-20T12:00:00Z";
+
+  it("barra: SPARKLINE de Google Sheets solo con números y colores fijos (nunca texto del proyecto)", () => {
+    expect(barra(67, "avance")).toBe('=SPARKLINE(67,{"charttype","bar";"max",100;"color1","#34a853"})');
+    expect(barra(140, "tiempo")).toBe('=SPARKLINE(100,{"charttype","bar";"max",100;"color1","#9aa0a6"})');
+    expect(barra(-5, "alerta")).toBe('=SPARKLINE(0,{"charttype","bar";"max",100;"color1","#ea4335"})');
+  });
+
+  it("fase: el tiempo corre desde la fecha objetivo de la fase anterior; avisa si el plazo va más rápido que el trabajo", () => {
+    const f = faseEnCurso(conFase, hoy)!;
+    expect(f).toMatchObject({ titulo: "Fase 3 — Comentarios", trabajo: 33, tiempo: 80, diasRestantes: 2, hechos: 1, enRevision: 1, porHacer: 1 });
+    expect(f.alerta).toBe("⚠️ el plazo va más rápido que el trabajo");
+  });
+
+  it("una fila por proyecto: texto aquí, barras aparte (columnas C, F y H)", () => {
+    const [enc, fila] = filasResumen([conFase], hoy);
+    expect(enc).toEqual(ENCABEZADOS.Resumen);
+    expect(fila).toEqual([
+      "vitrina", "🟡 amarillo", "", "80 % · 12 de 15", "Fase 3 — Comentarios", "", "33 %", "", "80 %",
+      "✅ 1 · 👀 1 · ⬜ 1", "en 2 días", "El PR #36 espera tu revisión hace más de 24 h · ⚠️ el plazo va más rápido que el trabajo", expect.stringMatching(/atrasado|adelantado|al día/),
+    ]);
+    expect(barrasResumen([conFase], hoy)).toEqual([[barra(80, "avance"), barra(33, "trabajo"), barra(80, "alerta")]]);
+  });
+
+  it("si la fase anterior ya se cerró, el tiempo cuenta desde su cierre real (no desde su fecha tentativa)", () => {
+    const cerrada = { ...conFase, milestones: [{ ...conFase.milestones[0], closed_at: "2026-10-17T12:00:00Z" }, conFase.milestones[1]] };
+    expect(faseEnCurso(cerrada, hoy)).toMatchObject({ tiempo: 60 });
+  });
+
+  it("sin fecha objetivo no hay barra de tiempo ni alerta; sin estado se dice", () => {
+    const sinFecha = { ...conFase, milestones: [{ ...conFase.milestones[1], due_on: null }] };
+    expect(faseEnCurso(sinFecha, hoy)).toMatchObject({ tiempo: null, alerta: null });
+    expect(filasResumen([sinFecha], hoy)[1][8]).toBe("sin fecha objetivo");
+    expect(barrasResumen([sinFecha], hoy)[0][2]).toBe("");
+    expect(filasResumen([sinEstado], hoy)[1][1]).toBe("sin estado todavía");
+    expect(barrasResumen([sinEstado], hoy)).toEqual([["", "", ""]]);
+  });
+
+  it("ancho de columna según el texto más largo, encabezado incluido", () => {
+    expect(anchos([["proyecto", "x"], ["guardian", "un texto bastante más largo"]])).toEqual([96, 248]);
+  });
+
+  it("tendencia: avance por día y proyecto, en columnas (para el gráfico)", () => {
+    const salud = [[...ENCABEZADOS.Salud], ["2026-10-19", "vitrina", "🟢", "70 %", "0", ""], ["2026-10-19", "guardian", "🟢", "60 %", "0", ""], ["2026-10-20", "vitrina", "🟡", "80 %", "0", ""]];
+    expect(filasTendencia(salud)).toEqual([
+      ["fecha", "guardian", "vitrina"],
+      ["2026-10-19", 60, 70],
+      ["2026-10-20", "", 80],
+    ]);
+  });
+});
+
+describe("plan vs. real de la fase en curso (gráfico)", () => {
+  const d: DatosProyecto = {
+    repo: "jjhoncv/x",
+    estado: null,
+    milestones: [
+      { title: "Fase 1 — A", due_on: "2026-10-05T00:00:00Z", open_issues: 0, closed_issues: 1, state: "closed", created_at: "2026-10-01T00:00:00Z", closed_at: "2026-10-08T15:00:00Z" },
+      { title: "Fase 2 — B", due_on: "2026-10-11T00:00:00Z", open_issues: 2, closed_issues: 2, state: "open", created_at: "2026-10-01T00:00:00Z" },
+    ],
+    tareas: [
+      { numero: 1, titulo: "", fase: "Fase 2 — B", estado: "hecho", creado: "", cerrado: "2026-10-08T20:00:00Z" },
+      { numero: 2, titulo: "", fase: "Fase 2 — B", estado: "hecho", creado: "", cerrado: "2026-10-09T10:00:00Z" },
+      { numero: 3, titulo: "", fase: "Fase 2 — B", estado: "abierto", creado: "", cerrado: null },
+      { numero: 4, titulo: "", fase: "Fase 2 — B", estado: "en revisión", creado: "", cerrado: null },
+    ],
+  };
+
+  it("una fila por día: el plan va de 0 a 100 % hasta la fecha tentativa; lo real, hasta hoy", () => {
+    expect(planVsReal(d, "2026-10-09T18:00:00Z")).toEqual({
+      titulo: "x · Fase 2 — B",
+      filas: [
+        ["2026-10-08", 0, 25],
+        ["2026-10-09", 33, 50],
+        ["2026-10-10", 67, ""],
+        ["2026-10-11", 100, ""],
+      ],
+    });
+  });
+
+  it("sin fecha tentativa no hay gráfico", () => {
+    expect(planVsReal({ ...d, milestones: [d.milestones[0], { ...d.milestones[1], due_on: null }] }, "2026-10-09T18:00:00Z")).toBeNull();
+  });
+
+  it("la pestaña Plan pone un bloque por proyecto (fecha, plan, real) separado por una columna", () => {
+    const { filas, bloques } = filasPlan([d, d], "2026-10-09T18:00:00Z");
+    expect(filas[0]).toEqual(["fecha", "plan (fecha tentativa)", "real (tickets hechos)", "", "fecha", "plan (fecha tentativa)", "real (tickets hechos)"]);
+    expect(filas[2]).toEqual(["2026-10-09", 33, 50, "", "2026-10-09", 33, 50]);
+    expect(bloques).toEqual([{ titulo: "x · Fase 2 — B", columna: 0, filas: 5 }, { titulo: "x · Fase 2 — B", columna: 4, filas: 5 }]);
+  });
+});
+
+describe("Foco: solo lo rojo y lo naranja, de más a menos grave, con qué hacer", () => {
+  const conAlertas = (repo: string, alertas: { gravedad: "rojo" | "amarillo" | "gris"; texto: string; accion: string; pr?: number }[]): DatosProyecto => ({
+    ...sinEstado,
+    repo,
+    estado: { ...vitrina.estado!, salud: { ...vitrina.estado!.salud, alertas } },
+  });
+
+  it("ordena rojo > gris > amarillo y arma el link de cada alerta", () => {
+    const filas = filasFoco([
+      conAlertas("jjhoncv/a", [{ gravedad: "amarillo", texto: "El PR #3 espera", accion: "Revisa el PR #3", pr: 3 }]),
+      conAlertas("jjhoncv/b", [{ gravedad: "rojo", texto: "«Fase 1» lleva 5 días de atraso", accion: "Decide…" }]),
+    ], "2026-10-20T12:00:00Z");
+    expect(filas[0]).toEqual(ENCABEZADOS.Foco);
+    expect(filas[1]).toEqual(["🔴", "b", "«Fase 1» lleva 5 días de atraso", "Decide…", "https://github.com/jjhoncv/b/milestones"]);
+    expect(filas[2]).toEqual(["🟡", "a", "El PR #3 espera", "Revisa el PR #3", "https://github.com/jjhoncv/a/pull/3"]);
+  });
+
+  it("suma el aviso de plan vs. real como naranja", () => {
+    const d = { ...conAlertas("jjhoncv/a", []), milestones: [{ title: "Fase 1 — A", due_on: "2026-10-22T12:00:00Z", open_issues: 3, closed_issues: 0, state: "open", created_at: "2026-10-12T12:00:00Z" }], tareas: [{ numero: 1, titulo: "", fase: "Fase 1 — A", estado: "abierto" as const, creado: "", cerrado: null }] };
+    expect(filasFoco([d], "2026-10-20T12:00:00Z")[1]).toEqual(["🟡", "a", "«Fase 1 — A»: el plazo va más rápido que el trabajo (80 % del tiempo, 0 % hecho)", "Prioriza los tickets que faltan o achica la fase", "https://github.com/jjhoncv/a/milestones"]);
+  });
+
+  it("sin nada que atender lo dice", () => {
+    expect(filasFoco([conAlertas("jjhoncv/a", [])], "2026-10-20T12:00:00Z")[1]).toEqual(["🟢", "", "Nada que atender hoy", "", ""]);
+  });
+});
+
+describe("curva del proyecto vs. plan original (X = % de avance, Y = día)", () => {
+  const p: DatosProyecto = {
+    repo: "jjhoncv/x",
+    estado: null,
+    milestones: [
+      // F1 se reprogramó (due_on nuevo), pero su fecha original quedó en la descripción: la línea del plan no se mueve.
+      { title: "Fase 1 — A", due_on: "2026-11-20T12:00:00Z", description: "Entregable: a\nFecha original: 2026-11-11", open_issues: 0, closed_issues: 2, state: "closed", created_at: "2026-11-01T09:00:00Z", closed_at: "2026-11-15T12:00:00Z" },
+      { title: "Fase 2 — B", due_on: "2026-11-21T12:00:00Z", open_issues: 2, closed_issues: 0, state: "open", created_at: "2026-11-01T09:00:00Z" },
+    ],
+    tareas: [
+      { numero: 1, titulo: "", fase: "Fase 1 — A", estado: "hecho", creado: "2026-11-01T09:00:00Z", cerrado: "2026-11-03T10:00:00Z" },
+      { numero: 2, titulo: "", fase: "Fase 1 — A", estado: "hecho", creado: "2026-11-01T09:00:00Z", cerrado: "2026-11-15T10:00:00Z" },
+      { numero: 3, titulo: "", fase: "Fase 2 — B", estado: "abierto", creado: "2026-11-01T09:00:00Z", cerrado: null },
+      { numero: 4, titulo: "", fase: "Fase 2 — B", estado: "abierto", creado: "2026-11-01T09:00:00Z", cerrado: null },
+    ],
+  };
+
+  it("el plan pasa por el fin ORIGINAL de cada fase (aunque se haya reprogramado)", () => {
+    const c = curvaProyecto(p, "2026-11-16T12:00:00Z")!;
+    expect(c.inicio).toBe("2026-11-01");
+    expect(c.plan).toEqual([[0, 0], [50, 10], [100, 20]]);
+  });
+
+  it("lo real: un punto por día con el % de tickets hechos hasta ese día", () => {
+    const c = curvaProyecto(p, "2026-11-16T12:00:00Z")!;
+    expect(c.real.slice(0, 3)).toEqual([[0, 0], [0, 1], [25, 2]]);
+    expect(c.real.at(-1)).toEqual([50, 15]);
+    expect(c.real).toHaveLength(16);
+  });
+
+  it("desvío en días: el plan llegaba al 50 % el día 10; hoy es el día 15 → 5 días atrasado", () => {
+    expect(curvaProyecto(p, "2026-11-16T12:00:00Z")!.desvio).toBe(5);
+  });
+
+  it("sin fechas en ninguna fase no hay curva", () => {
+    expect(curvaProyecto({ ...p, milestones: p.milestones.map((m) => ({ ...m, due_on: null, description: null })) }, "2026-11-16T12:00:00Z")).toBeNull();
+  });
+
+  it("la tabla para el gráfico: X compartido, una columna para el plan y otra para lo real", () => {
+    const { filas, bloques } = filasCurva([p], "2026-11-16T12:00:00Z");
+    expect(filas[0]).toEqual(["avance (%)", "plan original (día)", "real (día)"]);
+    expect(filas.slice(1, 4)).toEqual([[0, 0, ""], [0, "", 0], [0, "", 1]]);
+    expect(bloques[0]).toMatchObject({ titulo: "x", columna: 0, desvio: 5 });
+  });
+});

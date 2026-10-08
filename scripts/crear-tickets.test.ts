@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cuerpoTicket, marca, pendientes, tituloMilestone, validarPlan, fechasPorFase, type Plan } from "./crear-tickets";
+import { cuerpoTicket, marca, pendientes, tituloMilestone, validarPlan, descripcion, fechasPorFase, type Plan } from "./crear-tickets";
 
 const plan: Plan = {
   fases: [{ numero: 1, nombre: "Lista básica", entregable: "Agregar y marcar libros" }],
@@ -77,4 +77,9 @@ describe("fechasPorFase", () => {
     expect(fechasPorFase(fases, "## 6. Límites\n\n- **Tipo:** prueba\n", inicio).size).toBe(0);
     expect(fechasPorFase(fases, null, inicio).size).toBe(0);
   });
+});
+
+it("la descripción de la fase guarda su fecha original (la línea fija del plan)", () => {
+  expect(descripcion({ numero: 1, nombre: "A", entregable: "lista" }, "2026-11-09T12:00:00Z")).toBe("Entregable: lista\nFecha original: 2026-11-09");
+  expect(descripcion({ numero: 1, nombre: "A", entregable: "lista" })).toBe("Entregable: lista");
 });
