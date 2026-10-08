@@ -21,6 +21,12 @@ Una **plataforma en GitHub** (este repo: workflows reutilizables, scripts y regl
 
 Cada proyecto nuevo se crea con `scripts/nuevo-proyecto.sh <nombre>`: primero revisa y pide las llaves (Paso 0), después crea el sitio, el repo y las protecciones y sube el esqueleto. El proyecto **usa** los workflows del Guardián en una versión fija (`@vX.Y.Z`); no los copia.
 
+### Hacia dónde va (visión, no alcance)
+
+- **Hoy:** el Guardián se prueba con proyectos chicos (Vitrina). Cada uno es un laboratorio: mejora la plataforma, el esqueleto y a Claude como desarrollador, y mide **hasta dónde llega** Claude.
+- **Mañana:** proyectos más grandes (un e-commerce con SKU, dependencias y ofertas; un sistema de hotel; un control de vencimientos), con muchas fases y PRs. Ahí el Guardián es el **ojo que observa**: una lectura del proyecto de inicio a fin y avisos cuando el dueño debe intervenir o aprobar.
+- **Siempre:** Claude construye **a la manera del dueño**, para que él pueda entrar al código y modificarlo. Sus convenciones, y más adelante patrones de diseño y de arquitectura, se le enseñan con la guía por capas (ADR 0025).
+
 ## 3. Roles
 
 | Rol | Quién | Qué hace |
@@ -285,6 +291,9 @@ Escenario: El guardián me avisa
 - Cuando una fase queda sin tickets, el Guardián **abre un issue** «Fase N completa: revísala y ciérrala» (con el checklist del paso 7) — 2026-10-08 — hoy el aviso solo está en el resumen del run de Actions; en Vitrina el dueño no supo dónde verlo
 - **Dependencias entre tareas** del plan: campo `depende` en `plan/tareas.json` (lo llena `/guardian-planificar`) y el selector salta los tickets cuya dependencia no está fusionada — 2026-10-08 — en Vitrina, Claude tomó dos veces el #7 (Salir) y se detuvo porque necesita la sesión del #6, aún en revisión; dos corridas gastadas
 - **Candado entre corridas de «siguiente ticket»** (`concurrency` en el llamador `claude.yml` para los `pull_request`): dos merges seguidos lanzan dos Claude sobre el mismo ticket — 2026-10-08 — en Vitrina, el merge del #24 y del release lanzaron dos corridas sobre el #7; salió un solo PR (#29), pero se pagaron dos
+- **Convenciones del dueño** para construir (estructura de carpetas, nombres, patrones de diseño y de arquitectura) como capa de la guía de Claude, distinta por tipo de proyecto — 2026-10-08 — visión: proyectos grandes hechos a su manera
+- **Métricas de Claude como desarrollador**: commits `(consultor)` por PR, lecciones nuevas, corridas fallidas y costo por ticket — 2026-10-08 — muestran cuándo madura y hasta dónde llega; insumo de la Fase 4 (Visibilidad)
+- **Graduar lecciones a checks**: la primera, «POST sin sesión → rechazado» como prueba obligatoria en toda server action — 2026-10-08 — una regla escrita se olvida; un check en rojo, no
 
 ## 16. Decisiones tomadas
 

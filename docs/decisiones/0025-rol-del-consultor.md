@@ -17,6 +17,21 @@ Tres roles:
   2. En ese mismo commit agrega la **lección** a «Lecciones de revisión» del `CLAUDE.md` del proyecto; si es general, también al de `guardian-skeleton` (PR propio).
   3. Si la falla es de la plataforma (workflows, scripts), la arregla en el Guardián.
 
+## La guía de Claude, por capas
+
+Para que Claude no mezcle propósitos ni entre en círculos, la guía tiene cuatro capas que no se mezclan:
+
+| Capa | Dónde | Qué contiene | Cuándo cambia |
+|---|---|---|---|
+| 1. Objetivo | `PROYECTO.md` | Problema, qué NO es, **tipo** (prueba/MVP o producto), fase actual | Solo con aprobación del dueño y ADR |
+| 2. Cómo trabajar | `CLAUDE.md` (corto) | Inicio y fin de cada ticket, orden de prioridad | Casi nunca |
+| 3. Criterio | `docs/lecciones.md` | Lecciones con alcance (siempre / según tipo / según stack) y su porqué | Con cada revisión del consultor, con tope (~15) |
+| 4. Garantías | Pruebas y checks del CI | Lo que nunca puede fallar | Cuando una lección se gradúa |
+
+**Prioridad:** objetivo del proyecto > alcance de la fase y del ticket > tipo de proyecto > lecciones. Ninguna lección justifica salirse del ticket.
+
+**Ciclo de una lección:** nace en una revisión (con su PR de ejemplo) → si se repite o es de «siempre», se **gradúa** a prueba o check y sale del texto → si deja de aplicar, se **retira**.
+
 ## Madurez
 
 Cuantas más lecciones tiene el desarrollador y menos commits `(consultor)` aparecen por PR, menos interviene el consultor; con el desarrollador «experto», el dueño le habla solo a él. La revisión automática de cada PR está en el Parking lot.
