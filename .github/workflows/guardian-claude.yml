@@ -57,6 +57,7 @@ jobs:
             --model claude-sonnet-5-5
             --max-turns 60
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr view:*)"
+            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y en el cuerpo Closes #N, el escenario y cómo probarlo. No dejes solo un enlace para crearlo."
 
   # Siguiente tarea sola: al fusionar un PR, elige el ticket con el script de esta versión del Guardián.
   elegir:
