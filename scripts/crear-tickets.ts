@@ -59,6 +59,9 @@ export function fechasPorFase(fases: Fase[], proyecto: string | null, inicio: Da
   return new Map(orden.map((f, i) => [f.numero, fechas[i]]));
 }
 
+/** La fecha original queda escrita en la fase: si después se reprograma, el tablero compara contra ella (curva vs. plan original). */
+export const descripcion = (f: Fase, dueOn?: string) => `Entregable: ${f.entregable}` + (dueOn ? `\nFecha original: ${dueOn.slice(0, 10)}` : "");
+
 export function pendientes(tareas: Tarea[], cuerposExistentes: string[]): Tarea[] {
   return tareas.filter((t) => !cuerposExistentes.some((c) => c.includes(marca(t.id))));
 }
@@ -109,9 +112,9 @@ async function main() {
     const existente = actuales.find((x) => x.title === titulo);
     const m =
       existente ??
-      (await api<{ number: number }>("milestones", { method: "POST", body: JSON.stringify({ title: titulo, description: `Entregable: ${f.entregable}`, due_on }) }));
+      (await api<{ number: number }>("milestones", { method: "POST", body: JSON.stringify({ title: titulo, description: descripcion(f, due_on), due_on }) }));
     if (existente && due_on && !existente.due_on) {
-      await api(`milestones/${existente.number}`, { method: "PATCH", body: JSON.stringify({ due_on }) });
+      await api(`milestones/${existente.number}`, { method: "PATCH", body: JSON.stringify({ due_on, description: descripcion(f, due_on) }) });
     }
     milestones.set(f.numero, m.number);
   }

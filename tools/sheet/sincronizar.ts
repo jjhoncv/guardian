@@ -3,9 +3,9 @@
 // Proyectos = repos del dueño con el topic `guardian-proyecto` (los marca configurar-repo.sh).
 // Uso (CI): node tools/sheet/sincronizar.ts   env: GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA (JSON de la service account)
 import { JWT } from "google-auth-library";
-import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
+import { anchos, barrasResumen, ENCABEZADOS, filasCurva, filasFases, filasFoco, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
 import type { Estado } from "../../scripts/estado.ts";
-import { filasSimulacion, serieSimulacion, simular } from "../../scripts/simulacion.ts";
+import { curvaSimulacion, filasSimulacion, simular } from "../../scripts/simulacion.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
 if (!GITHUB_TOKEN || !DUENO || !SHEET_ID || !SHEET_SA) throw new Error("Faltan GITHUB_TOKEN, DUENO, SHEET_ID o SHEET_SA");
@@ -75,10 +75,10 @@ async function main() {
     Tareas: filasTareas(datos),
     Salud: historial,
     Tendencia: filasTendencia(historial),
-    Plan: [],
+    Curva: [],
   };
-  const plan = filasPlan(datos, ahora);
-  filas.Plan = plan.filas.length ? plan.filas : [[...ENCABEZADOS.Plan]];
+  const curva = filasCurva(datos, ahora);
+  filas.Curva = curva.filas.length ? curva.filas : [[...ENCABEZADOS.Curva]];
   const pestañas = Object.keys(filas) as Pestaña[];
   // Todo se reescribe salvo Salud, que solo crece: no se borra (si algo falla, el historial queda).
   await sheets("/values:batchClear", { method: "POST", body: { ranges: pestañas.filter((p) => p !== "Salud").map((p) => `${p}!A:Z`) } });
@@ -94,7 +94,7 @@ async function main() {
       body: { valueInputOption: "USER_ENTERED", data: [{ range: `Resumen!C2:C${n}`, values: columna(0) }, { range: `Resumen!F2:F${n}`, values: columna(1) }, { range: `Resumen!H2:H${n}`, values: columna(2) }] },
     });
   }
-  await darFormato(filas, datos, plan.bloques);
+  await darFormato(filas, datos, curva.bloques);
 
   const linea = datos.map((d) => `${d.estado?.salud.emoji ?? "·"} ${d.repo.split("/")[1]}`).join("  ");
   console.log(`Sheet actualizado (${datos.length} proyectos): ${linea}`);
@@ -105,7 +105,7 @@ async function main() {
 }
 
 // Formato del tablero: Resumen primero, encabezados fijos, filas del color de su salud, columnas a su ancho
-// y el gráfico de tendencia. Solo formato: los valores ya se escribieron como texto.
+// y la curva de cada proyecto vs. su plan original. Solo formato: los valores ya se escribieron como texto.
 const FONDO: Record<string, { red: number; green: number; blue: number }> = {
   verde: { red: 0.85, green: 0.95, blue: 0.85 },
   amarillo: { red: 1, green: 0.95, blue: 0.8 },
@@ -113,8 +113,10 @@ const FONDO: Record<string, { red: number; green: number; blue: number }> = {
   gris: { red: 0.88, green: 0.88, blue: 0.88 },
 };
 const POR_DEFECTO = ["Sheet1", "Hoja 1", "Hoja1"];
+// Pestañas de versiones anteriores del tablero que ya no se usan.
+const OBSOLETAS = ["Plan"];
 
-type Bloque = { titulo: string; columna: number; filas: number };
+type Bloque = { titulo: string; inicio: string; columna: number; filas: number; desvio: number };
 async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos: DatosProyecto[], bloques: Bloque[]) {
   type Hoja = { properties: { sheetId: number; title: string }; charts?: { chartId: number }[] };
   const { sheets: hojas } = await sheets<{ sheets: Hoja[] }>("?fields=sheets(properties(sheetId,title),charts(chartId))");
@@ -147,59 +149,47 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
   // Gráficos: se rehacen en cada corrida con los proyectos de hoy.
   for (const c of hojas.find((h) => h.properties.sheetId === resumen)?.charts ?? []) requests.push({ deleteEmbeddedObject: { objectId: c.chartId } });
   const debajo = datos.length + 3;
-  // Plan vs. real de la fase en curso: uno por proyecto, en fila. Plan punteado gris; real azul.
-  bloques.forEach((b, k) => {
-    const col = (c: number) => ({ sourceRange: { sources: [{ sheetId: id("Plan"), startRowIndex: 0, endRowIndex: b.filas, startColumnIndex: b.columna + c, endColumnIndex: b.columna + c + 1 }] } });
-    requests.push({
-      addChart: {
-        chart: {
-          spec: {
-            title: `${b.titulo}: plan vs. real`,
-            basicChart: {
-              chartType: "LINE",
-              legendPosition: "BOTTOM_LEGEND",
-              headerCount: 1,
-              axis: [{ position: "LEFT_AXIS", title: "% de la fase", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } }],
-              domains: [{ domain: col(0) }],
-              series: [
-                { series: col(1), targetAxis: "LEFT_AXIS", color: { red: 0.6, green: 0.63, blue: 0.65 }, lineStyle: { type: "MEDIUM_DASHED", width: 2 } },
-                { series: col(2), targetAxis: "LEFT_AXIS", color: { red: 0.26, green: 0.52, blue: 0.96 }, lineStyle: { width: 3 }, pointStyle: { shape: "CIRCLE", size: 6 } },
-              ],
-            },
-          },
-          position: { overlayPosition: { anchorCell: { sheetId: resumen, rowIndex: debajo, columnIndex: 0 }, offsetXPixels: k * 540, widthPixels: 520, heightPixels: 320 } },
-        },
-      },
-    });
-  });
-  const tendencia = filas.Tendencia;
-  if (tendencia.length > 1 && tendencia[0].length > 1) {
-    const rango = (columna: number) => ({ sourceRange: { sources: [{ sheetId: id("Tendencia"), startRowIndex: 0, endRowIndex: tendencia.length, startColumnIndex: columna, endColumnIndex: columna + 1 }] } });
-    requests.push({
-      addChart: {
-        chart: {
-          spec: {
-            title: "Avance por día (% de escenarios en verde)",
-            basicChart: {
-              chartType: "LINE",
-              legendPosition: "BOTTOM_LEGEND",
-              headerCount: 1,
-              axis: [{ position: "LEFT_AXIS", title: "%", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } }],
-              domains: [{ domain: rango(0) }],
-              series: tendencia[0].slice(1).map((_, i) => ({ series: rango(i + 1), targetAxis: "LEFT_AXIS" })),
-            },
-          },
-          position: { overlayPosition: { anchorCell: { sheetId: resumen, rowIndex: debajo + (bloques.length ? 17 : 0), columnIndex: 0 }, widthPixels: 520, heightPixels: 320 } },
-        },
-      },
-    });
-  }
+  // Curva de cada proyecto vs. su plan original (X = % de avance, Y = día): una al lado de la otra.
+  bloques.forEach((b, k) => requests.push(graficoCurva(id("Curva"), b, { sheetId: resumen, rowIndex: debajo, columnIndex: 0, offsetXPixels: k * 620 })));
   // La pestaña vacía que Google crea por defecto se quita (solo si está vacía).
   for (const h of hojas.filter((h) => POR_DEFECTO.includes(h.properties.title))) {
     const { values } = await sheets<{ values?: unknown[][] }>(`/values/${encodeURIComponent(`${h.properties.title}!A1:Z20`)}`);
     if (!values?.length) requests.push({ deleteSheet: { sheetId: h.properties.sheetId } });
   }
+  for (const h of hojas.filter((h) => OBSOLETAS.includes(h.properties.title))) requests.push({ deleteSheet: { sheetId: h.properties.sheetId } });
   await sheets(":batchUpdate", { method: "POST", body: { requests } });
+}
+
+/** Gráfico de la curva: plan original (gris punteado, fijo) y real (verde). Debajo de la gris = más rápido de lo pactado. */
+function graficoCurva(sheetId: number, b: Bloque, ancla: { sheetId: number; rowIndex: number; columnIndex: number; offsetXPixels?: number }) {
+  const col = (c: number) => ({ sourceRange: { sources: [{ sheetId, startRowIndex: 0, endRowIndex: b.filas, startColumnIndex: b.columna + c, endColumnIndex: b.columna + c + 1 }] } });
+  const estado = b.desvio > 0 ? `${b.desvio} días atrasado` : b.desvio < 0 ? `${-b.desvio} días adelantado` : "al día";
+  return {
+    addChart: {
+      chart: {
+        spec: {
+          title: `${b.titulo}: ${estado} vs. el plan original`,
+          subtitle: `Gris: plan original (fijo) · Verde: real, un punto por día desde el ${b.inicio} · Debajo de la gris = más rápido; encima = atrasado`,
+          basicChart: {
+            chartType: "LINE",
+            legendPosition: "BOTTOM_LEGEND",
+            headerCount: 1,
+            interpolateNulls: true,
+            axis: [
+              { position: "BOTTOM_AXIS", title: "avance del proyecto (% de tickets hechos)", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } },
+              { position: "LEFT_AXIS", title: "día del proyecto" },
+            ],
+            domains: [{ domain: col(0) }],
+            series: [
+              { series: col(1), targetAxis: "LEFT_AXIS", color: { red: 0.6, green: 0.63, blue: 0.65 }, lineStyle: { type: "MEDIUM_DASHED", width: 2 }, pointStyle: { shape: "DIAMOND", size: 8 } },
+              { series: col(2), targetAxis: "LEFT_AXIS", color: { red: 0.2, green: 0.66, blue: 0.33 }, lineStyle: { width: 2 }, pointStyle: { shape: "CIRCLE", size: 4 } },
+            ],
+          },
+        },
+        position: { overlayPosition: { anchorCell: { sheetId: ancla.sheetId, rowIndex: ancla.rowIndex, columnIndex: ancla.columnIndex }, offsetXPixels: ancla.offsetXPixels ?? 0, widthPixels: 600, heightPixels: 420 } },
+      },
+    },
+  };
 }
 
 /** Simulación (solo Sheet de pruebas): un proyecto inventado en 10 momentos, con el mismo cálculo que el tablero real. */
@@ -207,44 +197,15 @@ async function escribirSimulacion(existe: boolean) {
   if (!existe) await sheets(":batchUpdate", { method: "POST", body: { requests: [{ addSheet: { properties: { title: "Simulación" } } }] } });
   const momentos = simular();
   const filas = filasSimulacion(momentos);
-  const serie = serieSimulacion(momentos);
+  const curva = curvaSimulacion(momentos);
   await sheets("/values:batchClear", { method: "POST", body: { ranges: ["Simulación!A:Z"] } });
-  // La tabla a la izquierda; los números del gráfico, a la derecha (desde la columna L).
-  const leer = [["Cómo leerlo: si la línea azul (trabajo) queda por debajo de la gris (plazo), vas atrasado aunque la fecha no haya vencido. Las barras rojas crecen con cada día de atraso; la etiqueta de abajo dice el color de salud y qué pasó ese día."]];
-  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }, { range: "Simulación!L1", values: serie }, { range: `Simulación!A${filas.length + 2}`, values: leer }] } });
+  const leer = [["Cómo leerlo: la línea gris es el plan original (no se mueve aunque se reprograme). Cada punto verde es un día real. Debajo de la gris vas más rápido de lo pactado; encima, atrasado. Una subida vertical es un período parado; una inclinación a la derecha, avance."]];
+  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }, { range: "Simulación!L1", values: curva.filas }, { range: `Simulación!A${filas.length + 2}`, values: leer }] } });
   type Hoja = { properties: { sheetId: number; title: string }; charts?: { chartId: number }[] };
   const { sheets: hojas } = await sheets<{ sheets: Hoja[] }>("?fields=sheets(properties(sheetId,title),charts(chartId))");
   const hojaSim = hojas.find((h) => h.properties.title === "Simulación")!;
   const sheetId = hojaSim.properties.sheetId;
-  const col = (c: number) => ({ sourceRange: { sources: [{ sheetId, startRowIndex: 0, endRowIndex: serie.length, startColumnIndex: 11 + c, endColumnIndex: 12 + c }] } });
-  const linea = (c: number, rgb: [number, number, number], punteada = false) => ({ series: col(c), targetAxis: "LEFT_AXIS", type: "LINE", color: { red: rgb[0], green: rgb[1], blue: rgb[2] }, lineStyle: { width: 3, ...(punteada ? { type: "MEDIUM_DASHED" } : {}) }, pointStyle: { shape: "CIRCLE", size: 6 } });
-  const grafico = {
-    addChart: {
-      chart: {
-        spec: {
-          title: "proyecto-x en el tiempo (datos inventados)",
-          subtitle: "Azul: % de tickets de la fase hechos · Gris punteado: % del plazo que ya pasó · Verde: % del proyecto en verde · Barras rojas: días de atraso",
-          basicChart: {
-            chartType: "COMBO",
-            legendPosition: "BOTTOM_LEGEND",
-            headerCount: 1,
-            axis: [
-              { position: "LEFT_AXIS", title: "%", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } },
-              { position: "RIGHT_AXIS", title: "días de atraso" },
-            ],
-            domains: [{ domain: col(0) }],
-            series: [
-              linea(1, [0.26, 0.52, 0.96]),
-              linea(2, [0.6, 0.63, 0.65], true),
-              linea(3, [0.2, 0.66, 0.33]),
-              { series: col(4), targetAxis: "RIGHT_AXIS", type: "COLUMN", color: { red: 0.92, green: 0.26, blue: 0.21 }, dataLabel: { type: "DATA", placement: "OUTSIDE_END" } },
-            ],
-          },
-        },
-        position: { overlayPosition: { anchorCell: { sheetId, rowIndex: filas.length + 3, columnIndex: 0 }, widthPixels: 1100, heightPixels: 460 } },
-      },
-    },
-  };
+  const grafico = graficoCurva(sheetId, { ...curva.bloques[0], columna: 11, titulo: "proyecto-x (datos inventados)" }, { sheetId, rowIndex: filas.length + 3, columnIndex: 0 });
   const requests: unknown[] = [
     { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 1 } }, fields: "gridProperties.frozenRowCount" } },
     { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1 }, cell: { userEnteredFormat: { textFormat: { bold: true }, backgroundColor: { red: 0.93, green: 0.93, blue: 0.93 } } }, fields: "userEnteredFormat(textFormat,backgroundColor)" } },

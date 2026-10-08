@@ -13,12 +13,13 @@
 
 ## Cómo mostrar el trabajo
 
+- **Antes de construir un gráfico o un indicador, acordar qué pregunta responde** (p. ej. «¿voy a llegar a lo pactado y cuánto me desvío?») y contra qué referencia (el plan original, fijo). Mostrarle un boceto en texto y recién después construirlo. _Por qué: en la Fase 4 se hicieron varios gráficos (por fase, con dos ejes y el plan reiniciándose) que no respondían la pregunta del dueño; la curva del proyecto contra el plan original sí. Origen: 2026-10-08._
+
 - **PRs en dos niveles**, también los del consultor (salvo una línea al Parking lot): *En simple* (qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, «Qué necesito de ti» como checklist) y *Detalle técnico* plegado. Ejemplo: vitrina#36. Diagramas Mermaid con `%%{init: {"flowchart": {"htmlLabels": false, "wrappingWidth": 400}}}%%` y `flowchart TD` (sin las dos opciones GitHub corta las cajas largas); los emojis se quedan. _Por qué: que se entienda sin ser desarrollador y desde el celular. Origen: 2026-10-08._
 
 ## Alcance
 
-- **Toda mejora fuera de la tarea va al Parking lot sin preguntar** (con fecha y motivo); sí se pregunta si se hace ahora. _Por qué: su problema de fondo es el alcance que crece. Origen: 2026-10-05._
-- **Varias anotaciones del mismo momento, en un solo PR.** _Por qué: dos PRs que tocan la misma sección chocan (guardian#146). Origen: 2026-10-08._
+- **Toda mejora fuera de la tarea va al Parking lot sin preguntar** (con fecha y motivo); sí se pregunta si se hace ahora. Varias anotaciones del mismo momento van en un solo PR (dos PRs que tocan la misma sección chocan, guardian#146). _Por qué: su problema de fondo es el alcance que crece. Origen: 2026-10-05._
 - **Lo que el dueño propone para un proyecto también se cuida**: si es idea nueva (p. ej. header y footer en Vitrina, Entrar con Google), se recomienda Parking lot con el porqué, aunque venga de él. _Origen: 2026-10-08._
 
 ## Mirada

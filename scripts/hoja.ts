@@ -6,19 +6,19 @@ import type { Alerta } from "./salud.ts";
 export type DatosProyecto = {
   repo: string;
   estado: Estado | null;
-  milestones: { title: string; due_on: string | null; open_issues: number; closed_issues: number; state: string; created_at: string; closed_at?: string | null }[];
+  milestones: { title: string; due_on: string | null; open_issues: number; closed_issues: number; state: string; created_at: string; closed_at?: string | null; description?: string | null }[];
   tareas: { numero: number; titulo: string; fase: string; estado: "abierto" | "en revisión" | "hecho"; creado: string; cerrado: string | null }[];
 };
 
 export const ENCABEZADOS = {
   Foco: ["", "proyecto", "qué pasa", "qué hacer", "link"],
-  Resumen: ["proyecto", "salud", "avance del proyecto", "", "fase actual", "avance real de la fase", "", "tiempo transcurrido del plan", "", "tickets", "vence", "¿qué lo frena?"],
+  Resumen: ["proyecto", "salud", "avance del proyecto", "", "fase actual", "avance real de la fase", "", "tiempo transcurrido del plan", "", "tickets", "vence", "¿qué lo frena?", "vs. plan original"],
   Proyecto: ["proyecto", "fase actual", "fecha objetivo", "avance", "salud", "motivo", "actualizado", "repo"],
   Fases: ["proyecto", "fase", "fecha objetivo", "tickets hechos", "estado"],
   Tareas: ["proyecto", "ticket", "título", "fase", "estado", "creado", "cerrado", "link"],
   Salud: ["fecha", "proyecto", "salud", "avance", "días de atraso", "motivo"],
   Tendencia: ["fecha"],
-  Plan: ["fecha", "plan (fecha tentativa)", "real (tickets hechos)"],
+  Curva: ["avance (%)", "plan original (día)", "real (día)"],
 } as const satisfies Record<string, readonly string[]>;
 export type Pestaña = keyof typeof ENCABEZADOS;
 
@@ -122,6 +122,10 @@ export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
   return { titulo: f.title, trabajo, tiempo, diasRestantes, hechos, enRevision, porHacer: tareas.length - hechos - enRevision, alerta };
 }
 
+/** «5 días atrasado» / «2 días adelantado» / «al día» frente al plan original. */
+export const desvioTexto = (dias: number | undefined) =>
+  dias === undefined ? "" : dias > 0 ? `${dias} ${dias === 1 ? "día" : "días"} atrasado` : dias < 0 ? `${-dias} ${dias === -1 ? "día" : "días"} adelantado` : "al día";
+
 const vence = (dias: number | null) =>
   dias === null ? "sin fecha objetivo" : dias > 1 ? `en ${dias} días` : dias === 1 ? "mañana" : dias === 0 ? "hoy" : `venció hace ${-dias} ${dias === -1 ? "día" : "días"}`;
 
@@ -147,6 +151,7 @@ export function filasResumen(datos: DatosProyecto[], hoy: string): string[][] {
         f ? `✅ ${f.hechos} · 👀 ${f.enRevision} · ⬜ ${f.porHacer}` : "",
         f ? vence(f.diasRestantes) : "",
         frena,
+        desvioTexto(curvaProyecto(d, hoy)?.desvio),
       ];
     }),
   ];
@@ -239,4 +244,61 @@ export function filasFoco(datos: DatosProyecto[], hoy: string): string[][] {
   });
   items.sort((a, b) => a.orden - b.orden);
   return [[...ENCABEZADOS.Foco], ...(items.length ? items.map((i) => i.fila) : [["🟢", "", "Nada que atender hoy", "", ""]])];
+}
+
+/** Fecha original de una fase: la que se anotó al crear el plan («Fecha original: AAAA-MM-DD»); si no hay, la tentativa. */
+export const fechaOriginal = (m: Milestone) => m.description?.match(/Fecha original:\s*(\d{4}-\d{2}-\d{2})/)?.[1] ?? m.due_on?.slice(0, 10) ?? null;
+
+export type Curva = { titulo: string; inicio: string; plan: [number, number][]; real: [number, number][]; desvio: number };
+
+/** Curva del proyecto completo vs. el plan ORIGINAL (fijo). X = % de tickets hechos; Y = día del proyecto.
+ * Debajo de la línea del plan = más rápido de lo pactado; encima = atrasado. */
+export function curvaProyecto(d: DatosProyecto, hoy: string): Curva | null {
+  const fases = fasesOrdenadas(d);
+  const tareas = d.tareas.filter((t) => fases.some((f) => f.title === t.fase));
+  if (!tareas.length || !fases.some((f) => fechaOriginal(f))) return null;
+  const inicio = [...fases.map((f) => f.created_at), ...tareas.map((t) => t.creado)].filter(Boolean).sort()[0].slice(0, 10);
+  const dia = (fecha: string) => Math.round((Date.parse(fecha.slice(0, 10)) - Date.parse(inicio)) / DIA);
+  const pct = (n: number) => Math.round((n / tareas.length) * 100);
+  const plan: [number, number][] = [[0, 0]];
+  let acumulado = 0;
+  for (const f of fases) {
+    acumulado += tareas.filter((t) => t.fase === f.title).length;
+    const fin = fechaOriginal(f);
+    if (fin) plan.push([pct(acumulado), dia(fin)]);
+  }
+  const hoyDia = dia(hoy);
+  const real: [number, number][] = Array.from({ length: hoyDia + 1 }, (_, k) => {
+    const fecha = new Date(Date.parse(inicio) + k * DIA).toISOString().slice(0, 10);
+    return [pct(tareas.filter((t) => t.cerrado && t.cerrado.slice(0, 10) <= fecha).length), k];
+  });
+  // Desvío: qué día el plan original llegaba al avance de hoy, contra el día de hoy (+ atrasado, − adelantado).
+  const actual = real.at(-1)![0];
+  const j = plan.findIndex(([x]) => x >= actual);
+  const [x1, y1] = plan[Math.max(0, j - 1)];
+  const [x2, y2] = j < 0 ? plan.at(-1)! : plan[j];
+  const diaPlan = x2 === x1 ? y2 : y1 + ((actual - x1) / (x2 - x1)) * (y2 - y1);
+  return { titulo: nombre(d.repo), inicio, plan, real, desvio: Math.round(hoyDia - diaPlan) };
+}
+
+/** Pestaña Curva: un bloque por proyecto (avance %, día del plan, día real), ordenado por avance; fuente de los gráficos. */
+export function filasCurva(datos: DatosProyecto[], hoy: string) {
+  const curvas = datos.map((d) => curvaProyecto(d, hoy)).filter((c) => c !== null);
+  const bloquesFilas = curvas.map((c) => {
+    const puntos = [
+      ...c.plan.map(([x, y]) => ({ x, y, plan: true })),
+      ...c.real.map(([x, y]) => ({ x, y, plan: false })),
+    ].sort((a, b) => a.x - b.x || Number(b.plan) - Number(a.plan) || a.y - b.y);
+    return [["avance (%)", "plan original (día)", "real (día)"], ...puntos.map((p) => [p.x, p.plan ? p.y : "", p.plan ? "" : p.y])];
+  });
+  const alto = Math.max(0, ...bloquesFilas.map((b) => b.length));
+  const filas: (string | number)[][] = Array.from({ length: alto }, () => []);
+  const bloques = curvas.map((c, k) => {
+    for (let r = 0; r < alto; r++) {
+      if (k > 0) filas[r].push("");
+      filas[r].push(...(bloquesFilas[k][r] ?? ["", "", ""]));
+    }
+    return { titulo: c.titulo, inicio: c.inicio, columna: k * 4, filas: bloquesFilas[k].length, desvio: c.desvio };
+  });
+  return { filas, bloques };
 }

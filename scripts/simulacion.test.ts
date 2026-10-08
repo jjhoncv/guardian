@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { filasSimulacion, serieSimulacion, simular } from "./simulacion";
+import { curvaSimulacion, filasSimulacion, serieSimulacion, simular } from "./simulacion";
 
 it("el proyecto-x pasa por todos los colores en el orden esperado", () => {
   const colores = simular().map((m) => m.datos.estado!.salud.color);
@@ -24,4 +24,10 @@ it("serie numérica para el gráfico: avance real de la fase, tiempo del plan, a
   expect(serie[1]).toEqual(["🟢 4 nov · arranca", 25, 30, 0, 0]);
   expect(serie[7]).toEqual(["⚫ 14 dic · 1 mes parado", 50, 100, 18, 35]);
   expect(serie).toHaveLength(11);
+});
+
+it("la curva del proyecto-x: el plan original no se mueve aunque se reprograme, y al final va atrasado", () => {
+  const { bloques, filas } = curvaSimulacion(simular());
+  expect(filas.slice(1).filter((f) => f[1] !== "").map((f) => [f[0], f[1]])).toEqual([[0, 0], [36, 7], [73, 14], [100, 21]]);
+  expect(bloques[0].desvio).toBeGreaterThan(30);
 });

@@ -3,7 +3,7 @@
 // tablero real (calcularSalud, faseEnCurso, filasFoco), así que lo que se ve aquí es lo que pasaría de verdad.
 import { faseActual, type Estado } from "./estado.ts";
 import { calcularSalud } from "./salud.ts";
-import { faseEnCurso, filasFoco, type DatosProyecto } from "./hoja.ts";
+import { faseEnCurso, filasCurva, filasFoco, type DatosProyecto } from "./hoja.ts";
 
 const MEDIODIA = "T12:00:00Z";
 const REPO = "simulacion/proyecto-x";
@@ -51,7 +51,7 @@ export function simular(): Momento[] {
       const propios = TICKETS.filter((t) => t.fase === i + 1);
       const hechos = propios.filter((t) => cerrado(t.cerrado)).length;
       const cerradaFase = cerrado(CIERRE_FASE[i]);
-      return { title, due_on: vence[i] + MEDIODIA, open_issues: propios.length - hechos, closed_issues: hechos, state: cerradaFase ? "closed" : "open", created_at: "2026-11-02T09:00:00Z", closed_at: cerradaFase ? CIERRE_FASE[i]! + MEDIODIA : null };
+      return { title, description: `Fecha original: ${PLAN_ORIGINAL[i]}`, due_on: vence[i] + MEDIODIA, open_issues: propios.length - hechos, closed_issues: hechos, state: cerradaFase ? "closed" : "open", created_at: "2026-11-02T09:00:00Z", closed_at: cerradaFase ? CIERRE_FASE[i]! + MEDIODIA : null };
     });
     const enRevision = (t: (typeof TICKETS)[number]) => !cerrado(t.cerrado) && t.pr !== undefined && t.pr.slice(0, 10) <= m.fecha;
     const tareas: DatosProyecto["tareas"] = TICKETS.map((t) => ({
@@ -116,4 +116,10 @@ export function serieSimulacion(momentos: Momento[]): (string | number)[][] {
       return [`${e.salud.emoji} ${diaCorto(fecha)} · ${corto}`, f?.trabajo ?? 0, Math.min(f?.tiempo ?? 0, 100), e.avance!.porcentaje, e.salud.diasAtraso];
     }),
   ];
+}
+
+/** Curva del proyecto-x completo (hasta el último momento) vs. su plan original: la fuente del gráfico. */
+export function curvaSimulacion(momentos: Momento[]) {
+  const ultimo = momentos.at(-1)!;
+  return filasCurva([ultimo.datos], ultimo.fecha + MEDIODIA);
 }

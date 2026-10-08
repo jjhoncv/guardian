@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, planVsReal, type DatosProyecto } from "./hoja";
+import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, curvaProyecto, filasCurva, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, planVsReal, type DatosProyecto } from "./hoja";
 
 const vitrina: DatosProyecto = {
   repo: "jjhoncv/vitrina",
@@ -94,7 +94,7 @@ describe("Resumen: el tablero para leer en 10 segundos", () => {
     expect(enc).toEqual(ENCABEZADOS.Resumen);
     expect(fila).toEqual([
       "vitrina", "🟡 amarillo", "", "80 % · 12 de 15", "Fase 3 — Comentarios", "", "33 %", "", "80 %",
-      "✅ 1 · 👀 1 · ⬜ 1", "en 2 días", "El PR #36 espera tu revisión hace más de 24 h · ⚠️ el plazo va más rápido que el trabajo",
+      "✅ 1 · 👀 1 · ⬜ 1", "en 2 días", "El PR #36 espera tu revisión hace más de 24 h · ⚠️ el plazo va más rápido que el trabajo", expect.stringMatching(/atrasado|adelantado|al día/),
     ]);
     expect(barrasResumen([conFase], hoy)).toEqual([[barra(80, "avance"), barra(33, "trabajo"), barra(80, "alerta")]]);
   });
@@ -191,5 +191,51 @@ describe("Foco: solo lo rojo y lo naranja, de más a menos grave, con qué hacer
 
   it("sin nada que atender lo dice", () => {
     expect(filasFoco([conAlertas("jjhoncv/a", [])], "2026-10-20T12:00:00Z")[1]).toEqual(["🟢", "", "Nada que atender hoy", "", ""]);
+  });
+});
+
+describe("curva del proyecto vs. plan original (X = % de avance, Y = día)", () => {
+  const p: DatosProyecto = {
+    repo: "jjhoncv/x",
+    estado: null,
+    milestones: [
+      // F1 se reprogramó (due_on nuevo), pero su fecha original quedó en la descripción: la línea del plan no se mueve.
+      { title: "Fase 1 — A", due_on: "2026-11-20T12:00:00Z", description: "Entregable: a\nFecha original: 2026-11-11", open_issues: 0, closed_issues: 2, state: "closed", created_at: "2026-11-01T09:00:00Z", closed_at: "2026-11-15T12:00:00Z" },
+      { title: "Fase 2 — B", due_on: "2026-11-21T12:00:00Z", open_issues: 2, closed_issues: 0, state: "open", created_at: "2026-11-01T09:00:00Z" },
+    ],
+    tareas: [
+      { numero: 1, titulo: "", fase: "Fase 1 — A", estado: "hecho", creado: "2026-11-01T09:00:00Z", cerrado: "2026-11-03T10:00:00Z" },
+      { numero: 2, titulo: "", fase: "Fase 1 — A", estado: "hecho", creado: "2026-11-01T09:00:00Z", cerrado: "2026-11-15T10:00:00Z" },
+      { numero: 3, titulo: "", fase: "Fase 2 — B", estado: "abierto", creado: "2026-11-01T09:00:00Z", cerrado: null },
+      { numero: 4, titulo: "", fase: "Fase 2 — B", estado: "abierto", creado: "2026-11-01T09:00:00Z", cerrado: null },
+    ],
+  };
+
+  it("el plan pasa por el fin ORIGINAL de cada fase (aunque se haya reprogramado)", () => {
+    const c = curvaProyecto(p, "2026-11-16T12:00:00Z")!;
+    expect(c.inicio).toBe("2026-11-01");
+    expect(c.plan).toEqual([[0, 0], [50, 10], [100, 20]]);
+  });
+
+  it("lo real: un punto por día con el % de tickets hechos hasta ese día", () => {
+    const c = curvaProyecto(p, "2026-11-16T12:00:00Z")!;
+    expect(c.real.slice(0, 3)).toEqual([[0, 0], [0, 1], [25, 2]]);
+    expect(c.real.at(-1)).toEqual([50, 15]);
+    expect(c.real).toHaveLength(16);
+  });
+
+  it("desvío en días: el plan llegaba al 50 % el día 10; hoy es el día 15 → 5 días atrasado", () => {
+    expect(curvaProyecto(p, "2026-11-16T12:00:00Z")!.desvio).toBe(5);
+  });
+
+  it("sin fechas en ninguna fase no hay curva", () => {
+    expect(curvaProyecto({ ...p, milestones: p.milestones.map((m) => ({ ...m, due_on: null, description: null })) }, "2026-11-16T12:00:00Z")).toBeNull();
+  });
+
+  it("la tabla para el gráfico: X compartido, una columna para el plan y otra para lo real", () => {
+    const { filas, bloques } = filasCurva([p], "2026-11-16T12:00:00Z");
+    expect(filas[0]).toEqual(["avance (%)", "plan original (día)", "real (día)"]);
+    expect(filas.slice(1, 4)).toEqual([[0, 0, ""], [0, "", 0], [0, "", 1]]);
+    expect(bloques[0]).toMatchObject({ titulo: "x", columna: 0, desvio: 5 });
   });
 });
