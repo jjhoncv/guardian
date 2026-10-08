@@ -54,3 +54,10 @@ jobs:
           else
             echo "Sin reporte de escenarios."
           fi
+      # El workflow de estado (ADR 0026) toma el avance de main de aquí, sin ejecutar código del proyecto.
+      - if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('test-results/avance.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: avance
+          path: test-results/avance.json
+          retention-days: 7

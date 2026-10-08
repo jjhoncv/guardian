@@ -137,6 +137,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | `guardian-deploy.yml` | Preview por PR y staging en `main` (build sin secretos; deploy sin código del proyecto) |
 | `guardian-release.yml` | release-please → producción con aprobación (el build se guarda 14 días) → smoke test → rollback y alerta si falla |
 | `guardian-tickets.yml` | Un issue por tarea del plan aprobado y una **fecha objetivo por fase** (las semanas de Límites repartidas entre las fases) |
+| `guardian-estado.yml` | En cada CI de `main` y una vez al día: fase actual, % de avance y **salud** (🟢 🟡 🔴 ⚫) → rama `estado` (`estado.json` y badges). No ejecuta código del proyecto (ADR 0026) |
 | `guardian-claude.yml` | `@claude` del dueño → Claude desarrolla en la nube y abre el PR en dos niveles; al fusionar un PR toma solo el siguiente ticket de la fase actual (máx. 2 PRs suyos en revisión; no abre la fase siguiente; ADR 0024) |
 
 Cada workflow toma sus scripts y herramientas de **su propia versión** del Guardián (`job.workflow_sha`).
