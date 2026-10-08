@@ -10,12 +10,13 @@ export type DatosProyecto = {
 };
 
 export const ENCABEZADOS = {
-  Resumen: ["proyecto", "salud", "avance del proyecto", "", "fase actual", "trabajo de la fase", "", "tiempo de la fase", "", "tickets", "vence", "¿qué lo frena?"],
+  Resumen: ["proyecto", "salud", "avance del proyecto", "", "fase actual", "avance real de la fase", "", "tiempo transcurrido del plan", "", "tickets", "vence", "¿qué lo frena?"],
   Proyecto: ["proyecto", "fase actual", "fecha objetivo", "avance", "salud", "motivo", "actualizado", "repo"],
   Fases: ["proyecto", "fase", "fecha objetivo", "tickets hechos", "estado"],
   Tareas: ["proyecto", "ticket", "título", "fase", "estado", "creado", "cerrado", "link"],
   Salud: ["fecha", "proyecto", "salud", "avance", "días de atraso", "motivo"],
   Tendencia: ["fecha"],
+  Plan: ["fecha", "plan (fecha tentativa)", "real (tickets hechos)"],
 } as const satisfies Record<string, readonly string[]>;
 export type Pestaña = keyof typeof ENCABEZADOS;
 
@@ -92,9 +93,14 @@ export type FaseEnCurso = {
   alerta: string | null;
 };
 
+type Milestone = DatosProyecto["milestones"][number];
+const fasesOrdenadas = (d: DatosProyecto) => d.milestones.filter((m) => /^Fase \d+/.test(m.title)).sort((a, b) => numeroFase(a.title) - numeroFase(b.title));
+/** La fase empieza cuando se cerró la anterior (fecha real); si no, en su fecha tentativa; si no, al crearse. */
+const inicioDeFase = (fases: Milestone[], i: number) => fases[i - 1]?.closed_at ?? fases[i - 1]?.due_on ?? fases[i].created_at;
+
 /** La fase abierta de número más bajo: % de tickets hechos (avance real) vs. % del plazo gastado (contra la fecha tentativa). */
 export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
-  const fases = d.milestones.filter((m) => /^Fase \d+/.test(m.title)).sort((a, b) => numeroFase(a.title) - numeroFase(b.title));
+  const fases = fasesOrdenadas(d);
   const i = fases.findIndex((m) => m.state === "open");
   if (i < 0) return null;
   const f = fases[i];
@@ -105,8 +111,7 @@ export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
   let tiempo: number | null = null;
   let diasRestantes: number | null = null;
   if (f.due_on) {
-    // La fase empieza cuando se cerró la anterior (fecha real); si no, en su fecha tentativa; si no, al crearse.
-    const inicio = Date.parse(fases[i - 1]?.closed_at ?? fases[i - 1]?.due_on ?? f.created_at);
+    const inicio = Date.parse(inicioDeFase(fases, i));
     const fin = Date.parse(f.due_on);
     tiempo = Math.max(0, Math.round(((Date.parse(hoy) - inicio) / Math.max(fin - inicio, DIA)) * 100));
     diasRestantes = Math.ceil((fin - Date.parse(hoy)) / DIA);
@@ -171,4 +176,41 @@ export function filasTendencia(salud: readonly (readonly string[])[]): (string |
       return v === undefined || Number.isNaN(v) ? "" : v;
     })]),
   ];
+}
+
+/** Plan vs. real de la fase en curso, un punto por día: el plan sube lineal hasta la fecha tentativa;
+ * lo real es el % de tickets de la fase cerrados hasta ese día (desde la fecha de cierre de cada ticket). */
+export function planVsReal(d: DatosProyecto, hoy: string): { titulo: string; filas: (string | number)[][] } | null {
+  const fases = fasesOrdenadas(d);
+  const i = fases.findIndex((m) => m.state === "open");
+  if (i < 0 || !fases[i].due_on) return null;
+  const f = fases[i];
+  const desde = Date.parse(inicioDeFase(fases, i).slice(0, 10));
+  const hasta = Date.parse(f.due_on!.slice(0, 10));
+  const dias = Math.min(120, Math.max(1, Math.round((hasta - desde) / DIA)));
+  const tareas = d.tareas.filter((t) => t.fase === f.title);
+  const filas = Array.from({ length: dias + 1 }, (_, k) => {
+    const fecha = new Date(desde + k * DIA).toISOString().slice(0, 10);
+    const hechos = tareas.filter((t) => t.cerrado && t.cerrado.slice(0, 10) <= fecha).length;
+    const real = fecha <= hoy.slice(0, 10) && tareas.length ? Math.round((hechos / tareas.length) * 100) : "";
+    return [fecha, Math.round((k / dias) * 100), real];
+  });
+  return { titulo: `${nombre(d.repo)} · ${f.title}`, filas };
+}
+
+/** Pestaña Plan: un bloque (fecha, plan, real) por proyecto, separados por una columna; fuente de los gráficos. */
+export function filasPlan(datos: DatosProyecto[], hoy: string) {
+  const series = datos.map((d) => planVsReal(d, hoy)).filter((x) => x !== null);
+  const alto = Math.max(0, ...series.map((x) => x.filas.length)) + 1;
+  const filas: (string | number)[][] = Array.from({ length: series.length ? alto : 0 }, () => []);
+  const bloques = series.map((x, k) => {
+    const columna = k * 4;
+    const bloque = [["fecha", "plan (fecha tentativa)", "real (tickets hechos)"], ...x.filas];
+    for (let r = 0; r < alto; r++) {
+      if (k > 0) filas[r].push("");
+      filas[r].push(...(bloque[r] ?? ["", "", ""]));
+    }
+    return { titulo: x.titulo, columna, filas: bloque.length };
+  });
+  return { filas, bloques };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto } from "./hoja";
+import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, filasFases, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, planVsReal, type DatosProyecto } from "./hoja";
 
 const vitrina: DatosProyecto = {
   repo: "jjhoncv/vitrina",
@@ -124,5 +124,45 @@ describe("Resumen: el tablero para leer en 10 segundos", () => {
       ["2026-10-19", 60, 70],
       ["2026-10-20", "", 80],
     ]);
+  });
+});
+
+describe("plan vs. real de la fase en curso (gráfico)", () => {
+  const d: DatosProyecto = {
+    repo: "jjhoncv/x",
+    estado: null,
+    milestones: [
+      { title: "Fase 1 — A", due_on: "2026-10-05T00:00:00Z", open_issues: 0, closed_issues: 1, state: "closed", created_at: "2026-10-01T00:00:00Z", closed_at: "2026-10-08T15:00:00Z" },
+      { title: "Fase 2 — B", due_on: "2026-10-11T00:00:00Z", open_issues: 2, closed_issues: 2, state: "open", created_at: "2026-10-01T00:00:00Z" },
+    ],
+    tareas: [
+      { numero: 1, titulo: "", fase: "Fase 2 — B", estado: "hecho", creado: "", cerrado: "2026-10-08T20:00:00Z" },
+      { numero: 2, titulo: "", fase: "Fase 2 — B", estado: "hecho", creado: "", cerrado: "2026-10-09T10:00:00Z" },
+      { numero: 3, titulo: "", fase: "Fase 2 — B", estado: "abierto", creado: "", cerrado: null },
+      { numero: 4, titulo: "", fase: "Fase 2 — B", estado: "en revisión", creado: "", cerrado: null },
+    ],
+  };
+
+  it("una fila por día: el plan va de 0 a 100 % hasta la fecha tentativa; lo real, hasta hoy", () => {
+    expect(planVsReal(d, "2026-10-09T18:00:00Z")).toEqual({
+      titulo: "x · Fase 2 — B",
+      filas: [
+        ["2026-10-08", 0, 25],
+        ["2026-10-09", 33, 50],
+        ["2026-10-10", 67, ""],
+        ["2026-10-11", 100, ""],
+      ],
+    });
+  });
+
+  it("sin fecha tentativa no hay gráfico", () => {
+    expect(planVsReal({ ...d, milestones: [d.milestones[0], { ...d.milestones[1], due_on: null }] }, "2026-10-09T18:00:00Z")).toBeNull();
+  });
+
+  it("la pestaña Plan pone un bloque por proyecto (fecha, plan, real) separado por una columna", () => {
+    const { filas, bloques } = filasPlan([d, d], "2026-10-09T18:00:00Z");
+    expect(filas[0]).toEqual(["fecha", "plan (fecha tentativa)", "real (tickets hechos)", "", "fecha", "plan (fecha tentativa)", "real (tickets hechos)"]);
+    expect(filas[2]).toEqual(["2026-10-09", 33, 50, "", "2026-10-09", 33, 50]);
+    expect(bloques).toEqual([{ titulo: "x · Fase 2 — B", columna: 0, filas: 5 }, { titulo: "x · Fase 2 — B", columna: 4, filas: 5 }]);
   });
 });

@@ -3,7 +3,7 @@
 // Proyectos = repos del dueño con el topic `guardian-proyecto` (los marca configurar-repo.sh).
 // Uso (CI): node tools/sheet/sincronizar.ts   env: GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA (JSON de la service account)
 import { JWT } from "google-auth-library";
-import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
+import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
 import type { Estado } from "../../scripts/estado.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
@@ -72,7 +72,10 @@ async function main() {
     Tareas: filasTareas(datos),
     Salud: historial,
     Tendencia: filasTendencia(historial),
+    Plan: [],
   };
+  const plan = filasPlan(datos, ahora);
+  filas.Plan = plan.filas.length ? plan.filas : [[...ENCABEZADOS.Plan]];
   const pestañas = Object.keys(filas) as Pestaña[];
   // Todo se reescribe salvo Salud, que solo crece: no se borra (si algo falla, el historial queda).
   await sheets("/values:batchClear", { method: "POST", body: { ranges: pestañas.filter((p) => p !== "Salud").map((p) => `${p}!A:Z`) } });
@@ -88,7 +91,7 @@ async function main() {
       body: { valueInputOption: "USER_ENTERED", data: [{ range: `Resumen!C2:C${n}`, values: columna(0) }, { range: `Resumen!F2:F${n}`, values: columna(1) }, { range: `Resumen!H2:H${n}`, values: columna(2) }] },
     });
   }
-  await darFormato(filas, datos);
+  await darFormato(filas, datos, plan.bloques);
 
   const linea = datos.map((d) => `${d.estado?.salud.emoji ?? "·"} ${d.repo.split("/")[1]}`).join("  ");
   console.log(`Sheet actualizado (${datos.length} proyectos): ${linea}`);
@@ -108,7 +111,8 @@ const FONDO: Record<string, { red: number; green: number; blue: number }> = {
 };
 const POR_DEFECTO = ["Sheet1", "Hoja 1", "Hoja1"];
 
-async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos: DatosProyecto[]) {
+type Bloque = { titulo: string; columna: number; filas: number };
+async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos: DatosProyecto[], bloques: Bloque[]) {
   type Hoja = { properties: { sheetId: number; title: string }; charts?: { chartId: number }[] };
   const { sheets: hojas } = await sheets<{ sheets: Hoja[] }>("?fields=sheets(properties(sheetId,title),charts(chartId))");
   const id = (t: Pestaña) => hojas.find((h) => h.properties.title === t)!.properties.sheetId;
@@ -131,8 +135,34 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
     const color = d.estado ? (d.estado.salud.pausa ? "gris" : d.estado.salud.color) : "gris";
     requests.push({ repeatCell: { range: { sheetId: resumen, startRowIndex: i + 1, endRowIndex: i + 2 }, cell: { userEnteredFormat: { backgroundColor: FONDO[color] } }, fields: "userEnteredFormat.backgroundColor" } });
   });
-  // Gráfico de tendencia: se rehace en cada corrida con los proyectos de hoy.
+  // Gráficos: se rehacen en cada corrida con los proyectos de hoy.
   for (const c of hojas.find((h) => h.properties.sheetId === resumen)?.charts ?? []) requests.push({ deleteEmbeddedObject: { objectId: c.chartId } });
+  const debajo = datos.length + 3;
+  // Plan vs. real de la fase en curso: uno por proyecto, en fila. Plan punteado gris; real azul.
+  bloques.forEach((b, k) => {
+    const col = (c: number) => ({ sourceRange: { sources: [{ sheetId: id("Plan"), startRowIndex: 0, endRowIndex: b.filas, startColumnIndex: b.columna + c, endColumnIndex: b.columna + c + 1 }] } });
+    requests.push({
+      addChart: {
+        chart: {
+          spec: {
+            title: `${b.titulo}: plan vs. real`,
+            basicChart: {
+              chartType: "LINE",
+              legendPosition: "BOTTOM_LEGEND",
+              headerCount: 1,
+              axis: [{ position: "LEFT_AXIS", title: "% de la fase", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } }],
+              domains: [{ domain: col(0) }],
+              series: [
+                { series: col(1), targetAxis: "LEFT_AXIS", color: { red: 0.6, green: 0.63, blue: 0.65 }, lineStyle: { type: "MEDIUM_DASHED", width: 2 } },
+                { series: col(2), targetAxis: "LEFT_AXIS", color: { red: 0.26, green: 0.52, blue: 0.96 }, lineStyle: { width: 3 }, pointStyle: { shape: "CIRCLE", size: 6 } },
+              ],
+            },
+          },
+          position: { overlayPosition: { anchorCell: { sheetId: resumen, rowIndex: debajo, columnIndex: 0 }, offsetXPixels: k * 540, widthPixels: 520, heightPixels: 320 } },
+        },
+      },
+    });
+  });
   const tendencia = filas.Tendencia;
   if (tendencia.length > 1 && tendencia[0].length > 1) {
     const rango = (columna: number) => ({ sourceRange: { sources: [{ sheetId: id("Tendencia"), startRowIndex: 0, endRowIndex: tendencia.length, startColumnIndex: columna, endColumnIndex: columna + 1 }] } });
@@ -150,7 +180,7 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
               series: tendencia[0].slice(1).map((_, i) => ({ series: rango(i + 1), targetAxis: "LEFT_AXIS" })),
             },
           },
-          position: { overlayPosition: { anchorCell: { sheetId: resumen, rowIndex: datos.length + 3, columnIndex: 0 } } },
+          position: { overlayPosition: { anchorCell: { sheetId: resumen, rowIndex: debajo + (bloques.length ? 17 : 0), columnIndex: 0 }, widthPixels: 520, heightPixels: 320 } },
         },
       },
     });
