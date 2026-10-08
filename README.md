@@ -143,7 +143,7 @@ Cada workflow toma sus scripts y herramientas de **su propia versión** del Guar
 
 | Pieza | Dónde |
 |---|---|
-| Scripts de los workflows | `scripts/` (`avance.ts`, `chequeo-pr.ts`, `crear-tickets.ts`, `siguiente-ticket.ts`, `rollback.sh`) |
+| Scripts de los workflows | `scripts/` (`avance.ts`, `chequeo-pr.ts`, `crear-tickets.ts`, `fechas-fases.ts`, `salud.ts`, `siguiente-ticket.ts`, `rollback.sh`) |
 | netlify-cli del CI, fijado por lockfile | `tools/netlify/` |
 | Crear un proyecto (Paso 0 + infraestructura + esqueleto) | `scripts/nuevo-proyecto.sh` |
 | Protecciones, seguridad y tablero de un repo | `scripts/configurar-repo.sh` |
