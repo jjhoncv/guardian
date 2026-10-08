@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, filasFases, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, planVsReal, type DatosProyecto } from "./hoja";
+import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, planVsReal, type DatosProyecto } from "./hoja";
 
 const vitrina: DatosProyecto = {
   repo: "jjhoncv/vitrina",
@@ -164,5 +164,32 @@ describe("plan vs. real de la fase en curso (gráfico)", () => {
     expect(filas[0]).toEqual(["fecha", "plan (fecha tentativa)", "real (tickets hechos)", "", "fecha", "plan (fecha tentativa)", "real (tickets hechos)"]);
     expect(filas[2]).toEqual(["2026-10-09", 33, 50, "", "2026-10-09", 33, 50]);
     expect(bloques).toEqual([{ titulo: "x · Fase 2 — B", columna: 0, filas: 5 }, { titulo: "x · Fase 2 — B", columna: 4, filas: 5 }]);
+  });
+});
+
+describe("Foco: solo lo rojo y lo naranja, de más a menos grave, con qué hacer", () => {
+  const conAlertas = (repo: string, alertas: { gravedad: "rojo" | "amarillo" | "gris"; texto: string; accion: string; pr?: number }[]): DatosProyecto => ({
+    ...sinEstado,
+    repo,
+    estado: { ...vitrina.estado!, salud: { ...vitrina.estado!.salud, alertas } },
+  });
+
+  it("ordena rojo > gris > amarillo y arma el link de cada alerta", () => {
+    const filas = filasFoco([
+      conAlertas("jjhoncv/a", [{ gravedad: "amarillo", texto: "El PR #3 espera", accion: "Revisa el PR #3", pr: 3 }]),
+      conAlertas("jjhoncv/b", [{ gravedad: "rojo", texto: "«Fase 1» lleva 5 días de atraso", accion: "Decide…" }]),
+    ], "2026-10-20T12:00:00Z");
+    expect(filas[0]).toEqual(ENCABEZADOS.Foco);
+    expect(filas[1]).toEqual(["🔴", "b", "«Fase 1» lleva 5 días de atraso", "Decide…", "https://github.com/jjhoncv/b/milestones"]);
+    expect(filas[2]).toEqual(["🟡", "a", "El PR #3 espera", "Revisa el PR #3", "https://github.com/jjhoncv/a/pull/3"]);
+  });
+
+  it("suma el aviso de plan vs. real como naranja", () => {
+    const d = { ...conAlertas("jjhoncv/a", []), milestones: [{ title: "Fase 1 — A", due_on: "2026-10-22T12:00:00Z", open_issues: 3, closed_issues: 0, state: "open", created_at: "2026-10-12T12:00:00Z" }], tareas: [{ numero: 1, titulo: "", fase: "Fase 1 — A", estado: "abierto" as const, creado: "", cerrado: null }] };
+    expect(filasFoco([d], "2026-10-20T12:00:00Z")[1]).toEqual(["🟡", "a", "«Fase 1 — A»: el plazo va más rápido que el trabajo (80 % del tiempo, 0 % hecho)", "Prioriza los tickets que faltan o achica la fase", "https://github.com/jjhoncv/a/milestones"]);
+  });
+
+  it("sin nada que atender lo dice", () => {
+    expect(filasFoco([conAlertas("jjhoncv/a", [])], "2026-10-20T12:00:00Z")[1]).toEqual(["🟢", "", "Nada que atender hoy", "", ""]);
   });
 });

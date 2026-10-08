@@ -1,6 +1,7 @@
 // Filas del Sheet del Guardián (ADR 0026): un solo Sheet con todos los proyectos, espejo de GitHub.
 // Funciones puras; las usa tools/sheet/sincronizar.ts, que lee GitHub y escribe en Google Sheets.
 import type { Estado } from "./estado.ts";
+import type { Alerta } from "./salud.ts";
 
 export type DatosProyecto = {
   repo: string;
@@ -10,6 +11,7 @@ export type DatosProyecto = {
 };
 
 export const ENCABEZADOS = {
+  Foco: ["", "proyecto", "qué pasa", "qué hacer", "link"],
   Resumen: ["proyecto", "salud", "avance del proyecto", "", "fase actual", "avance real de la fase", "", "tiempo transcurrido del plan", "", "tickets", "vence", "¿qué lo frena?"],
   Proyecto: ["proyecto", "fase actual", "fecha objetivo", "avance", "salud", "motivo", "actualizado", "repo"],
   Fases: ["proyecto", "fase", "fecha objetivo", "tickets hechos", "estado"],
@@ -213,4 +215,28 @@ export function filasPlan(datos: DatosProyecto[], hoy: string) {
     return { titulo: x.titulo, columna, filas: bloque.length };
   });
   return { filas, bloques };
+}
+
+// Un proyecto abandonado (gris) se decide antes que un aviso naranja.
+const ORDEN: Record<Alerta["gravedad"], number> = { rojo: 0, gris: 1, amarillo: 2 };
+const EMOJI_GRAVEDAD: Record<Alerta["gravedad"], string> = { rojo: "🔴", amarillo: "🟡", gris: "⚫" };
+
+/** Foco: todo lo que hay que atender en todos los proyectos (🔴 → ⚫ → 🟡), con qué hacer y dónde. */
+export function filasFoco(datos: DatosProyecto[], hoy: string): string[][] {
+  const items = datos.flatMap((d) => {
+    const alertas: Alerta[] = d.estado?.salud.pausa ? [] : [...(d.estado?.salud.alertas ?? [])];
+    const f = faseEnCurso(d, hoy);
+    if (f?.alerta && !d.estado?.salud.pausa) {
+      alertas.push({ gravedad: "amarillo", texto: `«${f.titulo}»: el plazo va más rápido que el trabajo (${Math.min(f.tiempo!, 100)} % del tiempo, ${f.trabajo} % hecho)`, accion: "Prioriza los tickets que faltan o achica la fase" });
+    }
+    return alertas.map((a) => {
+      const link = a.pr ? `https://github.com/${d.repo}/pull/${a.pr}`
+        : a.texto.includes("main") ? `https://github.com/${d.repo}/actions/workflows/ci.yml?query=branch%3Amain`
+        : a.gravedad === "gris" ? `https://github.com/${d.repo}`
+        : `https://github.com/${d.repo}/milestones`;
+      return { orden: ORDEN[a.gravedad], fila: [EMOJI_GRAVEDAD[a.gravedad], nombre(d.repo), a.texto, a.accion, link] };
+    });
+  });
+  items.sort((a, b) => a.orden - b.orden);
+  return [[...ENCABEZADOS.Foco], ...(items.length ? items.map((i) => i.fila) : [["🟢", "", "Nada que atender hoy", "", ""]])];
 }

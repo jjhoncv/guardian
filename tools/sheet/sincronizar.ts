@@ -3,8 +3,9 @@
 // Proyectos = repos del dueño con el topic `guardian-proyecto` (los marca configurar-repo.sh).
 // Uso (CI): node tools/sheet/sincronizar.ts   env: GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA (JSON de la service account)
 import { JWT } from "google-auth-library";
-import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
+import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasFoco, filasPlan, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
 import type { Estado } from "../../scripts/estado.ts";
+import { filasSimulacion, simular } from "../../scripts/simulacion.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
 if (!GITHUB_TOKEN || !DUENO || !SHEET_ID || !SHEET_SA) throw new Error("Faltan GITHUB_TOKEN, DUENO, SHEET_ID o SHEET_SA");
@@ -54,6 +55,7 @@ async function main() {
   const hoja = await sheets<{ sheets: { properties: { title: string } }[] }>("?fields=sheets.properties.title").catch((e) => {
     throw new Error(`La service account ${cuenta.client_email} no puede abrir el Sheet: compártelo con ella como Editor. (${e.message})`);
   });
+  if (process.env.SIMULACION === "1") return escribirSimulacion(hoja.sheets.some((s) => s.properties.title === "Simulación"));
   const faltan = (Object.keys(ENCABEZADOS) as Pestaña[]).filter((p) => !hoja.sheets.some((s) => s.properties.title === p));
   if (faltan.length) await sheets(":batchUpdate", { method: "POST", body: { requests: faltan.map((title) => ({ addSheet: { properties: { title } } })) } });
 
@@ -66,6 +68,7 @@ async function main() {
   const salud = await sheets<{ values?: string[][] }>(`/values/${encodeURIComponent("Salud!A:F")}`);
   const historial = filasSalud(salud.values ?? [], datos, hoy);
   const filas: Record<Pestaña, (string | number)[][]> = {
+    Foco: filasFoco(datos, ahora),
     Resumen: filasResumen(datos, ahora),
     Proyecto: filasProyecto(datos),
     Fases: filasFases(datos),
@@ -135,6 +138,12 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
     const color = d.estado ? (d.estado.salud.pausa ? "gris" : d.estado.salud.color) : "gris";
     requests.push({ repeatCell: { range: { sheetId: resumen, startRowIndex: i + 1, endRowIndex: i + 2 }, cell: { userEnteredFormat: { backgroundColor: FONDO[color] } }, fields: "userEnteredFormat.backgroundColor" } });
   });
+  // Foco: cada fila del color de su gravedad.
+  const foco = id("Foco");
+  filas.Foco.slice(1).forEach((f, i) => {
+    const color = f[0] === "🔴" ? "rojo" : f[0] === "🟡" ? "amarillo" : f[0] === "⚫" ? "gris" : "verde";
+    requests.push({ repeatCell: { range: { sheetId: foco, startRowIndex: i + 1, endRowIndex: i + 2 }, cell: { userEnteredFormat: { backgroundColor: FONDO[color] } }, fields: "userEnteredFormat.backgroundColor" } });
+  });
   // Gráficos: se rehacen en cada corrida con los proyectos de hoy.
   for (const c of hojas.find((h) => h.properties.sheetId === resumen)?.charts ?? []) requests.push({ deleteEmbeddedObject: { objectId: c.chartId } });
   const debajo = datos.length + 3;
@@ -191,6 +200,24 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
     if (!values?.length) requests.push({ deleteSheet: { sheetId: h.properties.sheetId } });
   }
   await sheets(":batchUpdate", { method: "POST", body: { requests } });
+}
+
+/** Simulación (solo Sheet de pruebas): un proyecto inventado en 10 momentos, con el mismo cálculo que el tablero real. */
+async function escribirSimulacion(existe: boolean) {
+  if (!existe) await sheets(":batchUpdate", { method: "POST", body: { requests: [{ addSheet: { properties: { title: "Simulación" } } }] } });
+  const filas = filasSimulacion(simular());
+  await sheets("/values:batchClear", { method: "POST", body: { ranges: ["Simulación!A:Z"] } });
+  await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: [{ range: "Simulación!A1", values: filas }] } });
+  const { sheets: hojas } = await sheets<{ sheets: { properties: { sheetId: number; title: string } }[] }>("?fields=sheets.properties(sheetId,title)");
+  const sheetId = hojas.find((h) => h.properties.title === "Simulación")!.properties.sheetId;
+  const requests: unknown[] = [
+    { updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: 1 } }, fields: "gridProperties.frozenRowCount" } },
+    { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1 }, cell: { userEnteredFormat: { textFormat: { bold: true }, backgroundColor: { red: 0.93, green: 0.93, blue: 0.93 } } }, fields: "userEnteredFormat(textFormat,backgroundColor)" } },
+    ...anchos(filas).map((px, c) => ({ updateDimensionProperties: { range: { sheetId, dimension: "COLUMNS", startIndex: c, endIndex: c + 1 }, properties: { pixelSize: px }, fields: "pixelSize" } })),
+    ...filas.slice(1).map((f, i) => ({ repeatCell: { range: { sheetId, startRowIndex: i + 1, endRowIndex: i + 2 }, cell: { userEnteredFormat: { backgroundColor: FONDO[f[2].split(" ")[1]] ?? FONDO.verde } }, fields: "userEnteredFormat.backgroundColor" } })),
+  ];
+  await sheets(":batchUpdate", { method: "POST", body: { requests } });
+  console.log(`Simulación escrita: ${filas.length - 1} momentos del proyecto-x (datos inventados).`);
 }
 
 await main();

@@ -45,6 +45,7 @@ describe("calcularSalud (sección 11 de PROYECTO.md)", () => {
   it("gris: 14 días sin actividad (propone pausa o cierre consciente), aunque haya atraso", () => {
     const s = calcularSalud({ ...sano, ultimaActividad: "2026-10-06T12:00:00Z", fase: { titulo: "F", vence: "2026-10-01T12:00:00Z" } });
     expect(s.color).toBe("gris");
+    expect(s.diasAtraso).toBe(19);
     expect(s.motivos[0]).toMatch(/14 días sin actividad: ¿pausa o cierre consciente\?/);
   });
 
@@ -61,5 +62,25 @@ describe("calcularSalud (sección 11 de PROYECTO.md)", () => {
   it("el emoji acompaña al color", () => {
     expect(calcularSalud(sano).emoji).toBe("🟢");
     expect(calcularSalud({ ...sano, mainEnRojoDesde: "2026-10-18T00:00:00Z" }).emoji).toBe("🔴");
+  });
+});
+
+describe("alertas: qué atender, con gravedad y qué hacer", () => {
+  it("cada motivo trae su alerta con acción", () => {
+    const s = calcularSalud({ ...sano, fase: { titulo: "Fase 2 — Entrar", vence: "2026-10-15T12:00:00Z" }, prsEsperando: [{ numero: 14, desde: "2026-10-18T08:00:00Z" }] });
+    expect(s.alertas).toEqual([
+      { gravedad: "rojo", texto: "«Fase 2 — Entrar» lleva 5 días de atraso", accion: "Decide: achicar el alcance de la fase o reprogramar su fecha", pr: undefined },
+      { gravedad: "amarillo", texto: "El PR #14 espera tu revisión hace más de 24 h", accion: "Revisa el preview y aprueba o comenta el PR #14", pr: 14 },
+    ]);
+  });
+
+  it("main en rojo y 14 días sin actividad también dicen qué hacer", () => {
+    expect(calcularSalud({ ...sano, mainEnRojoDesde: "2026-10-18T00:00:00Z" }).alertas![0].accion).toBe("Mira el último CI de main: algo se rompió y bloquea a Claude");
+    expect(calcularSalud({ ...sano, ultimaActividad: "2026-10-01T00:00:00Z" }).alertas![0]).toMatchObject({ gravedad: "gris", accion: "Pausa (issue con la etiqueta pausa) o cierre consciente del proyecto" });
+  });
+
+  it("verde o en pausa: sin alertas", () => {
+    expect(calcularSalud(sano).alertas).toEqual([]);
+    expect(calcularSalud({ ...sano, pausa: true, mainEnRojoDesde: "2026-10-10T00:00:00Z" }).alertas).toEqual([]);
   });
 });

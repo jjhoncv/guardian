@@ -8,15 +8,17 @@ on:
   workflow_dispatch:
     inputs:
       destino:
-        description: Sheet a actualizar
+        description: Sheet a actualizar (simulacion = proyecto inventado en el Sheet de pruebas)
         type: choice
-        options: [pruebas, produccion]
+        options: [pruebas, produccion, simulacion]
         default: pruebas
   pull_request:
     paths:
       - tools/sheet/**
       - scripts/hoja.ts
       - scripts/estado.ts
+      - scripts/salud.ts
+      - scripts/simulacion.ts
       - .github/workflows/sheet.yml
 
 permissions:
@@ -44,9 +46,20 @@ jobs:
           node-version: 24
       - run: npm ci --prefix tools/sheet --ignore-scripts
       - name: Sincronizar (${{ env.PRODUCCION == 'true' && 'producción' || 'pruebas' }})
+        if: inputs.destino != 'simulacion'
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DUENO: ${{ github.repository_owner }}
           SHEET_ID: ${{ env.PRODUCCION == 'true' && vars.GUARDIAN_SHEET_PRODUCCION || vars.GUARDIAN_SHEET_PRUEBAS }}
           SHEET_SA: ${{ env.PRODUCCION == 'true' && secrets.GUARDIAN_SHEET_SA_PRODUCCION || secrets.GUARDIAN_SHEET_SA_PRUEBAS }}
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/sheet/sincronizar.ts
+      # Proyecto inventado (datos de prueba): solo en el Sheet de pruebas, en su propia pestaña «Simulación».
+      - name: Simulación (Sheet de pruebas)
+        if: github.event_name == 'pull_request' || inputs.destino == 'simulacion'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DUENO: ${{ github.repository_owner }}
+          SHEET_ID: ${{ vars.GUARDIAN_SHEET_PRUEBAS }}
+          SHEET_SA: ${{ secrets.GUARDIAN_SHEET_SA_PRUEBAS }}
+          SIMULACION: "1"
         run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/sheet/sincronizar.ts

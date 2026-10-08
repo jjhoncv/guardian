@@ -141,7 +141,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | `guardian-release.yml` | release-please → producción con aprobación (el build se guarda 14 días) → smoke test → rollback y alerta si falla |
 | `guardian-tickets.yml` | Un issue por tarea del plan aprobado y una **fecha objetivo por fase** (las semanas de Límites repartidas entre las fases) |
 | `guardian-estado.yml` | En cada CI de `main` y una vez al día: fase actual, % de avance y **salud** (🟢 🟡 🔴 ⚫) → rama `estado` (`estado.json` y badges). No ejecuta código del proyecto (ADR 0026) |
-| `sheet.yml` (solo en el Guardián) | Todos los días: copia el estado de **todos** los proyectos (topic `guardian-proyecto`) a un solo Sheet con las pestañas Proyecto, Fases, Tareas y Salud. Los PRs que tocan la sincronización se prueban contra el Sheet de pruebas |
+| `sheet.yml` (solo en el Guardián) | Todos los días: copia el estado de **todos** los proyectos (topic `guardian-proyecto`) a un solo Sheet: **Foco** (lo que hay que atender, 🔴 → ⚫ → 🟡, con qué hacer), **Resumen** (barras y plan vs. real), Proyecto, Fases, Tareas, Salud. Los PRs que tocan el tablero se prueban en el Sheet de pruebas, que además tiene una **Simulación** con un proyecto inventado en 10 momentos |
 | `guardian-claude.yml` | `@claude` del dueño → Claude desarrolla en la nube y abre el PR en dos niveles; al fusionar un PR toma solo el siguiente ticket de la fase actual (máx. 2 PRs suyos en revisión; no abre la fase siguiente; ADR 0024) |
 
 Cada workflow toma sus scripts y herramientas de **su propia versión** del Guardián (`job.workflow_sha`).
