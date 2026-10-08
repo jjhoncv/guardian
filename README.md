@@ -3,10 +3,13 @@
 [![CI](https://github.com/jjhoncv/guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/jjhoncv/guardian/actions/workflows/ci.yml)
 [![Deploy](https://github.com/jjhoncv/guardian/actions/workflows/deploy.yml/badge.svg)](https://github.com/jjhoncv/guardian/actions/workflows/deploy.yml)
 [![Release](https://github.com/jjhoncv/guardian/actions/workflows/release.yml/badge.svg)](https://github.com/jjhoncv/guardian/actions/workflows/release.yml)
+[![Fase](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jjhoncv/guardian/estado/fase.json)](https://github.com/jjhoncv/guardian/milestones)
+[![Avance](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jjhoncv/guardian/estado/avance.json)](https://github.com/jjhoncv/guardian/actions/workflows/ci.yml)
+[![Salud](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jjhoncv/guardian/estado/salud.json)](https://github.com/jjhoncv/guardian/actions/workflows/estado.yml)
 
 **Tus proyectos terminan.** El Guardián toma una idea, la convierte en un alcance fijo con fases chicas, la pone en producción desde el día 1 y deja que **Claude la desarrolle por tickets** mientras tú solo pruebas y apruebas. Lo que no está en el alcance va al *Parking lot*, no al proyecto.
 
-- **Fase actual:** 4 — Visibilidad (Fase 3 cerrada · v0.9.2 · avance 4 de 6 escenarios, 67 %) · **Novedades:** [`CHANGELOG.md`](CHANGELOG.md)
+- **Fase, avance y salud:** los badges de arriba se actualizan solos en cada merge y una vez al día (🟢 🟡 🔴 ⚫, [qué significa cada color](PROYECTO.md#11-barra-de-salud)) · **Novedades:** [`CHANGELOG.md`](CHANGELOG.md)
 - **Alcance y reglas:** [`PROYECTO.md`](PROYECTO.md) · **Decisiones:** [`docs/decisiones/`](docs/decisiones/README.md) · **Tablero:** [Projects](https://github.com/users/jjhoncv/projects/1)
 - **Staging:** https://staging--guardian-jjhoncv.netlify.app · **Producción:** https://guardian-jjhoncv.netlify.app
 
