@@ -27,9 +27,9 @@
 
 ## Cómo enseñarle a Claude desarrollador
 
+- **Al cerrar un proyecto laboratorio, cosechar:** revisar su Parking lot, su código y sus incidentes, y separar lo que es solo de ese proyecto (se queda ahí) de lo que sirve para cualquiera: lecciones de stack → `guardian-skeleton`; ideas de plataforma → Parking lot del Guardián; cómo trabajar → estas lecciones. _Por qué: el valor de un laboratorio es lo que aprende el Guardián, no el proyecto. Origen: cierre de Vitrina, 2026-10-08._
 - **El consultor arregla rápido, pero cada arreglo deja lección** (commit `(consultor)` + `docs/lecciones.md`). _Por qué: pedirle todo con `@claude` es lento, y sin lección Claude no aprende. Origen: ADR 0025, 2026-10-08._
 - **Criterio, no protocolo:** cada lección con su alcance (siempre / según el tipo: MVP o producto / según el stack). No convertir lo de un MVP en regla universal. _Por qué: el mismo Claude hará proyectos chicos y grandes. Origen: 2026-10-08._
-- **Todo lo aprendido vive en un repo, no en la sesión** (el consultor en el Guardián, Claude desarrollador en su proyecto y en el esqueleto). _Por qué: si se cierra la sesión, no se pierde nada. Origen: 2026-10-08._
 
 ## Cómo trabajar en git
 

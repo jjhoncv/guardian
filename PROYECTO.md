@@ -294,6 +294,10 @@ Escenario: El guardián me avisa
 - **Convenciones del dueño** para construir (estructura de carpetas, nombres, patrones de diseño y de arquitectura) como capa de la guía de Claude, distinta por tipo de proyecto — 2026-10-08 — visión: proyectos grandes hechos a su manera
 - **Métricas de Claude como desarrollador**: commits `(consultor)` por PR, lecciones nuevas, corridas fallidas y costo por ticket — 2026-10-08 — muestran cuándo madura y hasta dónde llega; insumo de la Fase 4 (Visibilidad)
 - **Graduar lecciones a checks**: la primera, «POST sin sesión → rechazado» como prueba obligatoria en toda server action — 2026-10-08 — una regla escrita se olvida; un check en rojo, no
+- **Recetas probadas** para proyectos tipo prueba/MVP (hoja de Google como base de datos; entrar con enlace por correo y sesión firmada; enviar correos), listas para que Claude las reutilice en vez de reescribirlas — 2026-10-08 — en Vitrina se escribieron desde cero (~320 líneas) y con piezas hechas a mano (cliente SMTP, firma JWT) que una receta debería tomar de librerías
+- **Layout base en el esqueleto** (cabecera con el nombre y lugar para la sesión, pie, estilos mínimos y legibles en el celular) — 2026-10-08 — en Vitrina el dueño pidió «header y footer para que se vea presentable»; todo proyecto lo va a querer
+- **Datos separados por ambiente** en los proyectos: `nuevo-proyecto.sh` pregunta si staging usa sus propios datos (otra hoja, otro remitente) y deja las variables de Netlify por contexto — 2026-10-08 — en Vitrina los comentarios de prueba en staging aparecieron en producción
+- **Etapa de medición** después de la última fase: el Guardián guarda la fecha y el criterio de «Cómo sé que funcionó», recuerda revisarlo y abre el issue de decisión (seguir / achicar / parar) — 2026-10-08 — en Vitrina el desarrollo terminó y nada marca cuándo medir; candidato a la Fase 4 o 5
 
 ## 16. Decisiones tomadas
 
