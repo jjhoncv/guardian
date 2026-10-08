@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.2](https://github.com/jjhoncv/guardian/compare/v0.9.1...v0.9.2) (2026-10-08)
+
+
+### Correcciones
+
+* **#134:** el build del release se guarda 14 días ([#135](https://github.com/jjhoncv/guardian/issues/135)) ([8643dec](https://github.com/jjhoncv/guardian/commit/8643decc4eca89d53898bce342e6bfcb2b1f49db))
+* **#136:** [@claude](https://github.com/claude) en un ticket abre el PR solo ([#137](https://github.com/jjhoncv/guardian/issues/137)) ([317f134](https://github.com/jjhoncv/guardian/commit/317f1343faed13f506899e1edd1a13d1b87f7961))
+
 ## [0.9.1](https://github.com/jjhoncv/guardian/compare/v0.9.0...v0.9.1) (2026-10-07)
 
 
