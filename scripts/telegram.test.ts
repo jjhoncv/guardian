@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { enviarTelegram, html, partir } from "./telegram";
+import { enviarFoto, enviarTelegram, html, partir } from "./telegram";
 
 describe("Telegram (Fase 5)", () => {
   it("escapa el texto que viene de GitHub (títulos de tickets) para el modo HTML", () => {
@@ -23,5 +23,17 @@ describe("Telegram (Fase 5)", () => {
     const error = await enviarTelegram("hola", { token: "T0K3N", chat: "42", fetch: fetchFalso }).catch((e: Error) => e.message);
     expect(error).toBe("Telegram no aceptó el mensaje: Forbidden: bot was blocked by the user");
     expect(error).not.toContain("T0K3N");
+  });
+});
+
+describe("enviarFoto", () => {
+  it("manda la imagen con su leyenda al chat del dueño", async () => {
+    const fetchFalso = vi.fn().mockResolvedValue({ json: async () => ({ ok: true }) });
+    await enviarFoto(new Uint8Array([137, 80, 78, 71]), "vitrina: 40 días adelantado", { token: "T0K3N", chat: "42", fetch: fetchFalso });
+    const [url, init] = fetchFalso.mock.calls[0];
+    expect(url).toBe("https://api.telegram.org/botT0K3N/sendPhoto");
+    expect(init.body.get("chat_id")).toBe("42");
+    expect(init.body.get("caption")).toBe("vitrina: 40 días adelantado");
+    expect(init.body.get("photo")).toBeInstanceOf(Blob);
   });
 });

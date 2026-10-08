@@ -15,7 +15,8 @@ on:
   pull_request:
     paths:
       - scripts/telegram.ts
-      - scripts/avisos.ts
+      - scripts/grafico.ts
+      - tools/avisos/**
       - scripts/resumen.ts
       - scripts/proyectos.ts
       - .github/workflows/avisos.yml
@@ -40,6 +41,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
+      - run: npm ci --prefix tools/avisos --ignore-scripts
       # El resumen sale en el horario, a mano y en los PRs que tocan los avisos (marcado como prueba).
       - name: Aviso
         env:
@@ -51,4 +53,4 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           if [ -n "$PR" ]; then export PRUEBA="Prueba del PR #$PR: así te llegará el resumen"; fi
-          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/avisos.ts "$AVISO"
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/avisos/avisos.ts "$AVISO"

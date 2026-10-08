@@ -21,7 +21,7 @@ export function partir(texto: string, max = 4000): string[] {
   return partes;
 }
 
-type Opciones = { token: string; chat: string; fetch?: (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ json(): Promise<unknown> }> };
+type Opciones = { token: string; chat: string; fetch?: (url: string, init: { method: string; headers?: Record<string, string>; body: string | FormData }) => Promise<{ json(): Promise<unknown> }> };
 
 export async function enviarTelegram(texto: string, { token, chat, fetch: f = fetch }: Opciones): Promise<void> {
   for (const parte of partir(texto)) {
@@ -33,6 +33,16 @@ export async function enviarTelegram(texto: string, { token, chat, fetch: f = fe
     // El error nunca incluye la URL: lleva el token.
     if (!r.ok) throw new Error(`Telegram no aceptó el mensaje: ${r.description ?? "sin detalle"}`);
   }
+}
+
+/** Manda una imagen (PNG) con su leyenda, p. ej. la curva de un proyecto vs. su plan original. */
+export async function enviarFoto(png: Uint8Array, leyenda: string, { token, chat, fetch: f = fetch }: Opciones): Promise<void> {
+  const cuerpo = new FormData();
+  cuerpo.set("chat_id", chat);
+  cuerpo.set("caption", leyenda);
+  cuerpo.set("photo", new Blob([new Uint8Array(png)], { type: "image/png" }), "curva.png");
+  const r = (await (await f(`https://api.telegram.org/bot${token}/sendPhoto`, { method: "POST", body: cuerpo })).json()) as { ok: boolean; description?: string };
+  if (!r.ok) throw new Error(`Telegram no aceptó la imagen: ${r.description ?? "sin detalle"}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

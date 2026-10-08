@@ -1,0 +1,9 @@
+{
+  "name": "herramientas-avisos",
+  "private": true,
+  "type": "module",
+  "description": "Avisos del Guardián por Telegram (Fase 5). @resvg/resvg-js convierte el gráfico SVG de la curva a PNG dentro del workflow: los datos no salen a servicios externos.",
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}
