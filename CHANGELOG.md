@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/jjhoncv/guardian/compare/v0.10.0...v0.11.0) (2026-10-08)
+
+
+### Funcionalidades
+
+* **#158:** lo que se aprendió en Vitrina ([#159](https://github.com/jjhoncv/guardian/issues/159)) ([c39bdf7](https://github.com/jjhoncv/guardian/commit/c39bdf797d272b3ee229189f86d255679114b25b))
+
 ## [0.10.0](https://github.com/jjhoncv/guardian/compare/v0.9.2...v0.10.0) (2026-10-08)
 
 
