@@ -10,7 +10,7 @@ export type DatosProyecto = {
 };
 
 export const ENCABEZADOS = {
-  Resumen: ["proyecto", "salud", "avance del proyecto", "fase actual", "fase: trabajo vs. tiempo", "tickets de la fase", "vence", "¿qué lo frena?"],
+  Resumen: ["proyecto", "salud", "avance del proyecto", "", "fase actual", "trabajo de la fase", "", "tiempo de la fase", "", "tickets", "vence", "¿qué lo frena?"],
   Proyecto: ["proyecto", "fase actual", "fecha objetivo", "avance", "salud", "motivo", "actualizado", "repo"],
   Fases: ["proyecto", "fase", "fecha objetivo", "tickets hechos", "estado"],
   Tareas: ["proyecto", "ticket", "título", "fase", "estado", "creado", "cerrado", "link"],
@@ -66,10 +66,19 @@ export function filasSalud(existentes: readonly (readonly string[])[], datos: Da
 
 const DIA = 86_400_000;
 
-/** Barra de 10 bloques: se ve igual en el celular y no necesita fórmulas en el Sheet. */
-export function barra(porcentaje: number): string {
-  const llenos = Math.max(0, Math.min(10, Math.round(porcentaje / 10)));
-  return "█".repeat(llenos) + "░".repeat(10 - llenos);
+/** Colores fijos de las barras (nunca vienen del proyecto). */
+const COLORES = { avance: "#34a853", trabajo: "#4285f4", tiempo: "#9aa0a6", alerta: "#ea4335" } as const;
+
+/** Barra de progreso real: fórmula SPARKLINE armada solo con un entero 0–100 y un color fijo. */
+export function barra(porcentaje: number, tipo: keyof typeof COLORES): string {
+  const n = Math.max(0, Math.min(100, Math.round(porcentaje)));
+  return `=SPARKLINE(${n},{"charttype","bar";"max",100;"color1","${COLORES[tipo]}"})`;
+}
+
+/** Ancho de cada columna (px) según su texto más largo, encabezado incluido. */
+export function anchos(filas: readonly (readonly (string | number)[])[]): number[] {
+  const columnas = Math.max(...filas.map((f) => f.length));
+  return Array.from({ length: columnas }, (_, c) => Math.min(420, Math.max(...filas.map((f) => String(f[c] ?? "").length)) * 8 + 32));
 }
 
 export type FaseEnCurso = {
@@ -108,27 +117,44 @@ export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
 const vence = (dias: number | null) =>
   dias === null ? "sin fecha objetivo" : dias > 1 ? `en ${dias} días` : dias === 1 ? "mañana" : dias === 0 ? "hoy" : `venció hace ${-dias} ${dias === -1 ? "día" : "días"}`;
 
+/** Texto del Resumen. Las columnas de barra (C, F, H) van vacías aquí: las llena `barrasResumen`, aparte. */
 export function filasResumen(datos: DatosProyecto[], hoy: string): string[][] {
   return [
     [...ENCABEZADOS.Resumen],
     ...datos.map((d) => {
       const e = d.estado;
       const f = faseEnCurso(d, hoy);
-      const avanceProyecto = !e?.avance ? "" : e.avance.total === 0 ? "sin escenarios" : `${barra(e.avance.porcentaje)} ${e.avance.porcentaje} % (${e.avance.verdes} de ${e.avance.total})`;
-      const fase = !f ? "" : `trabajo ${barra(f.trabajo)} ${f.trabajo} % · ${f.tiempo === null ? "sin fecha objetivo" : `tiempo ${barra(f.tiempo)} ${Math.min(f.tiempo, 100)} %`}`;
+      const avanceProyecto = !e?.avance ? "" : e.avance.total === 0 ? "sin escenarios" : `${e.avance.porcentaje} % · ${e.avance.verdes} de ${e.avance.total}`;
       const frena = [...(e?.salud.motivos ?? []), ...(f?.alerta ? [f.alerta] : [])].join(" · ") || "—";
       return [
         nombre(d.repo),
         e ? salud(e) : "sin estado todavía",
+        "",
         avanceProyecto,
         f?.titulo ?? "sin fase abierta",
-        fase,
+        "",
+        f ? `${f.trabajo} %` : "",
+        "",
+        !f ? "" : f.tiempo === null ? "sin fecha objetivo" : `${Math.min(f.tiempo, 100)} %`,
         f ? `✅ ${f.hechos} · 👀 ${f.enRevision} · ⬜ ${f.porHacer}` : "",
         f ? vence(f.diasRestantes) : "",
         frena,
       ];
     }),
   ];
+}
+
+/** Barras del Resumen (columnas C, F y H), una fila por proyecto. Solo fórmulas armadas aquí. */
+export function barrasResumen(datos: DatosProyecto[], hoy: string): string[][] {
+  return datos.map((d) => {
+    const f = faseEnCurso(d, hoy);
+    const a = d.estado?.avance;
+    return [
+      a && a.total > 0 ? barra(a.porcentaje, "avance") : "",
+      f ? barra(f.trabajo, "trabajo") : "",
+      f && f.tiempo !== null ? barra(f.tiempo, f.alerta ? "alerta" : "tiempo") : "",
+    ];
+  });
 }
 
 /** Avance (%) por día y proyecto, en columnas: la fuente del gráfico de tendencia. */

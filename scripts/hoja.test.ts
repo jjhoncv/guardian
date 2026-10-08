@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barra, ENCABEZADOS, faseEnCurso, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto } from "./hoja";
+import { anchos, barra, barrasResumen, ENCABEZADOS, faseEnCurso, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto } from "./hoja";
 
 const vitrina: DatosProyecto = {
   repo: "jjhoncv/vitrina",
@@ -75,34 +75,41 @@ describe("Resumen: el tablero para leer en 10 segundos", () => {
       { numero: 10, titulo: "c", fase: "Fase 3 — Comentarios", estado: "abierto", creado: "2026-10-12T00:00:00Z", cerrado: null },
     ],
   };
+  const hoy = "2026-10-20T12:00:00Z";
 
-  it("barra de 10 bloques", () => {
-    expect(barra(67)).toBe("███████░░░");
-    expect(barra(0)).toBe("░░░░░░░░░░");
-    expect(barra(140)).toBe("██████████");
+  it("barra: SPARKLINE de Google Sheets solo con números y colores fijos (nunca texto del proyecto)", () => {
+    expect(barra(67, "avance")).toBe('=SPARKLINE(67,{"charttype","bar";"max",100;"color1","#34a853"})');
+    expect(barra(140, "tiempo")).toBe('=SPARKLINE(100,{"charttype","bar";"max",100;"color1","#9aa0a6"})');
+    expect(barra(-5, "alerta")).toBe('=SPARKLINE(0,{"charttype","bar";"max",100;"color1","#ea4335"})');
   });
 
   it("fase: el tiempo corre desde la fecha objetivo de la fase anterior; avisa si el plazo va más rápido que el trabajo", () => {
-    const f = faseEnCurso(conFase, "2026-10-20T12:00:00Z")!;
+    const f = faseEnCurso(conFase, hoy)!;
     expect(f).toMatchObject({ titulo: "Fase 3 — Comentarios", trabajo: 33, tiempo: 80, diasRestantes: 2, hechos: 1, enRevision: 1, porHacer: 1 });
     expect(f.alerta).toBe("⚠️ el plazo va más rápido que el trabajo");
   });
 
-  it("una fila por proyecto con barras, tickets y qué lo frena", () => {
-    const [enc, fila] = filasResumen([conFase], "2026-10-20T12:00:00Z");
+  it("una fila por proyecto: texto aquí, barras aparte (columnas C, F y H)", () => {
+    const [enc, fila] = filasResumen([conFase], hoy);
     expect(enc).toEqual(ENCABEZADOS.Resumen);
     expect(fila).toEqual([
-      "vitrina", "🟡 amarillo", "████████░░ 80 % (12 de 15)", "Fase 3 — Comentarios",
-      "trabajo ███░░░░░░░ 33 % · tiempo ████████░░ 80 %", "✅ 1 · 👀 1 · ⬜ 1", "en 2 días",
-      "El PR #36 espera tu revisión hace más de 24 h · ⚠️ el plazo va más rápido que el trabajo",
+      "vitrina", "🟡 amarillo", "", "80 % · 12 de 15", "Fase 3 — Comentarios", "", "33 %", "", "80 %",
+      "✅ 1 · 👀 1 · ⬜ 1", "en 2 días", "El PR #36 espera tu revisión hace más de 24 h · ⚠️ el plazo va más rápido que el trabajo",
     ]);
+    expect(barrasResumen([conFase], hoy)).toEqual([[barra(80, "avance"), barra(33, "trabajo"), barra(80, "alerta")]]);
   });
 
   it("sin fecha objetivo no hay barra de tiempo ni alerta; sin estado se dice", () => {
-    const f = faseEnCurso({ ...conFase, milestones: [{ ...conFase.milestones[1], due_on: null }] }, "2026-10-20T12:00:00Z")!;
-    expect(f.tiempo).toBeNull();
-    expect(f.alerta).toBeNull();
-    expect(filasResumen([{ ...sinEstado }], "2026-10-20T12:00:00Z")[1][1]).toBe("sin estado todavía");
+    const sinFecha = { ...conFase, milestones: [{ ...conFase.milestones[1], due_on: null }] };
+    expect(faseEnCurso(sinFecha, hoy)).toMatchObject({ tiempo: null, alerta: null });
+    expect(filasResumen([sinFecha], hoy)[1][8]).toBe("sin fecha objetivo");
+    expect(barrasResumen([sinFecha], hoy)[0][2]).toBe("");
+    expect(filasResumen([sinEstado], hoy)[1][1]).toBe("sin estado todavía");
+    expect(barrasResumen([sinEstado], hoy)).toEqual([["", "", ""]]);
+  });
+
+  it("ancho de columna según el texto más largo, encabezado incluido", () => {
+    expect(anchos([["proyecto", "x"], ["guardian", "un texto bastante más largo"]])).toEqual([96, 248]);
   });
 
   it("tendencia: avance por día y proyecto, en columnas (para el gráfico)", () => {

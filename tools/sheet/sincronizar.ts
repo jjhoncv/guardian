@@ -3,7 +3,7 @@
 // Proyectos = repos del dueño con el topic `guardian-proyecto` (los marca configurar-repo.sh).
 // Uso (CI): node tools/sheet/sincronizar.ts   env: GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA (JSON de la service account)
 import { JWT } from "google-auth-library";
-import { ENCABEZADOS, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
+import { anchos, barrasResumen, ENCABEZADOS, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
 import type { Estado } from "../../scripts/estado.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
@@ -78,6 +78,16 @@ async function main() {
   await sheets("/values:batchClear", { method: "POST", body: { ranges: pestañas.filter((p) => p !== "Salud").map((p) => `${p}!A:Z`) } });
   // RAW: el texto se guarda tal cual, nunca como fórmula.
   await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: pestañas.map((p) => ({ range: `${p}!A1`, values: filas[p] })) } });
+  // Barras de progreso: las únicas celdas que se escriben como fórmula, armadas solo con números y colores fijos.
+  const barras = barrasResumen(datos, ahora);
+  if (barras.length) {
+    const columna = (i: number) => barras.map((b) => [b[i]]);
+    const n = barras.length + 1;
+    await sheets("/values:batchUpdate", {
+      method: "POST",
+      body: { valueInputOption: "USER_ENTERED", data: [{ range: `Resumen!C2:C${n}`, values: columna(0) }, { range: `Resumen!F2:F${n}`, values: columna(1) }, { range: `Resumen!H2:H${n}`, values: columna(2) }] },
+    });
+  }
   await darFormato(filas, datos);
 
   const linea = datos.map((d) => `${d.estado?.salud.emoji ?? "·"} ${d.repo.split("/")[1]}`).join("  ");
@@ -108,8 +118,12 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
     requests.push(
       { updateSheetProperties: { properties: { sheetId, index, gridProperties: { frozenRowCount: 1 } }, fields: "index,gridProperties.frozenRowCount" } },
       { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1 }, cell: { userEnteredFormat: { textFormat: { bold: true }, backgroundColor: { red: 0.93, green: 0.93, blue: 0.93 } } }, fields: "userEnteredFormat(textFormat,backgroundColor)" } },
-      { autoResizeDimensions: { dimensions: { sheetId, dimension: "COLUMNS", startIndex: 0, endIndex: filas[p][0].length } } },
     );
+    // Ancho calculado (el ajuste automático no cuenta el encabezado en negrita); las barras, 140 px.
+    anchos(filas[p]).forEach((px, c) => {
+      const barra = p === "Resumen" && [2, 5, 7].includes(c);
+      requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "COLUMNS", startIndex: c, endIndex: c + 1 }, properties: { pixelSize: barra ? 140 : px }, fields: "pixelSize" } });
+    });
   });
   // Resumen: cada proyecto con el color de su salud (la pausa, en gris).
   const resumen = id("Resumen");
@@ -131,7 +145,7 @@ async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos:
               chartType: "LINE",
               legendPosition: "BOTTOM_LEGEND",
               headerCount: 1,
-              axis: [{ position: "LEFT_AXIS", title: "%" }],
+              axis: [{ position: "LEFT_AXIS", title: "%", viewWindowOptions: { viewWindowMin: 0, viewWindowMax: 100, viewWindowMode: "EXPLICIT" } }],
               domains: [{ domain: rango(0) }],
               series: tendencia[0].slice(1).map((_, i) => ({ series: rango(i + 1), targetAxis: "LEFT_AXIS" })),
             },
