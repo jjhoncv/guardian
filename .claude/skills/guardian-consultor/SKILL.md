@@ -5,7 +5,7 @@ description: Revisión de consultor de un PR de Claude desarrollador en un proye
 
 # /guardian-consultor — revisar un PR de Claude desarrollador
 
-Antes de empezar, lee `docs/consultor.md` (quién es quién, cómo hablarle al dueño, formato de PR).
+Antes de empezar, lee `docs/consultor/manual.md` (quién es quién) y `docs/consultor/lecciones.md` (cómo hablarle al dueño, formato de PR).
 
 ## 1. Contexto
 - `gh pr view <PR> -R <repo>`: ticket (`Closes #N`), escenario, archivos, checks.
