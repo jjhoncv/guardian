@@ -19,6 +19,7 @@ on:
       - scripts/estado.ts
       - scripts/salud.ts
       - scripts/simulacion.ts
+      - scripts/proyectos.ts
       - .github/workflows/sheet.yml
 
 permissions:
