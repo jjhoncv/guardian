@@ -64,7 +64,8 @@ jobs:
         with:
           name: sitio
           include-hidden-files: true
-          retention-days: 1
+          # El dueño puede aprobar producción días después (revisa los fines de semana).
+          retention-days: 14
           path: |
             netlify.toml
             .netlify
