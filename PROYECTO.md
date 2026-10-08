@@ -143,12 +143,12 @@ GitHub es la fuente de verdad de la ejecución; el guardián **copia** el estado
 | Color | Condición |
 |---|---|
 | 🟢 Verde | Tareas al día y pipeline de `main` en verde |
-| 🟡 Amarillo | 1 o 2 días de atraso, o un PR esperando tu revisión más de 24 h |
+| 🟡 Amarillo | 1 a 3 días de atraso de la fase (contra su fecha objetivo), o un PR esperando tu revisión más de 24 h |
 | 🔴 Rojo | Más de 3 días de atraso, o `main` en rojo más de 24 h |
 | ⚫ Gris | 14 días sin actividad → el guardián propone **pausa** o **cierre consciente** |
 
 - La barra mide **si desbloqueas a Claude**, no si tú programaste.
-- **Modo pausa:** para vacaciones o semanas pesadas. La barra se congela, no cae.
+- **Modo pausa:** para vacaciones o semanas pesadas. La barra se congela, no cae. Se activa abriendo un issue con la etiqueta `pausa` (se puede desde el celular) y se quita cerrándolo.
 - **Cierre consciente:** si el proyecto ya no vale la pena, se cierra con una nota de por qué. Nada muere en silencio.
 
 ## 12. Ritmo
