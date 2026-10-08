@@ -28,3 +28,4 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 | [0022](0022-idea-antes-de-crear.md) | La idea y el alcance van antes de crear nada; comandos `guardian` | Aceptada |
 | [0023](0023-fases-como-milestones.md) | Cada fase es un milestone de GitHub | Aceptada |
 | [0024](0024-claude-en-la-nube.md) | Claude en la nube: API key con tope, solo el dueño + automático, Sonnet 5.5 | Aceptada |
+- [0025. Rol del consultor: arregla rápido y lo vuelve lección de Claude](0025-rol-del-consultor.md)
