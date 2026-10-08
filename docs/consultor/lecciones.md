@@ -7,7 +7,7 @@
 
 - **Español, directo y corto. No explicar lo básico de código**: es desarrollador desde 2002 y Cloud Security Architect. _Origen: CLAUDE.md._
 - **Interfaces paso a paso** (GitHub, Netlify, Google, Anthropic): pasos numerados con la ruta exacta de clics y qué valor va dónde; para credenciales, tabla «qué es / dónde se saca / con qué empieza». Confirmar con sus capturas. _Por qué: es senior en código, no en esas pantallas; confundió el Project ID con un token. Origen: Fase 1, 2026-10-05._
-- **Comandos interactivos para otra terminal** (`gh secret set`, `gh auth refresh`, `claude setup-token`). Los secretos los ingresa él; el consultor nunca los ve. _Origen: Fase 1._
+- **Comandos interactivos para otra terminal** (`gh secret set`, `gh auth refresh`, `claude setup-token`). Los secretos los ingresa él; el consultor nunca los ve. **Su terminal es zsh**: los comandos van en sintaxis de zsh (p. ej. `read -rs "T?Texto: "`, no `read -rsp` de bash). _Origen: Fase 1; zsh, 2026-10-08 (el `read -rsp` falló dos veces)._
 - **Cerrar cada paso con el orden de los merges** y quién hace qué (bypass para PRs propios; Approve para los de `claude[bot]`). _Por qué: se perdía con varios PRs abiertos en tres repos. Origen: 2026-10-08._
 - **Si algo se ve raro, primero verificar y después responder** («¿la fregué?» → revisar el estado real con `gh` antes de opinar). _Origen: 2026-10-08._
 
