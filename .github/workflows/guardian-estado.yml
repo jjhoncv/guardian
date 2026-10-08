@@ -1,0 +1,67 @@
+# Guardián · Estado reutilizable (ADR 0026): fase actual, % de avance y salud del proyecto → rama `estado`
+# (estado.json y los badges de shields.io del README). No ejecuta código del proyecto: solo lee GitHub y
+# el avance que dejó el CI de main.
+name: Guardián · Estado
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  estado:
+    name: estado del proyecto
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # solo para la rama `estado`; `main` está protegida por el ruleset
+      actions: read
+      issues: read
+      pull-requests: read
+    concurrency:
+      group: guardian-estado
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: scripts
+          path: .guardian
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      # Avance del CI de main que disparó esta corrida (en la corrida diaria se usa el último conocido).
+      - if: github.event_name == 'workflow_run'
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v7
+        with:
+          name: avance
+          path: avance
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Rama estado
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if git clone --quiet --depth 1 --branch estado "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" estado 2>/dev/null; then
+            echo "Rama estado encontrada."
+          else
+            git init --quiet -b estado estado
+            git -C estado remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          fi
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian/scripts/estado.ts estado avance/avance.json
+      - name: Guardar
+        working-directory: estado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add estado.json fase.json avance.json salud.json
+          if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
+          git commit --quiet -m "estado: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push --quiet origin estado

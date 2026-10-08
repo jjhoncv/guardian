@@ -1,0 +1,23 @@
+# Estado del propio Guardián: en cada CI de main y una vez al día (ADR 0026).
+name: Estado
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "0 11 * * *" # 6:00 en Lima
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  estado:
+    permissions:
+      contents: write
+      actions: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/guardian-estado.yml

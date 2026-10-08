@@ -1,7 +1,8 @@
 // Avance del proyecto = % de escenarios BDD del alcance en verde (PROYECTO.md, sección 5).
 // Lee el reporte JSON de Playwright; los escenarios @plantilla no cuentan.
 // Uso: node scripts/avance.ts test-results/resultados.json  (escribe en $GITHUB_STEP_SUMMARY si existe)
-import { appendFileSync, readFileSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 type Spec = { title: string; tags?: string[]; tests: { status?: string }[] };
@@ -38,7 +39,11 @@ export function resumenMarkdown(a: Avance): string {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const archivo = process.argv[2] ?? "test-results/resultados.json";
-  const md = resumenMarkdown(calcularAvance(JSON.parse(readFileSync(archivo, "utf8"))));
+  const avance = calcularAvance(JSON.parse(readFileSync(archivo, "utf8")));
+  const md = resumenMarkdown(avance);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+  // Para el workflow de estado (ADR 0026): solo los números, junto al reporte.
+  const { verdes, total, porcentaje } = avance;
+  writeFileSync(join(dirname(archivo), "avance.json"), JSON.stringify({ verdes, total, porcentaje }) + "\n");
   process.stdout.write(md);
 }
