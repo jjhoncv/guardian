@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0](https://github.com/jjhoncv/guardian/compare/v0.13.0...v0.14.0) (2026-10-08)
+
+
+### Funcionalidades
+
+* **#166:** Sheet del Guardián con todos los proyectos ([#178](https://github.com/jjhoncv/guardian/issues/178)) ([a60a9be](https://github.com/jjhoncv/guardian/commit/a60a9be8ee276487c639e6aadc1ae76d5c6ecdb6))
+
+
+### Correcciones
+
+* **#176:** avance del estado cuando el proyecto no tiene escenarios E2E ([#177](https://github.com/jjhoncv/guardian/issues/177)) ([cc9ca45](https://github.com/jjhoncv/guardian/commit/cc9ca457c3442defa8765a25b8fef07c92807ea8))
+
 ## [0.13.0](https://github.com/jjhoncv/guardian/compare/v0.12.0...v0.13.0) (2026-10-08)
 
 
