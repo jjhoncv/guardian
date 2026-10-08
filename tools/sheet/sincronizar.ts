@@ -3,7 +3,7 @@
 // Proyectos = repos del dueño con el topic `guardian-proyecto` (los marca configurar-repo.sh).
 // Uso (CI): node tools/sheet/sincronizar.ts   env: GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA (JSON de la service account)
 import { JWT } from "google-auth-library";
-import { ENCABEZADOS, filasFases, filasProyecto, filasSalud, filasTareas, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
+import { ENCABEZADOS, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
 import type { Estado } from "../../scripts/estado.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
@@ -61,19 +61,24 @@ async function main() {
   const datos = await Promise.all(items.map((r) => datosDe(r.full_name)));
   datos.sort((a, b) => a.repo.localeCompare(b.repo));
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const ahora = new Date().toISOString();
+  const hoy = ahora.slice(0, 10);
   const salud = await sheets<{ values?: string[][] }>(`/values/${encodeURIComponent("Salud!A:F")}`);
-  const filas: Record<Pestaña, string[][]> = {
+  const historial = filasSalud(salud.values ?? [], datos, hoy);
+  const filas: Record<Pestaña, (string | number)[][]> = {
+    Resumen: filasResumen(datos, ahora),
     Proyecto: filasProyecto(datos),
     Fases: filasFases(datos),
     Tareas: filasTareas(datos),
-    Salud: filasSalud(salud.values ?? [], datos, hoy),
+    Salud: historial,
+    Tendencia: filasTendencia(historial),
   };
   const pestañas = Object.keys(filas) as Pestaña[];
-  // Proyecto, Fases y Tareas pueden achicarse: se limpian. Salud solo crece: no se borra (si algo falla, el historial queda).
+  // Todo se reescribe salvo Salud, que solo crece: no se borra (si algo falla, el historial queda).
   await sheets("/values:batchClear", { method: "POST", body: { ranges: pestañas.filter((p) => p !== "Salud").map((p) => `${p}!A:Z`) } });
   // RAW: el texto se guarda tal cual, nunca como fórmula.
   await sheets("/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: pestañas.map((p) => ({ range: `${p}!A1`, values: filas[p] })) } });
+  await darFormato(filas, datos);
 
   const linea = datos.map((d) => `${d.estado?.salud.emoji ?? "·"} ${d.repo.split("/")[1]}`).join("  ");
   console.log(`Sheet actualizado (${datos.length} proyectos): ${linea}`);
@@ -81,6 +86,67 @@ async function main() {
     const { appendFileSync } = await import("node:fs");
     appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Sheet del Guardián\n\n${datos.length} proyectos: ${linea}\n`);
   }
+}
+
+// Formato del tablero: Resumen primero, encabezados fijos, filas del color de su salud, columnas a su ancho
+// y el gráfico de tendencia. Solo formato: los valores ya se escribieron como texto.
+const FONDO: Record<string, { red: number; green: number; blue: number }> = {
+  verde: { red: 0.85, green: 0.95, blue: 0.85 },
+  amarillo: { red: 1, green: 0.95, blue: 0.8 },
+  rojo: { red: 0.96, green: 0.8, blue: 0.8 },
+  gris: { red: 0.88, green: 0.88, blue: 0.88 },
+};
+const POR_DEFECTO = ["Sheet1", "Hoja 1", "Hoja1"];
+
+async function darFormato(filas: Record<Pestaña, (string | number)[][]>, datos: DatosProyecto[]) {
+  type Hoja = { properties: { sheetId: number; title: string }; charts?: { chartId: number }[] };
+  const { sheets: hojas } = await sheets<{ sheets: Hoja[] }>("?fields=sheets(properties(sheetId,title),charts(chartId))");
+  const id = (t: Pestaña) => hojas.find((h) => h.properties.title === t)!.properties.sheetId;
+  const requests: unknown[] = [];
+  (Object.keys(filas) as Pestaña[]).forEach((p, index) => {
+    const sheetId = id(p);
+    requests.push(
+      { updateSheetProperties: { properties: { sheetId, index, gridProperties: { frozenRowCount: 1 } }, fields: "index,gridProperties.frozenRowCount" } },
+      { repeatCell: { range: { sheetId, startRowIndex: 0, endRowIndex: 1 }, cell: { userEnteredFormat: { textFormat: { bold: true }, backgroundColor: { red: 0.93, green: 0.93, blue: 0.93 } } }, fields: "userEnteredFormat(textFormat,backgroundColor)" } },
+      { autoResizeDimensions: { dimensions: { sheetId, dimension: "COLUMNS", startIndex: 0, endIndex: filas[p][0].length } } },
+    );
+  });
+  // Resumen: cada proyecto con el color de su salud (la pausa, en gris).
+  const resumen = id("Resumen");
+  datos.forEach((d, i) => {
+    const color = d.estado ? (d.estado.salud.pausa ? "gris" : d.estado.salud.color) : "gris";
+    requests.push({ repeatCell: { range: { sheetId: resumen, startRowIndex: i + 1, endRowIndex: i + 2 }, cell: { userEnteredFormat: { backgroundColor: FONDO[color] } }, fields: "userEnteredFormat.backgroundColor" } });
+  });
+  // Gráfico de tendencia: se rehace en cada corrida con los proyectos de hoy.
+  for (const c of hojas.find((h) => h.properties.sheetId === resumen)?.charts ?? []) requests.push({ deleteEmbeddedObject: { objectId: c.chartId } });
+  const tendencia = filas.Tendencia;
+  if (tendencia.length > 1 && tendencia[0].length > 1) {
+    const rango = (columna: number) => ({ sourceRange: { sources: [{ sheetId: id("Tendencia"), startRowIndex: 0, endRowIndex: tendencia.length, startColumnIndex: columna, endColumnIndex: columna + 1 }] } });
+    requests.push({
+      addChart: {
+        chart: {
+          spec: {
+            title: "Avance por día (% de escenarios en verde)",
+            basicChart: {
+              chartType: "LINE",
+              legendPosition: "BOTTOM_LEGEND",
+              headerCount: 1,
+              axis: [{ position: "LEFT_AXIS", title: "%" }],
+              domains: [{ domain: rango(0) }],
+              series: tendencia[0].slice(1).map((_, i) => ({ series: rango(i + 1), targetAxis: "LEFT_AXIS" })),
+            },
+          },
+          position: { overlayPosition: { anchorCell: { sheetId: resumen, rowIndex: datos.length + 3, columnIndex: 0 } } },
+        },
+      },
+    });
+  }
+  // La pestaña vacía que Google crea por defecto se quita (solo si está vacía).
+  for (const h of hojas.filter((h) => POR_DEFECTO.includes(h.properties.title))) {
+    const { values } = await sheets<{ values?: unknown[][] }>(`/values/${encodeURIComponent(`${h.properties.title}!A1:Z20`)}`);
+    if (!values?.length) requests.push({ deleteSheet: { sheetId: h.properties.sheetId } });
+  }
+  await sheets(":batchUpdate", { method: "POST", body: { requests } });
 }
 
 await main();

@@ -5,15 +5,17 @@ import type { Estado } from "./estado.ts";
 export type DatosProyecto = {
   repo: string;
   estado: Estado | null;
-  milestones: { title: string; due_on: string | null; open_issues: number; closed_issues: number; state: string }[];
+  milestones: { title: string; due_on: string | null; open_issues: number; closed_issues: number; state: string; created_at: string }[];
   tareas: { numero: number; titulo: string; fase: string; estado: "abierto" | "en revisión" | "hecho"; creado: string; cerrado: string | null }[];
 };
 
 export const ENCABEZADOS = {
+  Resumen: ["proyecto", "salud", "avance del proyecto", "fase actual", "fase: trabajo vs. tiempo", "tickets de la fase", "vence", "¿qué lo frena?"],
   Proyecto: ["proyecto", "fase actual", "fecha objetivo", "avance", "salud", "motivo", "actualizado", "repo"],
   Fases: ["proyecto", "fase", "fecha objetivo", "tickets hechos", "estado"],
   Tareas: ["proyecto", "ticket", "título", "fase", "estado", "creado", "cerrado", "link"],
   Salud: ["fecha", "proyecto", "salud", "avance", "días de atraso", "motivo"],
+  Tendencia: ["fecha"],
 } as const satisfies Record<string, readonly string[]>;
 export type Pestaña = keyof typeof ENCABEZADOS;
 
@@ -60,4 +62,86 @@ export function filasSalud(existentes: readonly (readonly string[])[], datos: Da
   const historial = existentes.slice(1).map((f) => [...f]).filter((f) => !(f[0] === hoy && hoyDe.has(f[1])));
   const nuevas = conEstado.map(({ repo, estado: e }) => [hoy, nombre(repo), salud(e!), e!.avance ? `${e!.avance.porcentaje} %` : "", String(e!.salud.diasAtraso), e!.salud.motivos.join(" · ")]);
   return [[...ENCABEZADOS.Salud], ...historial, ...nuevas];
+}
+
+const DIA = 86_400_000;
+
+/** Barra de 10 bloques: se ve igual en el celular y no necesita fórmulas en el Sheet. */
+export function barra(porcentaje: number): string {
+  const llenos = Math.max(0, Math.min(10, Math.round(porcentaje / 10)));
+  return "█".repeat(llenos) + "░".repeat(10 - llenos);
+}
+
+export type FaseEnCurso = {
+  titulo: string;
+  trabajo: number;
+  tiempo: number | null;
+  diasRestantes: number | null;
+  hechos: number;
+  enRevision: number;
+  porHacer: number;
+  alerta: string | null;
+};
+
+/** La fase abierta de número más bajo: % de tickets hechos vs. % del plazo gastado (desde la fecha de la fase anterior). */
+export function faseEnCurso(d: DatosProyecto, hoy: string): FaseEnCurso | null {
+  const fases = d.milestones.filter((m) => /^Fase \d+/.test(m.title)).sort((a, b) => numeroFase(a.title) - numeroFase(b.title));
+  const i = fases.findIndex((m) => m.state === "open");
+  if (i < 0) return null;
+  const f = fases[i];
+  const tareas = d.tareas.filter((t) => t.fase === f.title);
+  const hechos = tareas.filter((t) => t.estado === "hecho").length;
+  const enRevision = tareas.filter((t) => t.estado === "en revisión").length;
+  const trabajo = tareas.length ? Math.round((hechos / tareas.length) * 100) : 0;
+  let tiempo: number | null = null;
+  let diasRestantes: number | null = null;
+  if (f.due_on) {
+    const inicio = Date.parse(fases[i - 1]?.due_on ?? f.created_at);
+    const fin = Date.parse(f.due_on);
+    tiempo = Math.max(0, Math.round(((Date.parse(hoy) - inicio) / Math.max(fin - inicio, DIA)) * 100));
+    diasRestantes = Math.ceil((fin - Date.parse(hoy)) / DIA);
+  }
+  const alerta = tiempo !== null && tiempo - trabajo >= 20 ? "⚠️ el plazo va más rápido que el trabajo" : null;
+  return { titulo: f.title, trabajo, tiempo, diasRestantes, hechos, enRevision, porHacer: tareas.length - hechos - enRevision, alerta };
+}
+
+const vence = (dias: number | null) =>
+  dias === null ? "sin fecha objetivo" : dias > 1 ? `en ${dias} días` : dias === 1 ? "mañana" : dias === 0 ? "hoy" : `venció hace ${-dias} ${dias === -1 ? "día" : "días"}`;
+
+export function filasResumen(datos: DatosProyecto[], hoy: string): string[][] {
+  return [
+    [...ENCABEZADOS.Resumen],
+    ...datos.map((d) => {
+      const e = d.estado;
+      const f = faseEnCurso(d, hoy);
+      const avanceProyecto = !e?.avance ? "" : e.avance.total === 0 ? "sin escenarios" : `${barra(e.avance.porcentaje)} ${e.avance.porcentaje} % (${e.avance.verdes} de ${e.avance.total})`;
+      const fase = !f ? "" : `trabajo ${barra(f.trabajo)} ${f.trabajo} % · ${f.tiempo === null ? "sin fecha objetivo" : `tiempo ${barra(f.tiempo)} ${Math.min(f.tiempo, 100)} %`}`;
+      const frena = [...(e?.salud.motivos ?? []), ...(f?.alerta ? [f.alerta] : [])].join(" · ") || "—";
+      return [
+        nombre(d.repo),
+        e ? salud(e) : "sin estado todavía",
+        avanceProyecto,
+        f?.titulo ?? "sin fase abierta",
+        fase,
+        f ? `✅ ${f.hechos} · 👀 ${f.enRevision} · ⬜ ${f.porHacer}` : "",
+        f ? vence(f.diasRestantes) : "",
+        frena,
+      ];
+    }),
+  ];
+}
+
+/** Avance (%) por día y proyecto, en columnas: la fuente del gráfico de tendencia. */
+export function filasTendencia(salud: readonly (readonly string[])[]): (string | number)[][] {
+  const filas = salud.slice(1).filter((f) => f[0] && f[1]);
+  const proyectos = [...new Set(filas.map((f) => f[1]))].sort();
+  const fechas = [...new Set(filas.map((f) => f[0]))].sort();
+  const valor = new Map(filas.map((f) => [`${f[0]}|${f[1]}`, Number.parseInt(f[3] ?? "", 10)]));
+  return [
+    ["fecha", ...proyectos],
+    ...fechas.map((fecha) => [fecha, ...proyectos.map((p) => {
+      const v = valor.get(`${fecha}|${p}`);
+      return v === undefined || Number.isNaN(v) ? "" : v;
+    })]),
+  ];
 }

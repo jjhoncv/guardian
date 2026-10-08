@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ENCABEZADOS, filasFases, filasProyecto, filasSalud, filasTareas, type DatosProyecto } from "./hoja";
+import { barra, ENCABEZADOS, faseEnCurso, filasFases, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto } from "./hoja";
 
 const vitrina: DatosProyecto = {
   repo: "jjhoncv/vitrina",
@@ -11,9 +11,9 @@ const vitrina: DatosProyecto = {
     actualizado: "2026-10-20T11:00:05Z",
   },
   milestones: [
-    { title: "Fase 1 — Catálogo", due_on: "2026-10-19T12:00:00Z", open_issues: 0, closed_issues: 3, state: "closed" },
-    { title: "Fase 3 — Comentarios", due_on: "2026-11-16T12:00:00Z", open_issues: 1, closed_issues: 1, state: "open" },
-    { title: "Otro", due_on: null, open_issues: 0, closed_issues: 0, state: "open" },
+    { title: "Fase 1 — Catálogo", due_on: "2026-10-19T12:00:00Z", open_issues: 0, closed_issues: 3, state: "closed", created_at: "2026-10-05T00:00:00Z" },
+    { title: "Fase 3 — Comentarios", due_on: "2026-11-16T12:00:00Z", open_issues: 1, closed_issues: 1, state: "open", created_at: "2026-10-05T00:00:00Z" },
+    { title: "Otro", due_on: null, open_issues: 0, closed_issues: 0, state: "open", created_at: "2026-10-05T00:00:00Z" },
   ],
   tareas: [
     { numero: 9, titulo: "Guardar comentario", fase: "Fase 3 — Comentarios", estado: "en revisión", creado: "2026-10-08T10:00:00Z", cerrado: null },
@@ -59,5 +59,58 @@ describe("hoja del Guardián (ADR 0026): una fila por proyecto, espejo de GitHub
   it("la pausa se ve en Proyecto y en Salud", () => {
     const pausado = { ...vitrina, estado: { ...vitrina.estado!, salud: { ...vitrina.estado!.salud, pausa: true, motivos: ["En pausa: la barra está congelada"] } } };
     expect(filasProyecto([pausado])[1][4]).toBe("⏸️ en pausa (🟡 amarillo)");
+  });
+});
+
+describe("Resumen: el tablero para leer en 10 segundos", () => {
+  const conFase: DatosProyecto = {
+    ...vitrina,
+    milestones: [
+      { title: "Fase 2 — Entrar", due_on: "2026-10-12T12:00:00Z", open_issues: 0, closed_issues: 3, state: "closed", created_at: "2026-10-01T00:00:00Z" },
+      { title: "Fase 3 — Comentarios", due_on: "2026-10-22T12:00:00Z", open_issues: 2, closed_issues: 1, state: "open", created_at: "2026-10-01T00:00:00Z" },
+    ],
+    tareas: [
+      { numero: 8, titulo: "a", fase: "Fase 3 — Comentarios", estado: "hecho", creado: "2026-10-12T00:00:00Z", cerrado: "2026-10-13T00:00:00Z" },
+      { numero: 9, titulo: "b", fase: "Fase 3 — Comentarios", estado: "en revisión", creado: "2026-10-12T00:00:00Z", cerrado: null },
+      { numero: 10, titulo: "c", fase: "Fase 3 — Comentarios", estado: "abierto", creado: "2026-10-12T00:00:00Z", cerrado: null },
+    ],
+  };
+
+  it("barra de 10 bloques", () => {
+    expect(barra(67)).toBe("███████░░░");
+    expect(barra(0)).toBe("░░░░░░░░░░");
+    expect(barra(140)).toBe("██████████");
+  });
+
+  it("fase: el tiempo corre desde la fecha objetivo de la fase anterior; avisa si el plazo va más rápido que el trabajo", () => {
+    const f = faseEnCurso(conFase, "2026-10-20T12:00:00Z")!;
+    expect(f).toMatchObject({ titulo: "Fase 3 — Comentarios", trabajo: 33, tiempo: 80, diasRestantes: 2, hechos: 1, enRevision: 1, porHacer: 1 });
+    expect(f.alerta).toBe("⚠️ el plazo va más rápido que el trabajo");
+  });
+
+  it("una fila por proyecto con barras, tickets y qué lo frena", () => {
+    const [enc, fila] = filasResumen([conFase], "2026-10-20T12:00:00Z");
+    expect(enc).toEqual(ENCABEZADOS.Resumen);
+    expect(fila).toEqual([
+      "vitrina", "🟡 amarillo", "████████░░ 80 % (12 de 15)", "Fase 3 — Comentarios",
+      "trabajo ███░░░░░░░ 33 % · tiempo ████████░░ 80 %", "✅ 1 · 👀 1 · ⬜ 1", "en 2 días",
+      "El PR #36 espera tu revisión hace más de 24 h · ⚠️ el plazo va más rápido que el trabajo",
+    ]);
+  });
+
+  it("sin fecha objetivo no hay barra de tiempo ni alerta; sin estado se dice", () => {
+    const f = faseEnCurso({ ...conFase, milestones: [{ ...conFase.milestones[1], due_on: null }] }, "2026-10-20T12:00:00Z")!;
+    expect(f.tiempo).toBeNull();
+    expect(f.alerta).toBeNull();
+    expect(filasResumen([{ ...sinEstado }], "2026-10-20T12:00:00Z")[1][1]).toBe("sin estado todavía");
+  });
+
+  it("tendencia: avance por día y proyecto, en columnas (para el gráfico)", () => {
+    const salud = [[...ENCABEZADOS.Salud], ["2026-10-19", "vitrina", "🟢", "70 %", "0", ""], ["2026-10-19", "guardian", "🟢", "60 %", "0", ""], ["2026-10-20", "vitrina", "🟡", "80 %", "0", ""]];
+    expect(filasTendencia(salud)).toEqual([
+      ["fecha", "guardian", "vitrina"],
+      ["2026-10-19", 60, 70],
+      ["2026-10-20", "", 80],
+    ]);
   });
 });
