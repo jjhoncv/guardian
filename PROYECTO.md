@@ -282,6 +282,7 @@ Escenario: El guardián me avisa
 - Al arrancar, Claude **comenta en el ticket** «Estoy trabajando en esto» con el link al run (y el tablero lo pasa a *En curso*) — 2026-10-06 — mientras Claude trabaja no se ve nada en el tablero ni en el issue hasta que abre el PR
 - Claude puede **proponer una dependencia nueva** (`npm install <paquete>`) que el dueño aprueba en el PR, con Dependabot y lockfile — 2026-10-08 — hoy solo tiene `npm ci` (bien contra la cadena de suministro), y en Vitrina #20 escribió su propio cliente SMTP en vez de usar nodemailer
 - **Revisión automática de cada PR de Claude**: un segundo pase de Claude (job aparte, sin permiso de escritura) que comenta hallazgos de seguridad y de alcance antes de que el dueño apruebe — 2026-10-08 — en Vitrina, los problemas de #20 (host header injection) y #24 (token en la URL) los encontró el Claude local del Guardián, que en el uso real no está; candidato a adelantarse por ser calidad de E3
+- Cuando una fase queda sin tickets, el Guardián **abre un issue** «Fase N completa: revísala y ciérrala» (con el checklist del paso 7) — 2026-10-08 — hoy el aviso solo está en el resumen del run de Actions; en Vitrina el dueño no supo dónde verlo
 - Reglas en el `CLAUDE.md` del esqueleto para responder a `@claude` en un PR: si lo pedido está dentro del ticket, lo arregla en el mismo PR; si es una idea nueva, no la implementa y propone la línea para el Parking lot del proyecto — 2026-10-08 — así el dueño conversa solo con Claude de la nube sin perder el alcance
 
 ## 16. Decisiones tomadas
