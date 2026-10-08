@@ -284,6 +284,7 @@ Escenario: El guardián me avisa
 - **Revisión automática de cada PR de Claude**: un segundo pase de Claude (job aparte, sin permiso de escritura) que comenta hallazgos de seguridad y de alcance antes de que el dueño apruebe — 2026-10-08 — en Vitrina, los problemas de #20 (host header injection) y #24 (token en la URL) los encontró el Claude local del Guardián, que en el uso real no está; candidato a adelantarse por ser calidad de E3
 - Cuando una fase queda sin tickets, el Guardián **abre un issue** «Fase N completa: revísala y ciérrala» (con el checklist del paso 7) — 2026-10-08 — hoy el aviso solo está en el resumen del run de Actions; en Vitrina el dueño no supo dónde verlo
 - Reglas en el `CLAUDE.md` del esqueleto para responder a `@claude` en un PR: si lo pedido está dentro del ticket, lo arregla en el mismo PR; si es una idea nueva, no la implementa y propone la línea para el Parking lot del proyecto — 2026-10-08 — así el dueño conversa solo con Claude de la nube sin perder el alcance
+- **Dependencias entre tareas** del plan: campo `depende` en `plan/tareas.json` (lo llena `/guardian-planificar`) y el selector salta los tickets cuya dependencia no está fusionada — 2026-10-08 — en Vitrina, Claude tomó dos veces el #7 (Salir) y se detuvo porque necesita la sesión del #6, aún en revisión; dos corridas gastadas
 
 ## 16. Decisiones tomadas
 
