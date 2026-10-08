@@ -51,7 +51,7 @@ El título (`# <Nombre>`) es el nombre del proyecto: es lo que mostrará la pág
 
 Si el proyecto necesita cuentas externas (Google, correo, pagos…), anótalas en **Límites** para que el dueño sepa qué le van a pedir.
 
-En **Límites** escribe siempre la línea `- **Tipo:** prueba / MVP rápido` o `- **Tipo:** producto` (según el paso 2). Claude la lee antes de cada ticket para decidir cuánto construir (`docs/lecciones.md` del proyecto).
+En **Límites** escribe siempre la línea `- **Semanas:** N` (las semanas disponibles en total; el Guardián las reparte en una fecha objetivo por fase) y la línea `- **Tipo:** prueba / MVP rápido` o `- **Tipo:** producto` (según el paso 2). Claude la lee antes de cada ticket para decidir cuánto construir (`docs/lecciones.md` del proyecto).
 
 ## Paso 5 — Mostrar y esperar
 
