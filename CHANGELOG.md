@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/jjhoncv/guardian/compare/v0.9.2...v0.10.0) (2026-10-08)
+
+
+### Funcionalidades
+
+* **#153:** manual y lecciones del consultor en el repo y /guardian-consultor ([#154](https://github.com/jjhoncv/guardian/issues/154)) ([bdd0f10](https://github.com/jjhoncv/guardian/commit/bdd0f10408d94ab47f0a419fdbc9b1e458b44ba3))
+* **#155:** README claro con ejemplo de punta a punta ([#156](https://github.com/jjhoncv/guardian/issues/156)) ([67bd400](https://github.com/jjhoncv/guardian/commit/67bd400475e777b13ba7f6b456ff1f9d2c97fa08))
+
+
+### Correcciones
+
+* **#151:** Claude escribe el PR en dos niveles ([#152](https://github.com/jjhoncv/guardian/issues/152)) ([1b6f16c](https://github.com/jjhoncv/guardian/commit/1b6f16c7b2fd1f5b22e6efeadfdf02cabe26a709))
+
 ## [0.9.2](https://github.com/jjhoncv/guardian/compare/v0.9.1...v0.9.2) (2026-10-08)
 
 
