@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { badges, faseActual, leerAvance, mainEnRojoDesde, type Estado } from "./estado";
+import { avanceDeProyecto, badges, faseActual, leerAvance, mainEnRojoDesde, type Estado } from "./estado";
 
 describe("faseActual", () => {
   it("es el milestone «Fase N» abierto de número más bajo, con su fecha objetivo", () => {
@@ -63,5 +63,20 @@ describe("badges (shields.io endpoint)", () => {
     expect(b.fase.message).toBe("sin fase abierta");
     expect(b.avance.message).toBe("sin datos");
     expect(b.salud.message).toBe("⏸️ en pausa");
+  });
+});
+
+describe("avanceDeProyecto (respaldo cuando el CI no tiene escenarios, ADR 0020)", () => {
+  it("lee «N de M escenarios en verde (P %)» de PROYECTO.md", () => {
+    expect(avanceDeProyecto("texto\n\n**4 de 6 escenarios en verde (67 %).**\n")).toEqual({ verdes: 4, total: 6, porcentaje: 67 });
+  });
+
+  it("sin esa línea no hay avance", () => {
+    expect(avanceDeProyecto("# X\n\nnada")).toBeNull();
+  });
+
+  it("el badge de un avance sin escenarios dice «sin escenarios»", () => {
+    const e = { proyecto: "x", fase: null, avance: { verdes: 0, total: 0, porcentaje: 0 }, salud: { color: "verde" as const, emoji: "🟢", motivos: [], diasAtraso: 0, pausa: false }, actualizado: "" };
+    expect(badges(e).avance.message).toBe("sin escenarios");
   });
 });

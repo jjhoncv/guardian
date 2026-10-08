@@ -45,13 +45,19 @@ export function leerAvance(texto: string): Avance | null {
   }
 }
 
+/** Respaldo cuando el CI no tiene escenarios: la línea «N de M escenarios en verde (P %)» de PROYECTO.md (ADR 0020). */
+export function avanceDeProyecto(proyecto: string): Avance | null {
+  const m = proyecto.match(/(\d+) de (\d+) escenarios en verde \((\d+) %\)/);
+  return m ? { verdes: Number(m[1]), total: Number(m[2]), porcentaje: Number(m[3]) } : null;
+}
+
 const COLOR_SHIELDS: Record<Color, string> = { verde: "brightgreen", amarillo: "yellow", rojo: "red", gris: "lightgrey" };
 
 export function badges(e: Estado): Record<"fase" | "avance" | "salud", Badge> {
   const badge = (label: string, message: string, color: string): Badge => ({ schemaVersion: 1, label, message, color });
   return {
     fase: badge("fase", e.fase ? e.fase.titulo.replace(/^Fase\s+/, "") : "sin fase abierta", "blue"),
-    avance: badge("avance", e.avance ? `${e.avance.verdes} de ${e.avance.total} · ${e.avance.porcentaje} %` : "sin datos", "blue"),
+    avance: badge("avance", !e.avance ? "sin datos" : e.avance.total === 0 ? "sin escenarios" : `${e.avance.verdes} de ${e.avance.total} · ${e.avance.porcentaje} %`, "blue"),
     salud: e.salud.pausa ? badge("salud", "⏸️ en pausa", "lightgrey") : badge("salud", `${e.salud.emoji} ${e.salud.color}`, COLOR_SHIELDS[e.salud.color]),
   };
 }
@@ -69,7 +75,12 @@ async function main() {
   const archivoAvance = process.argv[3];
   const anterior: Partial<Estado> = existsSync(join(salida, "estado.json")) ? JSON.parse(readFileSync(join(salida, "estado.json"), "utf8")) : {};
   // Sin un avance nuevo (corrida diaria), se mantiene el último conocido.
-  const avance = archivoAvance && existsSync(archivoAvance) ? leerAvance(readFileSync(archivoAvance, "utf8")) : (anterior.avance ?? null);
+  let avance = archivoAvance && existsSync(archivoAvance) ? leerAvance(readFileSync(archivoAvance, "utf8")) : (anterior.avance ?? null);
+  if (!avance || avance.total === 0) {
+    // Se lee como texto por la API: no se ejecuta nada del proyecto.
+    const archivo = await api<{ content: string }>("contents/PROYECTO.md").catch(() => null);
+    avance = (archivo && avanceDeProyecto(Buffer.from(archivo.content, "base64").toString("utf8"))) ?? avance;
+  }
 
   type Run = { name: string; conclusion: string | null; created_at: string; status: string };
   const [milestones, pausa, pulls, runs, commits, ultimoIssue] = await Promise.all([
