@@ -4,7 +4,11 @@
     "titulo": "Fase 4 — Visibilidad",
     "vence": null
   },
-  "avance": null,
+  "avance": {
+    "verdes": 0,
+    "total": 0,
+    "porcentaje": 0
+  },
   "salud": {
     "color": "verde",
     "emoji": "🟢",
@@ -12,5 +16,5 @@
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-08T21:16:43.201Z"
+  "actualizado": "2026-10-08T21:17:10.402Z"
 }
