@@ -2,19 +2,20 @@
   "proyecto": "guardian",
   "fase": {
     "titulo": "Fase 4 — Visibilidad",
-    "vence": null
+    "vence": "2026-10-11T00:00:00Z"
   },
   "avance": {
-    "verdes": 0,
-    "total": 0,
-    "porcentaje": 0
+    "verdes": 4,
+    "total": 6,
+    "porcentaje": 67
   },
   "salud": {
     "color": "verde",
     "emoji": "🟢",
     "motivos": [],
+    "alertas": [],
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-08T21:21:14.036Z"
+  "actualizado": "2026-10-08T22:33:41.650Z"
 }
