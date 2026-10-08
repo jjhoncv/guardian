@@ -45,6 +45,7 @@ El alcance completo, las reglas y las fases están en @PROYECTO.md. Léelo antes
 
 ## Mantener el conocimiento
 - Si Jhonnatan cambia algo del alcance o una decisión, actualiza PROYECTO.md y registra una ADR en `docs/decisiones/`. El repo es la memoria del proyecto, no las conversaciones.
+- Toda mejora que cambia lo que el Guardián **hace o enseña** (workflows, scripts, skills, esqueleto, guía del consultor) se titula `feat(#N)` o `fix(#N)`, para que entre al CHANGELOG, y **actualiza el README en el mismo PR** (comandos, ejemplo de punta a punta, «Cómo mejora el Guardián»). `docs(#N)` queda para textos y anotaciones del Parking lot.
 
 ## Comunicación
 - Español, directo y corto.
