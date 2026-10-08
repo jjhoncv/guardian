@@ -2,17 +2,22 @@
 name: Avisos
 
 on:
+  schedule:
+    - cron: "0 17 * * 1-5" # resumen diario: 12:00 en Lima, de lunes a viernes
   workflow_dispatch:
     inputs:
       aviso:
         description: Aviso a enviar
         type: choice
-        options: [prueba]
-        default: prueba
+        options: [resumen, prueba]
+        default: resumen
   # Los PRs que tocan los avisos mandan un mensaje de prueba (solo PRs del propio repo: los forks no reciben secretos).
   pull_request:
     paths:
       - scripts/telegram.ts
+      - scripts/avisos.ts
+      - scripts/resumen.ts
+      - scripts/proyectos.ts
       - .github/workflows/avisos.yml
 
 permissions:
@@ -35,13 +40,15 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-      - name: Prueba de conexión
-        if: github.event_name == 'pull_request' || inputs.aviso == 'prueba'
+      # El resumen sale en el horario, a mano y en los PRs que tocan los avisos (marcado como prueba).
+      - name: Aviso
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DUENO: ${{ github.repository_owner }}
+          AVISO: ${{ github.event_name == 'workflow_dispatch' && inputs.aviso || 'resumen' }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          texto="🛡️ <b>Guardián conectado</b> · los avisos de la Fase 5 llegarán aquí."
-          if [ -n "$PR" ]; then texto="$texto (prueba del PR #$PR)"; fi
-          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/telegram.ts "$texto"
+          if [ -n "$PR" ]; then export PRUEBA="Prueba del PR #$PR: así te llegará el resumen"; fi
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/avisos.ts "$AVISO"

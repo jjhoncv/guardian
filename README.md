@@ -141,7 +141,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 | `guardian-release.yml` | release-please → producción con aprobación (el build se guarda 14 días) → smoke test → rollback y alerta si falla |
 | `guardian-tickets.yml` | Un issue por tarea del plan aprobado y una **fecha objetivo por fase** (las semanas de Límites repartidas entre las fases); la **fecha original** queda anotada en la fase y no cambia aunque se reprograme |
 | `guardian-estado.yml` | En cada CI de `main` y una vez al día: fase actual, % de avance y **salud** (🟢 🟡 🔴 ⚫) → rama `estado` (`estado.json` y badges). No ejecuta código del proyecto (ADR 0026) |
-| `avisos.yml` (solo en el Guardián) | Avisos al celular por Telegram (Fase 5). Hoy: mensaje de prueba a mano y en los PRs que tocan los avisos |
+| `avisos.yml` (solo en el Guardián) | Avisos al celular por Telegram (Fase 5). **Resumen diario** de lunes a viernes a las 12:00 (Lima): lo que espera una acción tuya, con su link (PRs de Claude, preguntas de Claude, releases, deploys por aprobar, fases completas, alertas y lo del Foco), lo que hizo Claude desde ayer y cada proyecto con su desvío vs. el plan original |
 | `sheet.yml` (solo en el Guardián) | Todos los días: copia el estado de **todos** los proyectos (topic `guardian-proyecto`) a un solo Sheet: **Foco** (lo que hay que atender, 🔴 → ⚫ → 🟡, con qué hacer), **Resumen** (barras, desvío en días y la **curva de cada proyecto vs. su plan original**), Proyecto, Fases, Tareas, Salud. Los PRs que tocan el tablero se prueban en el Sheet de pruebas, que además tiene una **Simulación** con un proyecto inventado en 10 momentos |
 | `guardian-claude.yml` | `@claude` del dueño → Claude desarrolla en la nube y abre el PR en dos niveles; al fusionar un PR toma solo el siguiente ticket de la fase actual (máx. 2 PRs suyos en revisión; no abre la fase siguiente; ADR 0024) |
 
@@ -149,7 +149,7 @@ Cada workflow toma sus scripts y herramientas de **su propia versión** del Guar
 
 | Pieza | Dónde |
 |---|---|
-| Scripts de los workflows | `scripts/` (`avance.ts`, `chequeo-pr.ts`, `crear-tickets.ts`, `fechas-fases.ts`, `salud.ts`, `siguiente-ticket.ts`, `telegram.ts`, `rollback.sh`) |
+| Scripts de los workflows | `scripts/` (`avance.ts`, `chequeo-pr.ts`, `crear-tickets.ts`, `fechas-fases.ts`, `salud.ts`, `siguiente-ticket.ts`, `telegram.ts`, `proyectos.ts`, `resumen.ts`, `avisos.ts`, `rollback.sh`) |
 | netlify-cli del CI, fijado por lockfile | `tools/netlify/` |
 | Sincronización con el Sheet (google-auth-library fijada por lockfile) | `tools/sheet/` |
 | Crear un proyecto (Paso 0 + infraestructura + esqueleto) | `scripts/nuevo-proyecto.sh` |

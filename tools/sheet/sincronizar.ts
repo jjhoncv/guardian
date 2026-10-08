@@ -4,42 +4,11 @@
 // Uso (CI): node tools/sheet/sincronizar.ts   env: GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA (JSON de la service account)
 import { JWT } from "google-auth-library";
 import { anchos, barrasResumen, ENCABEZADOS, filasCurva, filasFases, filasFoco, filasProyecto, filasResumen, filasSalud, filasTareas, filasTendencia, type DatosProyecto, type Pestaña } from "../../scripts/hoja.ts";
-import type { Estado } from "../../scripts/estado.ts";
 import { curvaSimulacion, filasSimulacion, simular } from "../../scripts/simulacion.ts";
+import { clienteGitHub, leerProyecto, reposDelDueno } from "../../scripts/proyectos.ts";
 
 const { GITHUB_TOKEN, DUENO, SHEET_ID, SHEET_SA } = process.env;
 if (!GITHUB_TOKEN || !DUENO || !SHEET_ID || !SHEET_SA) throw new Error("Faltan GITHUB_TOKEN, DUENO, SHEET_ID o SHEET_SA");
-
-async function github<T>(ruta: string): Promise<T> {
-  const r = await fetch(`https://api.github.com/${ruta}`, { headers: { authorization: `Bearer ${GITHUB_TOKEN}`, accept: "application/vnd.github+json" } });
-  if (!r.ok) throw new Error(`GitHub ${r.status} ${ruta}`);
-  return r.json() as Promise<T>;
-}
-
-async function datosDe(repo: string): Promise<DatosProyecto> {
-  type Issue = { number: number; title: string; state: string; created_at: string; closed_at: string | null; milestone: { title: string } | null; pull_request?: unknown };
-  type Pull = { body: string | null };
-  const [respuestaEstado, milestones, issues, pulls] = await Promise.all([
-    fetch(`https://raw.githubusercontent.com/${repo}/estado/estado.json`),
-    github<DatosProyecto["milestones"]>(`repos/${repo}/milestones?state=all&per_page=100`),
-    github<Issue[]>(`repos/${repo}/issues?state=all&per_page=100`),
-    github<Pull[]>(`repos/${repo}/pulls?state=open&per_page=100`),
-  ]);
-  const estado = respuestaEstado.ok ? ((await respuestaEstado.json()) as Estado) : null;
-  // Un ticket está «en revisión» si un PR abierto lo cierra.
-  const enRevision = new Set(pulls.flatMap((p) => [...(p.body ?? "").matchAll(/\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi)].map((m) => Number(m[1]))));
-  const tareas: DatosProyecto["tareas"] = issues
-    .filter((i) => !i.pull_request && i.milestone && /^Fase \d+/.test(i.milestone.title))
-    .map((i) => ({
-      numero: i.number,
-      titulo: i.title,
-      fase: i.milestone!.title,
-      estado: i.state === "closed" ? "hecho" : enRevision.has(i.number) ? "en revisión" : "abierto",
-      creado: i.created_at,
-      cerrado: i.closed_at,
-    }));
-  return { repo, estado, milestones, tareas };
-}
 
 // Google Sheets: la librería firma y renueva el token; aquí solo REST.
 const cuenta = JSON.parse(SHEET_SA);
@@ -59,9 +28,8 @@ async function main() {
   const faltan = (Object.keys(ENCABEZADOS) as Pestaña[]).filter((p) => !hoja.sheets.some((s) => s.properties.title === p));
   if (faltan.length) await sheets(":batchUpdate", { method: "POST", body: { requests: faltan.map((title) => ({ addSheet: { properties: { title } } })) } });
 
-  const { items } = await github<{ items: { full_name: string }[] }>(`search/repositories?q=${encodeURIComponent(`topic:guardian-proyecto user:${DUENO}`)}&per_page=100`);
-  const datos = await Promise.all(items.map((r) => datosDe(r.full_name)));
-  datos.sort((a, b) => a.repo.localeCompare(b.repo));
+  const github = clienteGitHub(GITHUB_TOKEN!);
+  const datos = await Promise.all((await reposDelDueno(github, DUENO!)).map((repo) => leerProyecto(github, repo)));
 
   const ahora = new Date().toISOString();
   const hoy = ahora.slice(0, 10);
