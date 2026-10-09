@@ -24,10 +24,10 @@ export type Crudo = {
   ticketsCerradosRecientes: number;
 };
 
-export type Pendiente = { tipo: "alerta" | "deploy" | "pr" | "pregunta" | "release" | "fase"; urgente: boolean; texto: string; accion: string; url: string };
+export type Pendiente = { tipo: "alerta" | "deploy" | "pr" | "pregunta" | "release" | "fase" | "token"; urgente: boolean; texto: string; accion: string; url: string };
 export type Actividad = { fusionados: { numero: number; titulo: string; url: string }[]; abiertos: { numero: number; titulo: string; url: string }[]; ticketsCerrados: number };
 
-const ORDEN: Record<Pendiente["tipo"], number> = { alerta: 0, deploy: 1, pr: 2, pregunta: 3, release: 4, fase: 5 };
+const ORDEN: Record<Pendiente["tipo"], number> = { alerta: 0, deploy: 1, token: 2, pr: 3, pregunta: 4, release: 5, fase: 6 };
 /** «feat(#12): filtro de categorías» → «filtro de categorías». */
 const sinPrefijo = (titulo: string) => titulo.replace(/^\w+(\([^)]*\))?!?:\s*/, "");
 const numeroDe = (issueUrl: string) => Number(issueUrl.split("/").at(-1));

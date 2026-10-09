@@ -64,6 +64,20 @@ completar_marcadores() {
   done
 }
 
+
+# Anota cuándo vence un secreto como variable VENCE_<SECRETO> (no es secreta): los avisos del Guardián
+# avisan 7 días antes. Netlify y Anthropic no exponen la fecha por API; el PAT de release-please, sí.
+anotar_vence() {
+  local secreto="$1" fecha
+  read -rp "  ¿Cuándo vence $secreto? (AAAA-MM-DD; Enter si no vence): " fecha
+  [ -z "$fecha" ] && return 0
+  if [[ "$fecha" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    gh variable set "VENCE_$secreto" -R "$REPO" --body "$fecha" >/dev/null && ok "VENCE_$secreto = $fecha (te avisaré 7 días antes)"
+  else
+    info "fecha no válida: anótala después con gh variable set VENCE_$secreto -R $REPO --body AAAA-MM-DD"
+  fi
+}
+
 # ───────────────────────── Paso 0: qué hay y qué falta ─────────────────────────
 titulo "Paso 0 · Revisión (no crea nada)"
 FALTAN=0
@@ -190,6 +204,7 @@ titulo "3 · Secretos de Netlify"
 if [ "$HAY_TOKEN_NETLIFY" = si ] && [ "$HAY_SITIO" = si ]; then ok "ya estaban"
 else
   printf '%s' "$TOKEN_NETLIFY" | gh secret set NETLIFY_AUTH_TOKEN -R "$REPO" && ok "NETLIFY_AUTH_TOKEN guardado"
+  anotar_vence NETLIFY_AUTH_TOKEN
   gh variable set NETLIFY_SITE_ID -R "$REPO" --body "$SITE_ID" && ok "NETLIFY_SITE_ID = $SITE_ID"
   unset TOKEN_NETLIFY
 fi
@@ -227,7 +242,7 @@ TXT
     [ -z "$CLAUDE_KEY" ] && { info "sin llave: @claude no funcionará hasta que guardes ANTHROPIC_API_KEY en el repo"; break; }
     CODIGO=$(curl -s -o /dev/null -w '%{http_code}' -H "x-api-key: $CLAUDE_KEY" -H "anthropic-version: 2023-06-01" https://api.anthropic.com/v1/models)
     if [ "$CODIGO" = 200 ]; then
-      printf '%s' "$CLAUDE_KEY" | gh secret set ANTHROPIC_API_KEY -R "$REPO" && ok "ANTHROPIC_API_KEY guardada (válida)"; break
+      printf '%s' "$CLAUDE_KEY" | gh secret set ANTHROPIC_API_KEY -R "$REPO" && ok "ANTHROPIC_API_KEY guardada (válida)"; anotar_vence ANTHROPIC_API_KEY; break
     fi
     echo "  ❌ Anthropic rechazó esa llave (HTTP $CODIGO). Prueba de nuevo."
   done

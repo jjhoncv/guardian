@@ -9,6 +9,7 @@ import { decidir, type Memoria, type Momento } from "../../scripts/politica.ts";
 import { actividadDe, clienteGitHub, leerCrudo, leerProyecto, leerSemana, pendientesDe, reposDelDueno } from "../../scripts/proyectos.ts";
 import type { ParaResumen } from "../../scripts/resumen.ts";
 import { enviarFoto, enviarTelegram, html } from "../../scripts/telegram.ts";
+import { tokensPorVencer } from "../../scripts/tokens.ts";
 import { aPng } from "./png.ts";
 
 const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chat, GITHUB_TOKEN, DUENO, PRUEBA, MEMORIA } = process.env;
@@ -40,7 +41,7 @@ const proyectos: ParaResumen[] = await Promise.all(
       leerCrudo(github, repo, hoy),
       aviso === "semanal" ? leerSemana(github, repo, hoy) : Promise.resolve(undefined),
     ]);
-    return { datos, pendientes: pendientesDe(crudo, hoy), actividad: actividadDe(crudo, hoy), semana };
+    return { datos, pendientes: [...pendientesDe(crudo, hoy), ...tokensPorVencer(datos, hoy)], actividad: actividadDe(crudo, hoy), semana };
   }),
 );
 

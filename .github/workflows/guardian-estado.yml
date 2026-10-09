@@ -5,6 +5,10 @@ name: Guardián · Estado
 
 on:
   workflow_call:
+    secrets:
+      # Solo para leer su fecha de vencimiento (una lectura de la API); los avisos avisan 7 días antes.
+      RELEASE_PLEASE_TOKEN:
+        required: false
 
 permissions:
   contents: read
@@ -55,6 +59,8 @@ jobs:
           fi
       - env:
           GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          VARIABLES: ${{ toJSON(vars) }}
         run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian/scripts/estado.ts estado avance/avance.json
       - name: Guardar
         working-directory: estado

@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { calcularSalud, type Color, type Salud } from "./salud.ts";
+import { desdeHeader, desdeVariables, type Vencimiento } from "./tokens.ts";
 
 export type Avance = { verdes: number; total: number; porcentaje: number };
 export type Estado = {
@@ -13,6 +14,8 @@ export type Estado = {
   avance: Avance | null;
   salud: Salud;
   actualizado: string;
+  /** Fechas de vencimiento de los secretos del proyecto (T5). */
+  vencimientos?: { secreto: string; vence: string }[];
 };
 type Badge = { schemaVersion: 1; label: string; message: string; color: string };
 
@@ -102,7 +105,14 @@ async function main() {
     pausa: pausa.length > 0,
     colorAnterior: anterior.salud?.color,
   });
-  const estado: Estado = { proyecto: process.env.GITHUB_REPOSITORY!.split("/")[1], fase, avance, salud, actualizado: hoy };
+  // Vencimientos: el PAT de release-please lo dice GitHub al usarlo (una lectura, nada más); el resto, variables VENCE_*.
+  const vencimientos: Vencimiento[] = desdeVariables(process.env.VARIABLES);
+  if (process.env.RELEASE_PLEASE_TOKEN && !vencimientos.some((v) => v.secreto === "RELEASE_PLEASE_TOKEN")) {
+    const r = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}`, { headers: { authorization: `Bearer ${process.env.RELEASE_PLEASE_TOKEN}` } }).catch(() => null);
+    const vence = desdeHeader(r?.headers.get("github-authentication-token-expiration") ?? null);
+    if (vence) vencimientos.push({ secreto: "RELEASE_PLEASE_TOKEN", vence });
+  }
+  const estado: Estado = { proyecto: process.env.GITHUB_REPOSITORY!.split("/")[1], fase, avance, salud, actualizado: hoy, vencimientos };
 
   mkdirSync(salida, { recursive: true });
   writeFileSync(join(salida, "estado.json"), JSON.stringify(estado, null, 2) + "\n");
