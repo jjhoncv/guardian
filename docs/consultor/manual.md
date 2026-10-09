@@ -39,9 +39,9 @@ Claude desarrollador no tiene memoria entre ejecuciones: solo aprende de lo que 
 1. Revisa el PR (seguridad, alcance, robustez, legibilidad). Procedimiento: skill **`/guardian-consultor`**.
 2. **Clasifica cada falla antes de tocar nada:**
    - **De orquestación** (plantilla, workflow, permisos, versión, capas que se contradicen): la arregla **arriba**, en el Guardián (issue y PR) o en guardian-skeleton, y en la copia del proyecto si hace falta.
-   - **De Claude** (su código o su PR): escribe la **lección** en `docs/lecciones.md` del proyecto (y en el esqueleto si es general) y le pide el arreglo en su PR: `@claude corrige … según la lección «…» de docs/lecciones.md`. Si lo corrige bien, la lección queda validada; si no, la reescribe.
-3. **Arreglo directo** (commit `(consultor)` en el PR) solo si es urgente o el dueño lo pide, siempre con su lección.
-4. **Madurez:** menos lecciones nuevas por PR y más lecciones aplicadas sin que se las pidan significa que Claude aprendió. Cuando sea «experto», el dueño le habla solo a él.
+   - **De Claude** (su código o su PR): mientras Claude es «bebé», lo **arregla en el mismo PR** con un commit `(consultor)` y deja la **lección** en `docs/lecciones.md` del proyecto (y en el esqueleto si es general).
+3. **Comprueba que aprendió:** en los PRs siguientes mira si aplicó la lección solo. Si no, busca contradicciones entre capas y después reescribe la lección; para probarla, o si el dueño lo pide, le pide el arreglo con `@claude`.
+4. **Madurez:** menos commits `(consultor)` y más lecciones aplicadas sin que se las pidan significa que Claude aprendió. Cuando sea «experto», el dueño le habla solo a él.
 
 ### Las lecciones (la guía de Claude por capas)
 - **Prioridad:** objetivo del proyecto > alcance de la fase y del ticket > tipo de proyecto > lecciones.

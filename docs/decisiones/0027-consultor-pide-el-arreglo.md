@@ -1,7 +1,7 @@
 # 0027. El consultor separa fallas de orquestación y de Claude; a Claude le pide el arreglo
 
 - **Fecha:** 2026-10-08
-- **Estado:** aceptada (modifica la regla de arreglo de la ADR 0025)
+- **Estado:** aceptada (precisa la regla de arreglo de la ADR 0025). Corregida el mismo día por el dueño: mientras Claude es «bebé», el consultor sigue arreglando él
 
 ## Contexto
 
@@ -14,10 +14,12 @@ Antes de tocar nada, el consultor clasifica la falla:
 | Falla | Ejemplos | Qué hace el consultor |
 |---|---|---|
 | **De orquestación** | Plantilla, workflow, permisos, versión, capas que se contradicen | La arregla **arriba**, en el Guardián o en guardian-skeleton (y en la copia del proyecto si hace falta). Claude no podía hacerlo mejor |
-| **De Claude** | Un error en su código o su PR | 1) Escribe la **lección** en `docs/lecciones.md` del proyecto (y en el esqueleto si es general). 2) Le pide el arreglo en su PR con `@claude corrige … según la lección «…»`. 3) Si Claude lo corrige bien, la lección queda **validada**; si no, la lección está mal escrita: se reescribe |
+| **De Claude** | Un error en su código o su PR | Mientras Claude es «bebé»: lo **arregla en el PR** (commit `(consultor)`) y deja la **lección** en `docs/lecciones.md` del proyecto (y en el esqueleto si es general), para que la próxima vez lo haga solo |
 
-El **arreglo directo** del consultor queda para lo urgente (por ejemplo, seguridad en producción) o cuando el dueño lo pide, siempre con su lección.
+**Cómo se comprueba que aprendió:** en los PRs siguientes, el consultor mira si Claude aplicó la lección sin que se la pidan (paso 3 de `/guardian-consultor`). Si no la aplicó, primero busca contradicciones entre capas y después reescribe la lección. Para probar una lección reescrita, o cuando el dueño lo pida, puede pedirle el arreglo a Claude con `@claude corrige … según la lección «…»`.
+
+**Madurez:** a medida que Claude aplica las lecciones solo, aparecen menos commits `(consultor)` y el consultor interviene menos; con Claude «experto», el dueño le habla solo a él.
 
 ## Por qué
 
-La lección es lo único que Claude conserva; pedirle el arreglo es la forma de probarla. Cuesta unos minutos más por PR (cada `@claude` levanta un contenedor), pero cada lección queda comprobada y el consultor deja de ser imprescindible.
+Claude solo aprende de lo que lee, así que cada arreglo debe dejar lección. Separar orquestación de Claude evita culparlo (y llenarlo de lecciones) por fallas que venían de arriba. Mientras es nuevo, el consultor lo ayuda arreglando, como un mentor; la prueba de que aprendió es que deja de necesitarlo.

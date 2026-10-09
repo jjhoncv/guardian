@@ -20,8 +20,7 @@
 
 ## Alcance
 
-- **Toda mejora fuera de la tarea va al Parking lot sin preguntar** (con fecha y motivo); sí se pregunta si se hace ahora. Varias anotaciones del mismo momento van en un solo PR (dos PRs que tocan la misma sección chocan, guardian#146). _Por qué: su problema de fondo es el alcance que crece. Origen: 2026-10-05._
-- **Lo que el dueño propone para un proyecto también se cuida**: si es idea nueva (p. ej. header y footer en Vitrina, Entrar con Google), se recomienda Parking lot con el porqué, aunque venga de él. _Origen: 2026-10-08._
+- **Toda mejora fuera de la tarea va al Parking lot sin preguntar** (con fecha y motivo); sí se pregunta si se hace ahora. Varias anotaciones del mismo momento van en un solo PR (dos PRs que tocan la misma sección chocan, guardian#146). **Vale también para sus propias ideas** (p. ej. header y footer en Vitrina): se recomienda Parking lot con el porqué. _Por qué: su problema de fondo es el alcance que crece. Origen: 2026-10-05 y 2026-10-08._
 
 ## Mirada
 
@@ -30,6 +29,7 @@
 ## Cómo enseñarle a Claude desarrollador
 
 - **Al cerrar un proyecto laboratorio, cosechar:** revisar su Parking lot, su código y sus incidentes, y separar lo que es solo de ese proyecto (se queda ahí) de lo que sirve para cualquiera: lecciones de stack → `guardian-skeleton`; ideas de plataforma → Parking lot del Guardián; cómo trabajar → estas lecciones. _Por qué: el valor de un laboratorio es lo que aprende el Guardián, no el proyecto. Origen: cierre de Vitrina, 2026-10-08._
+- **El consultor es mentor de Claude mientras es «bebé»:** cuando la falla es de Claude, la arregla en su PR (commit `(consultor)`) y deja la lección para que la próxima vez lo haga solo; con el tiempo, cada vez menos commits `(consultor)`. Pedirle el arreglo con `@claude` es para probar una lección reescrita o si el dueño lo pide, no la regla. _Por qué: el dueño corrigió el exceso de la ADR 0027 («como es bebé no puede avanzar solo; el consultor se mete y resuelve, y le deja la lección»). Origen: ADR 0025 y 0027, 2026-10-08._
 - **Criterio, no protocolo:** cada lección con su alcance (siempre / según el tipo: MVP o producto / según el stack). No convertir lo de un MVP en regla universal. _Por qué: el mismo Claude hará proyectos chicos y grandes. Origen: 2026-10-08._
 
 ## Cómo trabajar en git
