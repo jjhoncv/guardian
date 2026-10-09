@@ -179,3 +179,19 @@ export async function leerCrudo(github: GitHub, repo: string, hoy: string): Prom
     ticketsCerradosRecientes: cerrados.filter((i) => !i.pull_request && (i.closed_at ?? "") > ayer).length,
   };
 }
+
+/** Para la revisión semanal: PRs de Claude fusionados y tickets cerrados en 7 días, e ideas nuevas del Parking lot. */
+export async function leerSemana(github: GitHub, repo: string, hoy: string): Promise<{ ideas: string[]; prsFusionados: number; ticketsCerrados: number }> {
+  const { ideasNuevas } = await import("./semanal.ts");
+  const desde = new Date(Date.parse(hoy) - 7 * DIA).toISOString();
+  const [prs, cerrados, proyecto] = await Promise.all([
+    github<PrReciente[]>(`repos/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100`),
+    todas<{ pull_request?: unknown; closed_at: string | null }>(github, `repos/${repo}/issues?state=closed&since=${desde}`),
+    github<{ content: string }>(`repos/${repo}/contents/PROYECTO.md`).catch(() => null),
+  ]);
+  return {
+    ideas: proyecto ? ideasNuevas(Buffer.from(proyecto.content, "base64").toString("utf8"), hoy) : [],
+    prsFusionados: prs.filter((p) => p.user.login === CLAUDE && p.merged_at && p.merged_at > desde).length,
+    ticketsCerrados: cerrados.filter((i) => !i.pull_request && (i.closed_at ?? "") > desde).length,
+  };
+}

@@ -83,3 +83,20 @@ describe("qué se manda (y qué no)", () => {
     expect(decidir([p(salud("verde"), [], hecho)], r.memoria, lima("2026-10-12", "19:00")).texto).toBeNull();
   });
 });
+
+describe("sábado 8:00: revisión semanal (llega siempre)", () => {
+  it("con tendencia del desvío, actividad de la semana, ideas nuevas y todas las curvas", () => {
+    const conSemana = { ...p(salud("verde")), semana: { ideas: ["Pronóstico"], prsFusionados: 9, ticketsCerrados: 23 } };
+    const memoria = { ...vacia, enviados: {}, colores: { "jjhoncv/vitrina": "verde" as const } };
+    const r = decidir([conSemana], memoria, lima("2026-10-17", "08:00"), "semanal");
+    expect(r.texto).toContain("📅 <b>Revisión semanal</b>");
+    expect(r.texto).toContain("🤖 Claude esta semana: 9 PRs fusionados · 23 tickets cerrados");
+    expect(r.texto).toContain("💡 <b>Parking lot: 1 idea nueva</b>");
+    expect(r.texto).toContain("• vitrina: Pronóstico · <a href=\"https://github.com/jjhoncv/vitrina/blob/main/PROYECTO.md\">ver todas</a>");
+  });
+
+  it("aunque no haya novedades, la revisión semanal sale", () => {
+    const r = decidir([p(salud("verde"))], { ...vacia, colores: { "jjhoncv/vitrina": "verde" } }, lima("2026-10-17", "08:00"), "semanal");
+    expect(r.texto).toContain("📅 <b>Revisión semanal</b>");
+  });
+});

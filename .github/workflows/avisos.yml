@@ -1,11 +1,13 @@
 # Avisos del Guardián al celular del dueño por Telegram (Fase 5), en sus ventanas (Lima = UTC−5):
-# lunes a sábado ☀️ 8:00 buenos días, 🌙 19:00 cierre del día y 🚨 emergencias de 8:00–9:00 y 19:00–22:00.
+# lunes a viernes ☀️ 8:00 buenos días, sábado 📅 8:00 revisión semanal, lunes a sábado 🌙 19:00 cierre del día
+# y 🚨 emergencias de 8:00–9:00 y 19:00–22:00.
 # Domingo: silencio. Sin novedades no se manda nada; cada cosa se avisa una vez (memoria en la rama `avisos`).
 name: Avisos
 
 on:
   schedule:
-    - cron: "0 13 * * 1-6" # ☀️ 8:00 lunes a sábado
+    - cron: "0 13 * * 1-5" # ☀️ 8:00 lunes a viernes
+    - cron: "0 13 * * 6" # 📅 8:00 sábado: revisión semanal (llega siempre)
     - cron: "0 0 * * 0,2-6" # 🌙 19:00 lunes a sábado (00:00 UTC del día siguiente)
     - cron: "30 13 * * 1-6" # 🚨 8:30
     - cron: "30 0 * * 0,2-6" # 🚨 19:30
@@ -15,9 +17,9 @@ on:
       aviso:
         description: Qué mandar (fuera de las ventanas, manana y noche llegan marcados como prueba)
         type: choice
-        options: [manana, noche, emergencias, prueba]
+        options: [manana, noche, semanal, emergencias, prueba]
         default: manana
-  # Los PRs que tocan los avisos mandan una prueba del «buenos días» (sin tocar la memoria real).
+  # Los PRs que tocan los avisos mandan una prueba de la revisión semanal, la más completa (sin tocar la memoria real).
   pull_request:
     paths:
       - scripts/telegram.ts
@@ -25,6 +27,7 @@ on:
       - scripts/politica.ts
       - scripts/proyectos.ts
       - scripts/grafico.ts
+      - scripts/semanal.ts
       - tools/avisos/**
       - .github/workflows/avisos.yml
 
@@ -71,7 +74,8 @@ jobs:
           MANUAL: ${{ inputs.aviso }}
         run: |
           case "$HORARIO" in
-            "0 13 * * 1-6") AVISO=manana ;;
+            "0 13 * * 1-5") AVISO=manana ;;
+            "0 13 * * 6") AVISO=semanal ;;
             "0 0 * * 0,2-6") AVISO=noche ;;
             "") AVISO="$MANUAL"; [ "$AVISO" = prueba ] || export PRUEBA="Envío manual (vista previa: no cuenta como avisado)" ;;
             *) AVISO=emergencias ;;
@@ -106,5 +110,5 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ github.token }}
           DUENO: ${{ github.repository_owner }}
-          PRUEBA: "Prueba del PR #${{ github.event.pull_request.number }}: así llegará el «buenos días»"
-        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/avisos/avisos.ts manana
+          PRUEBA: "Prueba del PR #${{ github.event.pull_request.number }}: así llegará la revisión del sábado"
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/avisos/avisos.ts semanal

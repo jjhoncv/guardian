@@ -159,7 +159,7 @@ El dueño atiende al Guardián en **dos ventanas, de lunes a sábado: 8:00–9:0
 |---|---|---|
 | ☀️ 8:00, lunes a sábado | **Buenos días:** lo que espera su acción (con links), lo que hizo Claude y las curvas que cambiaron | No llega nada |
 | 🌙 19:00, lunes a sábado | **Cierre del día:** lo nuevo desde la mañana | No llega nada |
-| 📅 Sábado 8:00 | **Revisión semanal** (avance, desvío, Parking lot, releases) con las curvas de la semana | Llega igual |
+| 📅 Sábado 8:00 | **Revisión semanal** (en lugar del «buenos días»): lo que espera tu acción, cómo terminó la semana con la **tendencia del desvío**, lo que hizo Claude en 7 días, las **ideas nuevas del Parking lot** (3 por proyecto y el link a todas) y las curvas | Llega igual |
 | 🚨 Dentro de las ventanas | **Emergencia:** un proyecto pasa a 🔴 o hay un rollback en producción | — (fuera de las ventanas espera a la siguiente) |
 
 Cada cosa se avisa **una sola vez**; lo que sigue pendiente aparece en el siguiente resumen con su antigüedad, sin volver a sonar. Así el Guardián da **foco**, no ruido.
