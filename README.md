@@ -111,10 +111,8 @@ El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjh
 <details>
 <summary><strong>Mantenimiento: tokens que vencen</strong></summary>
 
-Nada avisa todavía (llega en la Fase 5). Anota las fechas al crearlos:
+El Guardián **avisa 7 días antes** en tu «buenos días» (🔑), con los pasos para renovar. La fecha del PAT de release-please la lee solo; la de Netlify y la de Claude las pregunta `nuevo-proyecto.sh` y las guarda como variables `VENCE_<SECRETO>` (si renuevas, actualízala con `gh variable set VENCE_<SECRETO> -R <repo> --body AAAA-MM-DD`).
 
-| Secreto | Si vence | Renovar |
-|---|---|---|
 | `RELEASE_PLEASE_TOKEN` (90 días) | No se abre ni actualiza el PR de release | Nuevo PAT fine-grained con los mismos permisos → `gh secret set RELEASE_PLEASE_TOKEN` |
 | `NETLIFY_AUTH_TOKEN` | Fallan preview, staging y producción | Nuevo token en Netlify → `gh secret set NETLIFY_AUTH_TOKEN` |
 | `ANTHROPIC_API_KEY` (cada proyecto) | `@claude` y la siguiente tarea automática no corren | Nueva key en el workspace con tope (y crédito en *Billing*) → `gh secret set ANTHROPIC_API_KEY -R <repo>` |

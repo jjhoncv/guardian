@@ -21,3 +21,4 @@ jobs:
       issues: read
       pull-requests: read
     uses: ./.github/workflows/guardian-estado.yml
+    secrets: inherit

@@ -42,8 +42,8 @@ export function resumenDiario(proyectos: ParaResumen[], hoy: string, opciones: O
   const items = activos.flatMap(({ datos, pendientes }) => {
     const proyecto = nombre(datos.repo);
     const desdePendientes = pendientes.map((p) => ({
-      prioridad: p.tipo === "pr" ? (p.urgente ? PRIORIDAD.prUrgente : PRIORIDAD.pr) : PRIORIDAD[p.tipo],
-      linea: `${nueva(clavePendiente(datos.repo, p))}${p.tipo === "pr" && p.urgente ? "⏰ " : ""}${html(proyecto)} · ${html(p.texto)}`,
+      prioridad: p.tipo === "pr" ? (p.urgente ? PRIORIDAD.prUrgente : PRIORIDAD.pr) : p.tipo === "token" ? (p.urgente ? PRIORIDAD.deploy : PRIORIDAD.release) : PRIORIDAD[p.tipo],
+      linea: `${nueva(clavePendiente(datos.repo, p))}${p.tipo === "pr" && p.urgente ? "⏰ " : p.tipo === "token" ? "🔑 " : ""}${html(proyecto)} · ${html(p.texto)}`,
       accion: p.accion,
       url: p.url,
     }));
