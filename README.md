@@ -56,7 +56,7 @@ flowchart TD
 |---|---|---|---|
 | **1. Idea** | Tú + `/guardian-idea` | Respondes 5 preguntas (es una prueba): qué quieres probar, para quién, cómo sabrás que funcionó («el equipo revisa los vencimientos aquí y no en la hoja»), cuántas semanas, nombre. Fases: **1 · Lista de etiquetas**, **2 · Aviso de las que vencen**; 4 semanas (cada fase recibe su fecha objetivo) | `~/Projects/ideas/vencimientos/PROYECTO.md` |
 | **2. Crear** | Tú, en la terminal | `scripts/nuevo-proyecto.sh vencimientos --alcance ~/Projects/ideas/vencimientos/PROYECTO.md`: te pide los tokens ocultos y crea todo | Repo `vencimientos`, staging en línea con el título «Vencimientos» |
-| **3. Planificar** | Tú + `/guardian-planificar` en el proyecto | Convierte el alcance en escenarios («Dado que la hoja tiene la etiqueta X que vence mañana… entonces la veo en rojo») y tickets por fase | Un PR de plan; al fusionarlo, los tickets en el tablero |
+| **3. Planificar** | Tú + `/guardian-planificar` en el proyecto | Convierte el alcance en escenarios («Dado que la hoja tiene la etiqueta X que vence mañana… entonces la veo en rojo») y tickets por fase | Un PR de plan; al fusionarlo, los tickets en el tablero y Claude con el primero |
 | **4. Desarrollar** | Claude desarrollador | Toma solo el primer ticket de la fase: pruebas primero, código, preview. Abre el PR en dos niveles (**En simple** + detalle técnico). Si le falta algo tuyo (una cuenta, un permiso), te lo pide en el ticket y espera | PR con preview y checks en verde |
 | **5. Revisar** | Consultor (`/guardian-consultor`) | Revisa seguridad, alcance y que el preview funcione. Si corrige algo, lo hace en el mismo PR con un commit `(consultor)` y deja la **lección** para que Claude no lo repita | Commits `(consultor)` y lecciones nuevas |
 | **6. Aprobar** | Tú | Pruebas en el preview desde el celular → **Approve** → **Squash and merge**. Al fusionar, Claude toma el siguiente ticket solo | El ticket en *Hecho*; el siguiente, en camino |
@@ -103,7 +103,7 @@ Rollback: **automático** si falla el smoke test después de un release (abre un
    scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md             # crea todo
    ```
    Pide el token de Netlify (oculto) y crea el sitio; crea el repo; pide un PAT solo para ese repo y la llave de Claude; recién entonces sube **guardian-skeleton** con tu alcance, configura protecciones y tablero, y verifica staging. Si se corta, vuelve a correrlo: salta lo hecho.
-3. **Escenarios y tickets.** En el tablero, *Workflows*: activa *Auto-add* (filtro `is:issue is:open`) y cambia *Pull request linked to issue* a **En revisión**. Luego, en Claude Code dentro del proyecto, corre **`/guardian-planificar`**: abre un PR con los escenarios BDD (en rojo) y el plan; al fusionarlo se crean los tickets.
+3. **Escenarios y tickets.** En el tablero, *Workflows*: activa *Auto-add* (filtro `is:issue is:open`) y cambia *Pull request linked to issue* a **En revisión**. Luego, en Claude Code dentro del proyecto, corre **`/guardian-planificar`**: abre un PR con los escenarios BDD (en rojo) y el plan; al fusionarlo se crean los tickets y Claude toma el primero solo (espera a que existan).
 
 El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjhoncv/guardian/.github/workflows/guardian-ci.yml@vX.Y.Z`); para recibir mejoras se sube la versión (Dependabot lo propone).
 </details>
