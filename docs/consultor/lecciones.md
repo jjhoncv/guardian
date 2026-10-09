@@ -1,6 +1,7 @@
 # Lecciones del consultor
 
 > Lo que el dueño le enseñó al consultor sobre **cómo trabajar con él**. Se leen al empezar cada sesión.
+> **Esta es la memoria del consultor:** vive en el repo, no en la sesión de Claude Code. Si se cierra la sesión o se cambia de máquina, nada se pierde. Lo que el consultor aprende se escribe aquí (o en el manual) por PR, nunca solo en su memoria local.
 > Formato: la lección, **por qué** y **de dónde salió**. Ciclo: nace → si se repite o se vuelve regla, se **gradúa** a [`manual.md`](manual.md) o a una skill → si deja de aplicar, se **retira**. Tope: unas 15 vivas.
 
 ## Cómo hablarle
@@ -19,8 +20,7 @@
 
 ## Alcance
 
-- **Toda mejora fuera de la tarea va al Parking lot sin preguntar** (con fecha y motivo); sí se pregunta si se hace ahora. Varias anotaciones del mismo momento van en un solo PR (dos PRs que tocan la misma sección chocan, guardian#146). _Por qué: su problema de fondo es el alcance que crece. Origen: 2026-10-05._
-- **Lo que el dueño propone para un proyecto también se cuida**: si es idea nueva (p. ej. header y footer en Vitrina, Entrar con Google), se recomienda Parking lot con el porqué, aunque venga de él. _Origen: 2026-10-08._
+- **Toda mejora fuera de la tarea va al Parking lot sin preguntar** (con fecha y motivo); sí se pregunta si se hace ahora. Varias anotaciones del mismo momento van en un solo PR (dos PRs que tocan la misma sección chocan, guardian#146). **Vale también para sus propias ideas** (p. ej. header y footer en Vitrina): se recomienda Parking lot con el porqué. _Por qué: su problema de fondo es el alcance que crece. Origen: 2026-10-05 y 2026-10-08._
 
 ## Mirada
 
@@ -29,10 +29,11 @@
 ## Cómo enseñarle a Claude desarrollador
 
 - **Al cerrar un proyecto laboratorio, cosechar:** revisar su Parking lot, su código y sus incidentes, y separar lo que es solo de ese proyecto (se queda ahí) de lo que sirve para cualquiera: lecciones de stack → `guardian-skeleton`; ideas de plataforma → Parking lot del Guardián; cómo trabajar → estas lecciones. _Por qué: el valor de un laboratorio es lo que aprende el Guardián, no el proyecto. Origen: cierre de Vitrina, 2026-10-08._
-- **El consultor arregla rápido, pero cada arreglo deja lección** (commit `(consultor)` + `docs/lecciones.md`). _Por qué: pedirle todo con `@claude` es lento, y sin lección Claude no aprende. Origen: ADR 0025, 2026-10-08._
+- **El consultor es mentor de Claude mientras es «bebé»:** cuando la falla es de Claude, la arregla en su PR (commit `(consultor)`) y deja la lección para que la próxima vez lo haga solo; con el tiempo, cada vez menos commits `(consultor)`. Pedirle el arreglo con `@claude` es para probar una lección reescrita o si el dueño lo pide, no la regla. _Por qué: el dueño corrigió el exceso de la ADR 0027 («como es bebé no puede avanzar solo; el consultor se mete y resuelve, y le deja la lección»). Origen: ADR 0025 y 0027, 2026-10-08._
 - **Criterio, no protocolo:** cada lección con su alcance (siempre / según el tipo: MVP o producto / según el stack). No convertir lo de un MVP en regla universal. _Por qué: el mismo Claude hará proyectos chicos y grandes. Origen: 2026-10-08._
 
 ## Cómo trabajar en git
 
 - **Un arreglo se vuelve regla tal cual funcionó, y se comprueba en otro caso** antes de darlo por hecho. _Por qué: la regla de Mermaid se escribió con una sola de las dos opciones que habían funcionado y el diagrama del README salió cortado. Origen: 2026-10-08._
+- **Antes de agregar commits a un PR, confirmar que siga abierto** (`gh pr view N --json state`). Si ya se fusionó, va en un PR nuevo. _Por qué: tres ideas del Parking lot quedaron fuera porque guardian#203 se fusionó antes de que llegaran sus últimos commits (se recuperaron en guardian#208). Origen: 2026-10-08._
 - **Nunca commitear con conflictos**: antes de cada commit, `git diff --cached | grep '^+<<<<<<<'` vacío; después de un merge, correr lint, typecheck, test, build y e2e antes de subir. _Por qué: en vitrina#36 el consultor subió marcas de conflicto y el CI quedó en rojo. Origen: 2026-10-08._
