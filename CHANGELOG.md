@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.0](https://github.com/jjhoncv/guardian/compare/v0.15.0...v0.16.0) (2026-10-09)
+
+
+### Funcionalidades
+
+* **#185:** revisión semanal del sábado ([#193](https://github.com/jjhoncv/guardian/issues/193)) ([65db76e](https://github.com/jjhoncv/guardian/commit/65db76ef1fa4b60a0c374634bd7a3f7133206dba))
+* **#186:** aviso de tokens por vencer ([#195](https://github.com/jjhoncv/guardian/issues/195)) ([5a64cf6](https://github.com/jjhoncv/guardian/commit/5a64cf677e4575ecc58f493d33f51baa6835876d))
+
 ## [0.15.0](https://github.com/jjhoncv/guardian/compare/v0.14.0...v0.15.0) (2026-10-09)
 
 
