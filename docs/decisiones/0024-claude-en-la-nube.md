@@ -14,6 +14,7 @@ La Fase 3 hace que Claude desarrolle los tickets en GitHub Actions con `anthropi
 - **Modelo:** Sonnet 5.5 (`--model claude-sonnet-5-5`), con máximo de turnos y de tiempo por tarea.
 - **PR:** se le permite **solo** `gh pr create` para abrir el PR con `Closes #N`; no puede aprobar ni fusionar, y `main` exige la aprobación del dueño (0009 → 1 aprobación).
 - **Identidad:** la GitHub App oficial de Claude (`claude[bot]`); sus PRs disparan el CI y el preview.
+- **Dependencias (2026-10-08, #199):** Claude puede agregarlas solo con `npm install --ignore-scripts`; los scripts de instalación de un paquete nuevo correrían con la llave de Anthropic en el entorno. Cada dependencia se justifica en el PR y el dueño la revisa.
 
 ## Por qué
 
