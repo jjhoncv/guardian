@@ -19,7 +19,16 @@ Antes de empezar, lee `docs/consultor/manual.md` (quién es quién) y `docs/cons
 4. **Probarlo de verdad:** checks del PR y el **preview** (`curl` a las páginas tocadas; los errores 500 no siempre los ve el CI).
 5. **Legibilidad del PR:** ¿está en dos niveles (En simple + Detalle técnico)? Si no, corrige la descripción.
 
-## 3. Si hay que corregir
+## 3. Si Claude no aplicó una lección que ya tenía
+
+Antes de repetir la lección, busca **por qué no la aplicó**:
+- ¿Una capa que lee **siempre** (`CLAUDE.md`, la skill que corrió, la plantilla del ticket) dice otra cosa? Gana la que lee siempre: corrige la contradicción ahí.
+- ¿La skill o el momento no leen `docs/lecciones.md`? Agrégale el paso de leerlas.
+- Recién si nada de eso explica el error, la lección está mal escrita: reescríbela más clara.
+
+_Ejemplo: en Vencimientos pidió secretos «en Netlify y GitHub Secrets» porque `CLAUDE.md` decía «usa GitHub Secrets y variables de Netlify» y `/guardian-planificar` no leía las lecciones (guardian-skeleton#16)._
+
+## 4. Si hay que corregir
 - Rama del PR: `git checkout -B <rama> origin/<rama>`. **Prueba primero** (que falle), después el arreglo.
 - Antes de cada commit: `git diff --cached | grep '^+<<<<<<<'` debe estar vacío (nunca commitear conflictos). Si la rama está atrasada con `main`, resuelve los conflictos uno por uno y corre lint, typecheck, test, build y e2e antes de subir.
 - Commit: `fix(#N): <qué> (consultor)`, con el porqué en el cuerpo.
@@ -27,7 +36,7 @@ Antes de empezar, lee `docs/consultor/manual.md` (quién es quién) y `docs/cons
 - Si la lección sirve para cualquier proyecto: PR igual en `jjhoncv/guardian-skeleton`.
 - Si la falla es de la plataforma: issue y PR en el Guardián. Si es una idea, va al Parking lot.
 
-## 4. Cerrar con el dueño
+## 5. Cerrar con el dueño
 - Qué encontró (lo bueno también: lecciones que Claude ya aplicó), qué corrigió y con qué commits.
 - Cómo probarlo en el preview, en pasos.
 - Qué necesita de él y el **orden** de los merges.
