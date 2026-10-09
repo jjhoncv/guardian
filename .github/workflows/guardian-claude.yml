@@ -64,14 +64,30 @@ jobs:
     name: siguiente ticket
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     permissions:
       contents: read
       issues: read
       pull-requests: read
+      actions: read
     outputs:
       ticket: ${{ steps.elegir.outputs.ticket }}
     steps:
+      # Si el PR traía el plan, «Tickets del plan» corre a la vez: espera a que cree los tickets (#200).
+      - name: esperar los tickets del plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          gh api "repos/$REPO/pulls/$PR/files" --paginate -q '.[].filename' | grep -qx 'plan/tareas.json' || exit 0
+          for _ in $(seq 1 30); do
+            estado=$(gh run list -R "$REPO" --workflow tickets.yml --commit "$SHA" --json status -q '.[0].status')
+            [ "$estado" = completed ] && exit 0
+            sleep 10
+          done
+          echo "::warning::«Tickets del plan» no terminó en 5 minutos; elijo con los tickets que hay."
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ job.workflow_repository }}
