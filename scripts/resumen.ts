@@ -4,7 +4,13 @@ import { curvaProyecto, desvioTexto, filasFoco, type DatosProyecto } from "./hoj
 import type { Actividad, Pendiente } from "./proyectos.ts";
 import { html } from "./telegram.ts";
 
-export type ParaResumen = { datos: DatosProyecto; pendientes: Pendiente[]; actividad: Actividad };
+export type ParaResumen = {
+  datos: DatosProyecto;
+  pendientes: Pendiente[];
+  actividad: Actividad;
+  /** Solo para la revisión semanal: ideas nuevas del Parking lot y actividad de 7 días. */
+  semana?: { ideas: string[]; prsFusionados: number; ticketsCerrados: number };
+};
 
 /** Identidad de cada cosa avisada (para no repetir): los números (días de atraso, horas) no cuentan. */
 export const clavePendiente = (repo: string, p: Pendiente) => `${repo}|${p.tipo}${p.urgente ? "-urgente" : ""}|${p.url}`;
@@ -12,7 +18,7 @@ export const claveFoco = (repo: string, texto: string) => `${repo}|foco|${texto.
 export const claveActividad = (repo: string, url: string) => `${repo}|claude|${url}`;
 
 /** Opciones de la política de avisos: título del momento, qué es nuevo (🆕) y qué actividad ya se contó. */
-export type OpcionesResumen = { titulo?: string; nuevas?: Set<string>; actividadVista?: Set<string> };
+export type OpcionesResumen = { titulo?: string; nuevas?: Set<string>; actividadVista?: Set<string>; sinActividad?: boolean; sinProyectos?: boolean };
 
 const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -71,7 +77,7 @@ export function resumenDiario(proyectos: ParaResumen[], hoy: string, opciones: O
       items.forEach((i, n) => lineas.push(`${n + 1}. ${i.linea}`, `   → ${html(i.accion)} · ${enlace(i.url)}`));
     } else lineas.push("🟢 Nada que atender hoy");
     lineas.push("");
-    if (conActividad.length || totalTickets) {
+    if (!opciones.sinActividad && (conActividad.length || totalTickets)) {
       lineas.push("🤖 <b>Claude desde ayer</b>");
       for (const { datos, actividad: a } of conActividad) {
         const pr = (x: Actividad["fusionados"][number]) => `<a href="${html(x.url)}">#${x.numero}</a> ${html(x.titulo)}`;
@@ -86,6 +92,7 @@ export function resumenDiario(proyectos: ParaResumen[], hoy: string, opciones: O
     }
   }
 
+  if (opciones.sinProyectos) return lineas.join("\n").trimEnd();
   lineas.push("📊 <b>Proyectos</b>");
   for (const { datos } of proyectos) {
     const e = datos.estado;
