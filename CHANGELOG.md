@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/jjhoncv/guardian/compare/v0.17.0...v0.18.0) (2026-10-09)
+
+
+### Funcionalidades
+
+* **#205:** el consultor separa fallas de orquestación y de Claude; a Claude le pide el arreglo ([#206](https://github.com/jjhoncv/guardian/issues/206)) ([bd4e102](https://github.com/jjhoncv/guardian/commit/bd4e1021f3baa902959ca29d27ab5fc7373c628c))
+
 ## [0.17.0](https://github.com/jjhoncv/guardian/compare/v0.16.0...v0.17.0) (2026-10-09)
 
 
