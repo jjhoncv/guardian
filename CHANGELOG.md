@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.0](https://github.com/jjhoncv/guardian/compare/v0.16.0...v0.17.0) (2026-10-09)
+
+
+### Funcionalidades
+
+* **#196:** el consultor busca contradicciones entre capas ([#197](https://github.com/jjhoncv/guardian/issues/197)) ([597756b](https://github.com/jjhoncv/guardian/commit/597756bf77133720151fd8d7133a6ccc8e290a64))
+
+
+### Correcciones
+
+* **#199:** Claude en la nube puede agregar dependencias sin scripts de instalación ([#201](https://github.com/jjhoncv/guardian/issues/201)) ([65b08bb](https://github.com/jjhoncv/guardian/commit/65b08bbbce54fcd7b7a9fd3a286a78d6b5b2c365))
+
 ## [0.16.0](https://github.com/jjhoncv/guardian/compare/v0.15.0...v0.16.0) (2026-10-09)
 
 
