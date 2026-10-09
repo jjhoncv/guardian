@@ -17,5 +17,11 @@
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-09T00:16:41.877Z"
+  "actualizado": "2026-10-09T00:24:42.261Z",
+  "vencimientos": [
+    {
+      "secreto": "RELEASE_PLEASE_TOKEN",
+      "vence": "2027-01-02"
+    }
+  ]
 }
