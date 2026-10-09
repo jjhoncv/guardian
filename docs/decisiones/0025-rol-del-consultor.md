@@ -9,6 +9,8 @@ En Vitrina, el Claude local del Guardián revisó los PRs de Claude de la nube y
 
 ## Decisión
 
+> **Modificada por la ADR 0027 (2026-10-08):** el consultor arregla directo solo las fallas de orquestación; las de Claude las convierte en lección y se las pide con `@claude`.
+
 Tres roles:
 - **Desarrollador:** Claude de la nube. Hace los tickets y responde a los `@claude` del dueño (lo del ticket, en el mismo PR; una idea nueva, al Parking lot del proyecto).
 - **Dueño:** prueba, aprueba y decide.
