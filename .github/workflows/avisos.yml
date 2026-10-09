@@ -1,24 +1,31 @@
-# Avisos del Guardián al celular del dueño por Telegram (Fase 5). Un solo bot para todos los proyectos.
+# Avisos del Guardián al celular del dueño por Telegram (Fase 5), en sus ventanas (Lima = UTC−5):
+# lunes a sábado ☀️ 8:00 buenos días, 🌙 19:00 cierre del día y 🚨 emergencias de 8:00–9:00 y 19:00–22:00.
+# Domingo: silencio. Sin novedades no se manda nada; cada cosa se avisa una vez (memoria en la rama `avisos`).
 name: Avisos
 
 on:
   schedule:
-    - cron: "0 17 * * 1-5" # resumen diario: 12:00 en Lima, de lunes a viernes
+    - cron: "0 13 * * 1-6" # ☀️ 8:00 lunes a sábado
+    - cron: "0 0 * * 0,2-6" # 🌙 19:00 lunes a sábado (00:00 UTC del día siguiente)
+    - cron: "30 13 * * 1-6" # 🚨 8:30
+    - cron: "30 0 * * 0,2-6" # 🚨 19:30
+    - cron: "*/30 1-2 * * 0,2-6" # 🚨 20:00 a 21:30
   workflow_dispatch:
     inputs:
       aviso:
-        description: Aviso a enviar
+        description: Qué mandar (fuera de las ventanas, manana y noche llegan marcados como prueba)
         type: choice
-        options: [resumen, prueba]
-        default: resumen
-  # Los PRs que tocan los avisos mandan un mensaje de prueba (solo PRs del propio repo: los forks no reciben secretos).
+        options: [manana, noche, emergencias, prueba]
+        default: manana
+  # Los PRs que tocan los avisos mandan una prueba del «buenos días» (sin tocar la memoria real).
   pull_request:
     paths:
       - scripts/telegram.ts
+      - scripts/resumen.ts
+      - scripts/politica.ts
+      - scripts/proyectos.ts
       - scripts/grafico.ts
       - tools/avisos/**
-      - scripts/resumen.ts
-      - scripts/proyectos.ts
       - .github/workflows/avisos.yml
 
 permissions:
@@ -31,9 +38,11 @@ concurrency:
 jobs:
   avisos:
     name: avisos por Telegram
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    permissions:
+      contents: write # solo para la rama `avisos` (memoria de lo avisado); `main` está protegida
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,15 +51,60 @@ jobs:
         with:
           node-version: 24
       - run: npm ci --prefix tools/avisos --ignore-scripts
-      # El resumen sale en el horario, a mano y en los PRs que tocan los avisos (marcado como prueba).
+      - name: Memoria (rama avisos)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if ! git clone --quiet --depth 1 --branch avisos "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" memoria 2>/dev/null; then
+            git init --quiet -b avisos memoria
+            git -C memoria remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          fi
       - name: Aviso
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ github.token }}
           DUENO: ${{ github.repository_owner }}
-          AVISO: ${{ github.event_name == 'workflow_dispatch' && inputs.aviso || 'resumen' }}
-          PR: ${{ github.event.pull_request.number }}
+          MEMORIA: memoria/avisos.json
+          HORARIO: ${{ github.event.schedule }}
+          MANUAL: ${{ inputs.aviso }}
         run: |
-          if [ -n "$PR" ]; then export PRUEBA="Prueba del PR #$PR: así te llegará el resumen"; fi
+          case "$HORARIO" in
+            "0 13 * * 1-6") AVISO=manana ;;
+            "0 0 * * 0,2-6") AVISO=noche ;;
+            "") AVISO="$MANUAL"; [ "$AVISO" = prueba ] || export PRUEBA="Envío manual (vista previa: no cuenta como avisado)" ;;
+            *) AVISO=emergencias ;;
+          esac
           node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/avisos/avisos.ts "$AVISO"
+      - name: Guardar lo avisado
+        working-directory: memoria
+        run: |
+          [ -f avisos.json ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add avisos.json
+          if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
+          git commit --quiet -m "avisos: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push --quiet origin avisos
+
+  prueba:
+    name: prueba de avisos (PR)
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - run: npm ci --prefix tools/avisos --ignore-scripts
+      - env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DUENO: ${{ github.repository_owner }}
+          PRUEBA: "Prueba del PR #${{ github.event.pull_request.number }}: así llegará el «buenos días»"
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/avisos/avisos.ts manana

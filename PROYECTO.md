@@ -153,12 +153,16 @@ GitHub es la fuente de verdad de la ejecución; el guardián **copia** el estado
 
 ## 12. Ritmo
 
-| Cuándo | Qué haces | Tiempo |
-|---|---|---|
-| Lunes a viernes, refrigerio | Lees el resumen diario, revisas el preview, apruebas o comentas PRs desde la app de GitHub | 15 min |
-| Fin de semana | Revisión semanal: avance de la fase, staging, decisiones, Parking lot, aprobar release | 30 min |
+El dueño atiende al Guardián en **dos ventanas, de lunes a sábado: 8:00–9:00 y 19:00–22:00** (Lima). El domingo no lo atiende: el Guardián no lo busca; si él quiere, mira el Sheet o corre `/guardian`.
 
-**Resumen diario (mediodía):** qué hizo Claude, qué espera de ti, % de avance, color de salud.
+| Cuándo | Qué le llega por Telegram | Si no hay novedades |
+|---|---|---|
+| ☀️ 8:00, lunes a sábado | **Buenos días:** lo que espera su acción (con links), lo que hizo Claude y las curvas que cambiaron | No llega nada |
+| 🌙 19:00, lunes a sábado | **Cierre del día:** lo nuevo desde la mañana | No llega nada |
+| 📅 Sábado 8:00 | **Revisión semanal** (avance, desvío, Parking lot, releases) con las curvas de la semana | Llega igual |
+| 🚨 Dentro de las ventanas | **Emergencia:** un proyecto pasa a 🔴 o hay un rollback en producción | — (fuera de las ventanas espera a la siguiente) |
+
+Cada cosa se avisa **una sola vez**; lo que sigue pendiente aparece en el siguiente resumen con su antigüedad, sin volver a sonar. Así el Guardián da **foco**, no ruido.
 
 El plan se arma con **esta capacidad real**, no con la ideal.
 
@@ -299,7 +303,7 @@ Escenario: El guardián me avisa
 - **Datos separados por ambiente** en los proyectos: `nuevo-proyecto.sh` pregunta si staging usa sus propios datos (otra hoja, otro remitente) y deja las variables de Netlify por contexto — 2026-10-08 — en Vitrina los comentarios de prueba en staging aparecieron en producción
 - **Etapa de medición** después de la última fase: el Guardián guarda la fecha y el criterio de «Cómo sé que funcionó», recuerda revisarlo y abre el issue de decisión (seguir / achicar / parar) — 2026-10-08 — en Vitrina el desarrollo terminó y nada marca cuándo medir; candidato a la Fase 4 o 5
 - **Pronóstico y «qué pasa si» por proyecto real:** con la velocidad real (tickets cerrados por día) el tablero dice «a este ritmo terminas la fase el …» y permite simular «si paro N días» o «si saco estos tickets», antes de reprogramar — 2026-10-08 — la simulación de la Fase 4 usa un proyecto inventado para probar el tablero; el dueño preguntó si sirve para sus proyectos reales: para eso hace falta este pronóstico
-- **Aviso al instante** de lo que espera al dueño (p. ej. «Claude abrió el PR #44» en el momento, sin esperar al resumen del mediodía) — 2026-10-08 — el dueño quiere actuar rápido desde el celular; hoy llega en el resumen diario
+- ~~Aviso al instante~~ (hecho en la Fase 5 como avisos estratégicos en las ventanas del dueño) de lo que espera al dueño (p. ej. «Claude abrió el PR #44» en el momento, sin esperar al resumen del mediodía) — 2026-10-08 — el dueño quiere actuar rápido desde el celular; hoy llega en el resumen diario
 - **Prueba de punta a punta con un proyecto nuevo desde cero:** `/guardian-idea` → `nuevo-proyecto.sh` → `/guardian-planificar` → Claude desarrolla → el proyecto aparece solo en el Sheet con su Foco, su curva vs. plan original y sus badges, sin pasos a mano — 2026-10-08 — Vitrina se adaptó a mano a la Fase 4; hay que confirmar que un proyecto nuevo nace con todo el seguimiento
 - **Candidata a Fase 6 — Guardián desde el navegador:** crear y guiar un proyecto sin Claude Code en la terminal. Repo desde la plantilla `guardian-skeleton` → secretos en *Settings* (incluye un PAT con permiso de *Administration*, porque `GITHUB_TOKEN` no crea rulesets ni environments) → issue «Iniciar proyecto» donde Claude Guardián hace el Paso 0, crea el sitio y configura → la idea como **formulario en un issue** (no chat: cada respuesta levanta un contenedor) → PR con `PROYECTO.md` → planificar → tickets → Claude desarrollador; y el consultor revisando cada PR en la nube — 2026-10-08 — hoy solo la creación del proyecto y el consultor necesitan la terminal; se decide al cerrar la Fase 4 si va antes que la Fase 5
 
@@ -338,4 +342,5 @@ Escenario: El guardián me avisa
 | 2026-10-08 | Fechas tentativas del Guardián: unos **3 días por fase** (Fase 4 → 2026-10-11, Fase 5 → 2026-10-14). La fecha es tentativa; el avance real son los tickets y escenarios, y el tablero compara los dos | El dueño quiere ver tiempo vs. trabajo en un caso real |
 | 2026-10-08 | **Cierre de la Fase 4.** E5 probado con el Guardián y Vitrina en el Sheet de producción. Sigue la Fase 5 (Empuje); la Fase 6 (navegador) queda candidata | Avance del Guardián: 5 de 6 escenarios (83 %) |
 | 2026-10-08 | Fase 5: los avisos salen del repo del Guardián con un solo bot de Telegram (`TELEGRAM_BOT_TOKEN` secreto, `TELEGRAM_CHAT_ID` variable) y leen el estado de todos los proyectos. Resumen 12:00 de lunes a viernes y recordatorio sábado 9:00 (Lima) | Un solo lugar para las llaves, como el Sheet; las horas siguen el ritmo de la sección 12 |
+| 2026-10-08 | Avisos **estratégicos**: solo en las ventanas del dueño (L–S 8–9 y 19–22, Lima), ☀️ buenos días, 🌙 cierre del día y 🚨 emergencias; sin novedades no se manda nada; cada cosa una vez (memoria en la rama `avisos`); domingo en silencio | Si el Guardián escribe a cada rato pierde el foco; el dueño fijó sus horarios reales |
 | 2026-10-06 | `main` exige **1 aprobación**: los PRs de `claude[bot]` esperan al dueño; el dueño (admin) puede fusionar los suyos sin auto-aprobarse | Cierra la ADR 0009; Claude no puede fusionar ni saltarse la regla |
