@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.0](https://github.com/jjhoncv/guardian/compare/v0.14.0...v0.15.0) (2026-10-09)
+
+
+### Funcionalidades
+
+* **#182:** envío de avisos a Telegram ([#189](https://github.com/jjhoncv/guardian/issues/189)) ([58d64aa](https://github.com/jjhoncv/guardian/commit/58d64aa645b913c0a2a5a96f35fe2b8e0052b666))
+* **#183:** resumen diario por Telegram ([#191](https://github.com/jjhoncv/guardian/issues/191)) ([eed13cd](https://github.com/jjhoncv/guardian/commit/eed13cde50136cd26f60c0e25eb8990f621eba46))
+* **#184:** avisos estratégicos en tus ventanas ([#192](https://github.com/jjhoncv/guardian/issues/192)) ([e3811af](https://github.com/jjhoncv/guardian/commit/e3811afe20ae7bcba3b949e18fd06d5e764a8182))
+
 ## [0.14.0](https://github.com/jjhoncv/guardian/compare/v0.13.0...v0.14.0) (2026-10-08)
 
 
