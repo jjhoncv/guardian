@@ -6,6 +6,14 @@ import { html } from "./telegram.ts";
 
 export type ParaResumen = { datos: DatosProyecto; pendientes: Pendiente[]; actividad: Actividad };
 
+/** Identidad de cada cosa avisada (para no repetir): los números (días de atraso, horas) no cuentan. */
+export const clavePendiente = (repo: string, p: Pendiente) => `${repo}|${p.tipo}${p.urgente ? "-urgente" : ""}|${p.url}`;
+export const claveFoco = (repo: string, texto: string) => `${repo}|foco|${texto.replace(/\d+/g, "#")}`;
+export const claveActividad = (repo: string, url: string) => `${repo}|claude|${url}`;
+
+/** Opciones de la política de avisos: título del momento, qué es nuevo (🆕) y qué actividad ya se contó. */
+export type OpcionesResumen = { titulo?: string; nuevas?: Set<string>; actividadVista?: Set<string> };
+
 const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 /** Fecha y hora de Lima (UTC−5, sin horario de verano). */
@@ -22,13 +30,14 @@ const enlace = (url: string) => `<a href="${html(url)}">abrir</a>`;
 // Prioridad: lo que rompe o bloquea primero; lo que solo informa al final.
 const PRIORIDAD = { alerta: 0, deploy: 1, prUrgente: 2, rojo: 3, gris: 4, pregunta: 5, pr: 6, amarillo: 7, release: 8, fase: 9 } as const;
 
-export function resumenDiario(proyectos: ParaResumen[], hoy: string): string {
+export function resumenDiario(proyectos: ParaResumen[], hoy: string, opciones: OpcionesResumen = {}): string {
+  const nueva = (clave: string) => (opciones.nuevas?.has(clave) ? "🆕 " : "");
   const activos = proyectos.filter((p) => !p.datos.estado?.salud.pausa);
   const items = activos.flatMap(({ datos, pendientes }) => {
     const proyecto = nombre(datos.repo);
     const desdePendientes = pendientes.map((p) => ({
       prioridad: p.tipo === "pr" ? (p.urgente ? PRIORIDAD.prUrgente : PRIORIDAD.pr) : PRIORIDAD[p.tipo],
-      linea: `${p.tipo === "pr" && p.urgente ? "⏰ " : ""}${html(proyecto)} · ${html(p.texto)}`,
+      linea: `${nueva(clavePendiente(datos.repo, p))}${p.tipo === "pr" && p.urgente ? "⏰ " : ""}${html(proyecto)} · ${html(p.texto)}`,
       accion: p.accion,
       url: p.url,
     }));
@@ -38,7 +47,7 @@ export function resumenDiario(proyectos: ParaResumen[], hoy: string): string {
       .filter((f) => f[0] !== "🟢" && !f[4].includes("/pull/"))
       .map((f) => ({
         prioridad: f[0] === "🔴" ? PRIORIDAD.rojo : f[0] === "⚫" ? PRIORIDAD.gris : PRIORIDAD.amarillo,
-        linea: `${f[0]} ${html(proyecto)} · ${html(f[2])}`,
+        linea: `${nueva(claveFoco(datos.repo, f[2]))}${f[0]} ${html(proyecto)} · ${html(f[2])}`,
         accion: f[3],
         url: f[4],
       }));
@@ -46,11 +55,14 @@ export function resumenDiario(proyectos: ParaResumen[], hoy: string): string {
   });
   items.sort((a, b) => a.prioridad - b.prioridad);
 
-  const conActividad = activos.filter(({ actividad: a }) => a.fusionados.length || a.abiertos.length);
+  // La actividad ya contada en un aviso anterior no se repite.
+  const sinVista = (repo: string, xs: Actividad["fusionados"]) => xs.filter((x) => !opciones.actividadVista?.has(claveActividad(repo, x.url)));
+  const activos2 = activos.map((p) => ({ ...p, actividad: { ...p.actividad, fusionados: sinVista(p.datos.repo, p.actividad.fusionados), abiertos: sinVista(p.datos.repo, p.actividad.abiertos) } }));
+  const conActividad = activos2.filter(({ actividad: a }) => a.fusionados.length || a.abiertos.length);
   const tickets = activos.filter((p) => p.actividad.ticketsCerrados > 0);
   const totalTickets = tickets.reduce((n, p) => n + p.actividad.ticketsCerrados, 0);
 
-  const lineas = [`🛡️ <b>Guardián</b> · ${enLima(hoy)}`, ""];
+  const lineas = [`${opciones.titulo ?? "🛡️ <b>Guardián</b>"} · ${enLima(hoy)}`, ""];
   if (!items.length && !conActividad.length && !totalTickets) {
     lineas.push("🟢 Todo en orden, sin novedades", "");
   } else {

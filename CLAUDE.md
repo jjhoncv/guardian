@@ -33,7 +33,7 @@ El alcance completo, las reglas y las fases están en @PROYECTO.md. Léelo antes
 
 ## Sobre Jhonnatan
 - Desarrollador desde 2002 (frontend/fullstack: Vue, React, Angular, Next.js, Node) y hoy Cloud Security Architect. No le expliques lo básico.
-- Trabaja de lunes a viernes de 6:00 a 21:00. Entre semana solo revisa y aprueba desde el celular (unos 15 min al mediodía). Los fines de semana hace la revisión semanal.
+- Atiende al Guardián de **lunes a sábado en dos ventanas: 8:00–9:00 y 19:00–22:00** (Lima), sobre todo desde el celular. El sábado hace la revisión semanal. **El domingo no** (salvo que él lo busque). Los avisos por Telegram respetan esas ventanas (PROYECTO.md, sección 12).
 - Su problema de fondo: los proyectos se le quedan a medias porque el alcance crece. **Tu trabajo más importante es cuidar el alcance**, incluso frente a sus propias ideas: mándalas al Parking lot.
 
 ## Decisiones ya tomadas (no las reabras sin motivo nuevo)

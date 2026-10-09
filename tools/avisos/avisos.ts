@@ -1,40 +1,50 @@
-// Avisos del Guardián por Telegram (Fase 5). Uso (CI): node tools/avisos/avisos.ts <prueba|resumen>
-// env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, GITHUB_TOKEN, DUENO; PRUEBA=«texto» antepone una marca de prueba.
+// Avisos del Guardián por Telegram (Fase 5), con la política de scripts/politica.ts.
+// Uso (CI): node tools/avisos/avisos.ts <manana|noche|emergencias|prueba>
+// env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, GITHUB_TOKEN, DUENO; MEMORIA=archivo JSON de lo ya avisado
+// (rama `avisos`); PRUEBA=«texto» marca el mensaje como prueba y no respeta las ventanas.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { svgCurva } from "../../scripts/grafico.ts";
 import { curvaProyecto, desvioTexto } from "../../scripts/hoja.ts";
+import { decidir, type Memoria, type Momento } from "../../scripts/politica.ts";
 import { actividadDe, clienteGitHub, leerCrudo, leerProyecto, pendientesDe, reposDelDueno } from "../../scripts/proyectos.ts";
-import { resumenDiario, type ParaResumen } from "../../scripts/resumen.ts";
+import type { ParaResumen } from "../../scripts/resumen.ts";
 import { enviarFoto, enviarTelegram, html } from "../../scripts/telegram.ts";
 import { aPng } from "./png.ts";
 
-const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chat, GITHUB_TOKEN, DUENO, PRUEBA } = process.env;
+const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chat, GITHUB_TOKEN, DUENO, PRUEBA, MEMORIA } = process.env;
 if (!token || !chat) throw new Error("Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID");
 const telegram = { token, chat };
-const marca = PRUEBA ? `🧪 <i>${html(PRUEBA)}</i>\n\n` : "";
-
-async function leerTodo(hoy: string): Promise<ParaResumen[]> {
-  if (!GITHUB_TOKEN || !DUENO) throw new Error("Faltan GITHUB_TOKEN o DUENO");
-  const github = clienteGitHub(GITHUB_TOKEN);
-  return Promise.all(
-    (await reposDelDueno(github, DUENO)).map(async (repo) => {
-      const [datos, crudo] = await Promise.all([leerProyecto(github, repo), leerCrudo(github, repo, hoy)]);
-      return { datos, pendientes: pendientesDe(crudo, hoy), actividad: actividadDe(crudo, hoy) };
-    }),
-  );
-}
-
 const aviso = process.argv[2] ?? "prueba";
-if (aviso === "resumen") {
-  const hoy = new Date().toISOString();
-  const proyectos = await leerTodo(hoy);
-  await enviarTelegram(marca + resumenDiario(proyectos, hoy), telegram);
-  // Después del texto, la curva de cada proyecto activo vs. su plan original (si tiene fechas).
-  for (const { datos } of proyectos.filter((p) => !p.datos.estado?.salud.pausa)) {
-    const curva = curvaProyecto(datos, hoy);
-    if (!curva) continue;
-    await enviarFoto(aPng(svgCurva(curva)), `${curva.titulo}: ${desvioTexto(curva.desvio)} vs. el plan original`, telegram);
-  }
-} else {
-  await enviarTelegram(marca + "🛡️ <b>Guardián conectado</b> · los avisos de la Fase 5 llegarán aquí.", telegram);
+
+if (aviso === "prueba") {
+  await enviarTelegram(`${PRUEBA ? `🧪 <i>${html(PRUEBA)}</i>\n\n` : ""}🛡️ <b>Guardián conectado</b> · los avisos de la Fase 5 llegarán aquí.`, telegram);
+  console.log("Prueba enviada.");
+  process.exit(0);
 }
-console.log(`Aviso «${aviso}» enviado a Telegram.`);
+
+if (!GITHUB_TOKEN || !DUENO) throw new Error("Faltan GITHUB_TOKEN o DUENO");
+const github = clienteGitHub(GITHUB_TOKEN);
+// En una prueba, la hora es la de la ventana pedida (para ver el mensaje aunque sea otra hora).
+const hoy = PRUEBA ? new Date(`${new Date().toISOString().slice(0, 10)}T${aviso === "noche" ? "19" : "08"}:05:00-05:00`).toISOString() : new Date().toISOString();
+const proyectos: ParaResumen[] = await Promise.all(
+  (await reposDelDueno(github, DUENO)).map(async (repo) => {
+    const [datos, crudo] = await Promise.all([leerProyecto(github, repo), leerCrudo(github, repo, hoy)]);
+    return { datos, pendientes: pendientesDe(crudo, hoy), actividad: actividadDe(crudo, hoy) };
+  }),
+);
+
+const vacia: Memoria = { enviados: {}, colores: {}, curvas: {} };
+const memoria: Memoria = MEMORIA && existsSync(MEMORIA) ? { ...vacia, ...JSON.parse(readFileSync(MEMORIA, "utf8")) } : vacia;
+const d = decidir(proyectos, memoria, hoy, aviso as Momento);
+if (!d.texto) {
+  console.log(`«${aviso}»: sin novedades, no se manda nada.`);
+} else {
+  await enviarTelegram(`${PRUEBA ? `🧪 <i>${html(PRUEBA)}</i>\n\n` : ""}${d.texto}`, telegram);
+  for (const repo of d.curvas) {
+    const curva = curvaProyecto(proyectos.find((p) => p.datos.repo === repo)!.datos, hoy);
+    if (curva) await enviarFoto(aPng(svgCurva(curva)), `${curva.titulo}: ${desvioTexto(curva.desvio)} vs. el plan original`, telegram);
+  }
+  console.log(`«${aviso}» enviado: ${d.curvas.length} curvas.`);
+}
+// Lo avisado se guarda solo fuera de las pruebas (así una prueba no «gasta» un aviso real).
+if (MEMORIA && !PRUEBA) writeFileSync(MEMORIA, JSON.stringify(d.memoria, null, 2) + "\n");
