@@ -19,7 +19,7 @@
 |---|---|---|
 | 👤 | **Tú** (dueño) | Defines la idea, pruebas en el preview, apruebas y decides |
 | 🤖 | **Claude desarrollador** | Claude en la nube, dentro de cada proyecto: toma los tickets, escribe pruebas y código, y abre PRs chicos |
-| 🧑‍🏫 | **Consultor** | Claude Code en tu terminal, en este repo: revisa lo que hizo Claude desarrollador, corrige y lo vuelve **lección** para que no se repita ([`docs/consultor/`](docs/consultor/)) |
+| 🧑‍🏫 | **Consultor** | Claude Code en tu terminal, en este repo: revisa lo que hizo Claude desarrollador; arregla las fallas de la plataforma y las de Claude las vuelve **lección** y se las pide, para comprobar que aprendió ([`docs/consultor/`](docs/consultor/)) |
 | 🛡️ | **Guardián** | Este repo: los workflows y las reglas que cuidan el alcance, las fases y los ambientes |
 | 📦 | **[guardian-skeleton](https://github.com/jjhoncv/guardian-skeleton)** | Con lo que nace cada proyecto: `CLAUDE.md`, lecciones y plantillas |
 
@@ -58,7 +58,7 @@ flowchart TD
 | **2. Crear** | Tú, en la terminal | `scripts/nuevo-proyecto.sh vencimientos --alcance ~/Projects/ideas/vencimientos/PROYECTO.md`: te pide los tokens ocultos y crea todo | Repo `vencimientos`, staging en línea con el título «Vencimientos» |
 | **3. Planificar** | Tú + `/guardian-planificar` en el proyecto | Convierte el alcance en escenarios («Dado que la hoja tiene la etiqueta X que vence mañana… entonces la veo en rojo») y tickets por fase | Un PR de plan; al fusionarlo, los tickets en el tablero y Claude con el primero |
 | **4. Desarrollar** | Claude desarrollador | Toma solo el primer ticket de la fase: pruebas primero, código, preview. Abre el PR en dos niveles (**En simple** + detalle técnico). Si le falta algo tuyo (una cuenta, un permiso), te lo pide en el ticket y espera | PR con preview y checks en verde |
-| **5. Revisar** | Consultor (`/guardian-consultor`) | Revisa seguridad, alcance y que el preview funcione. Si corrige algo, lo hace en el mismo PR con un commit `(consultor)` y deja la **lección** para que Claude no lo repita | Commits `(consultor)` y lecciones nuevas |
+| **5. Revisar** | Consultor (`/guardian-consultor`) | Revisa seguridad, alcance y que el preview funcione. Si la falla es de la plataforma, la arregla en el Guardián o el esqueleto; si es de Claude, escribe la **lección** y se la pide con `@claude` en el PR, así se comprueba que aprendió | Lecciones nuevas y validadas |
 | **6. Aprobar** | Tú | Pruebas en el preview desde el celular → **Approve** → **Squash and merge**. Al fusionar, Claude toma el siguiente ticket solo | El ticket en *Hecho*; el siguiente, en camino |
 | **7. Release** | Tú | Fusionas el PR de release y apruebas el deploy a producción. Si el smoke test falla, vuelve atrás solo y te abre un issue | La versión nueva en producción |
 | **8. Cierre de fase** | Tú | Cuando la fase queda sin tickets, Claude se detiene y avisa. Revisas el Parking lot, cierras el milestone y abres la fase siguiente (o cierras el proyecto comparando con «cómo sé que funcionó») | La fase siguiente, o un proyecto terminado |

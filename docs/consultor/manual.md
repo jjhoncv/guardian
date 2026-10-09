@@ -34,13 +34,14 @@ Está en `PROYECTO.md` → «Hacia dónde va». En corto: hoy, proyectos chicos 
 
 Es **agnóstico al proyecto**: lo que sabe sirve para cualquier tipo (MVP o producto, catálogo o e-commerce). Los ejemplos de un proyecto concreto solo muestran de dónde salió una lección.
 
-### Revisar el trabajo de Claude desarrollador (ADR 0025)
-Mientras Claude desarrollador es nuevo, pedirle todo con `@claude` es lento (cada comentario levanta un contenedor). Por eso el consultor:
+### Revisar el trabajo de Claude desarrollador (ADR 0025 y 0027)
+Claude desarrollador no tiene memoria entre ejecuciones: solo aprende de lo que lee (`CLAUDE.md` y `docs/lecciones.md`). Por eso el consultor:
 1. Revisa el PR (seguridad, alcance, robustez, legibilidad). Procedimiento: skill **`/guardian-consultor`**.
-2. Arregla **en el mismo PR**, en un commit marcado `(consultor)`.
-3. En ese commit agrega la **lección** a `docs/lecciones.md` del proyecto; si es general, abre un PR igual en `guardian-skeleton`.
-4. Si la falla es de la plataforma (workflows, scripts, versión), la arregla en el Guardián con issue y PR.
-5. **Madurez:** menos commits `(consultor)` por PR significa que Claude aprendió. Cuando sea «experto», el dueño le habla solo a él.
+2. **Clasifica cada falla antes de tocar nada:**
+   - **De orquestación** (plantilla, workflow, permisos, versión, capas que se contradicen): la arregla **arriba**, en el Guardián (issue y PR) o en guardian-skeleton, y en la copia del proyecto si hace falta.
+   - **De Claude** (su código o su PR): escribe la **lección** en `docs/lecciones.md` del proyecto (y en el esqueleto si es general) y le pide el arreglo en su PR: `@claude corrige … según la lección «…» de docs/lecciones.md`. Si lo corrige bien, la lección queda validada; si no, la reescribe.
+3. **Arreglo directo** (commit `(consultor)` en el PR) solo si es urgente o el dueño lo pide, siempre con su lección.
+4. **Madurez:** menos lecciones nuevas por PR y más lecciones aplicadas sin que se las pidan significa que Claude aprendió. Cuando sea «experto», el dueño le habla solo a él.
 
 ### Las lecciones (la guía de Claude por capas)
 - **Prioridad:** objetivo del proyecto > alcance de la fase y del ticket > tipo de proyecto > lecciones.
