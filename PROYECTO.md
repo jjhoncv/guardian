@@ -162,7 +162,7 @@ El dueño atiende al Guardián en **dos ventanas, de lunes a sábado: 8:00–9:0
 | 📅 Sábado 8:00 | **Revisión semanal** (en lugar del «buenos días»): lo que espera tu acción, cómo terminó la semana con la **tendencia del desvío**, lo que hizo Claude en 7 días, las **ideas nuevas del Parking lot** (3 por proyecto y el link a todas) y las curvas | Llega igual |
 | 🚨 Dentro de las ventanas | **Emergencia:** un proyecto pasa a 🔴 o hay un rollback en producción | — (fuera de las ventanas espera a la siguiente) |
 
-Las horas son las del **primer intento** de cada ventana: GitHub atrasa los cron en horas de carga, así que el Guardián prueba cada 15 minutos (8:07–8:52 y 19:07–21:52) y manda el aviso del día en el primero que corre (#210). Si GitHub no corre ninguno dentro de la ventana, ese aviso se pierde.
+Las horas son las del **primer intento** de cada ventana: el Guardián prueba cada 15 minutos (8:07–8:52 y 19:07–21:52) y manda el aviso del día en el primero. Los intentos los dispara una **función programada de Netlify**, porque GitHub atrasa o salta sus cron (#210, #214, ADR 0028).
 
 Cada cosa se avisa **una sola vez**; lo que sigue pendiente aparece en el siguiente resumen con su antigüedad, sin volver a sonar. Así el Guardián da **foco**, no ruido.
 
@@ -351,5 +351,6 @@ Escenario: El guardián me avisa
 | 2026-10-08 | **Cierre de la Fase 4.** E5 probado con el Guardián y Vitrina en el Sheet de producción. Sigue la Fase 5 (Empuje); la Fase 6 (navegador) queda candidata | Avance del Guardián: 5 de 6 escenarios (83 %) |
 | 2026-10-08 | Fase 5: los avisos salen del repo del Guardián con un solo bot de Telegram (`TELEGRAM_BOT_TOKEN` secreto, `TELEGRAM_CHAT_ID` variable) y leen el estado de todos los proyectos. Resumen 12:00 de lunes a viernes y recordatorio sábado 9:00 (Lima) | Un solo lugar para las llaves, como el Sheet; las horas siguen el ritmo de la sección 12 |
 | 2026-10-08 | Avisos **estratégicos**: solo en las ventanas del dueño (L–S 8–9 y 19–22, Lima), ☀️ buenos días, 🌙 cierre del día y 🚨 emergencias; sin novedades no se manda nada; cada cosa una vez (memoria en la rama `avisos`); domingo en silencio | Si el Guardián escribe a cada rato pierde el foco; el dueño fijó sus horarios reales |
+| 2026-10-10 | Los avisos los **despierta Netlify** (función programada en el sitio del Guardián, token fine-grained solo con Actions: write), no el cron de GitHub (ADR 0028) | De 16 intentos programados, GitHub corrió uno, 7 h tarde; Netlify ya está en el stack y corre a la hora |
 | 2026-10-08 | El consultor **clasifica cada falla**: la de orquestación la arregla en el Guardián o el esqueleto; la de Claude la arregla en su PR mientras es nuevo y deja lección; en los PRs siguientes comprueba que la aplique solo (ADR 0027) | Claude solo aprende de lo que lee; el consultor lo ayuda como mentor hasta que deja de necesitarlo |
 | 2026-10-06 | `main` exige **1 aprobación**: los PRs de `claude[bot]` esperan al dueño; el dueño (admin) puede fusionar los suyos sin auto-aprobarse | Cierra la ADR 0009; Claude no puede fusionar ni saltarse la regla |

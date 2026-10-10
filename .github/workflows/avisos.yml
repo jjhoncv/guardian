@@ -5,18 +5,16 @@
 name: Avisos
 
 on:
-  schedule:
-    # GitHub atrasa (o descarta) los cron en horas de carga, sobre todo en la hora en punto (#210): por eso corre
-    # cada 15 min dentro de las ventanas y fuera de la hora en punto. El script decide qué toca con la hora real:
-    # la primera corrida de la ventana manda el ☀️ (L–V) / 📅 (sábado) / 🌙 de hoy; las demás, solo emergencias.
-    - cron: "7,22,37,52 13 * * 1-6" # 8:07–8:52 Lima, lunes a sábado
-    - cron: "7,22,37,52 0-2 * * 0,2-6" # 19:07–21:52 Lima, lunes a sábado (00–02 UTC del día siguiente)
+  # Lo despierta a la hora exacta la función programada de Netlify (netlify/functions/despertador.mts, ADR 0028)
+  # con `aviso=auto`: GitHub no corre sus propios cron a tiempo (#210, #214). El script decide qué toca con la
+  # hora real: el primer intento de la ventana manda el ☀️ (L–V) / 📅 (sábado) / 🌙 de hoy; los demás, solo
+  # emergencias; nunca se duplica.
   workflow_dispatch:
     inputs:
       aviso:
         description: Qué mandar (fuera de las ventanas, manana y noche llegan marcados como prueba)
         type: choice
-        options: [manana, noche, semanal, emergencias, prueba]
+        options: [manana, noche, semanal, emergencias, prueba, auto]
         default: manana
   # Los PRs que tocan los avisos mandan una prueba de la revisión semanal, la más completa (sin tocar la memoria real).
   pull_request:
@@ -69,10 +67,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DUENO: ${{ github.repository_owner }}
           MEMORIA: memoria/avisos.json
-          HORARIO: ${{ github.event.schedule }}
           MANUAL: ${{ inputs.aviso }}
         run: |
-          if [ -n "$HORARIO" ]; then
+          # «auto» (el despertador de Netlify): lo real. Lo demás, a mano: vista previa que no cuenta.
+          if [ "$MANUAL" = auto ]; then
             AVISO=auto
           else
             AVISO="$MANUAL"; [ "$AVISO" = prueba ] || export PRUEBA="Envío manual (vista previa: no cuenta como avisado)"
