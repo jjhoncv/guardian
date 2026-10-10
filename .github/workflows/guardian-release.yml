@@ -66,10 +66,14 @@ jobs:
           include-hidden-files: true
           # El dueño puede aprobar producción días después (revisa los fines de semana).
           retention-days: 14
+          # netlify/functions: `netlify deploy --no-build` vuelve a empaquetar las funciones del proyecto desde ahí
+          # (#216). Solo se empaquetan; el deploy no ejecuta código del repo.
           path: |
             netlify.toml
             .netlify
             !.netlify/plugins
+            netlify/functions
+            !netlify/functions/**/*.test.ts
 
   produccion:
     name: deploy a producción

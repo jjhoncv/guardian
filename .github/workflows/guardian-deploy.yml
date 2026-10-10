@@ -42,10 +42,14 @@ jobs:
           name: sitio
           include-hidden-files: true
           retention-days: 1
+          # netlify/functions: `netlify deploy --no-build` vuelve a empaquetar las funciones del proyecto desde ahí
+          # (#216). Solo se empaquetan; el deploy no ejecuta código del repo.
           path: |
             netlify.toml
             .netlify
             !.netlify/plugins
+            netlify/functions
+            !netlify/functions/**/*.test.ts
 
   deploy:
     name: deploy a Netlify
