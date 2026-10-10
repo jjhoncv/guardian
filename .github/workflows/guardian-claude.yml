@@ -59,10 +59,13 @@ jobs:
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*)"
             --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit. Para agregar una dependencia usa npm install --ignore-scripts --save-exact <paquete> (sin scripts de instalación) y explica en el PR por qué hace falta."
 
-  # Siguiente tarea sola: al fusionar un PR, elige el ticket con el script de esta versión del Guardián.
+  # Siguiente tarea sola: al fusionar un PR, o al cerrar el dueño una fase (milestone), elige el ticket con el
+  # script de esta versión del Guardián. Al cerrar una fase, la fase actual pasa a ser la siguiente (#204).
   elegir:
     name: siguiente ticket
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'milestone' && github.event.action == 'closed')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
@@ -75,6 +78,7 @@ jobs:
     steps:
       # Si el PR traía el plan, «Tickets del plan» corre a la vez: espera a que cree los tickets (#200).
       - name: esperar los tickets del plan
+        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}

@@ -21,7 +21,7 @@ export function elegirSiguiente(e: Estado): Eleccion {
     .sort((a, b) => Number(a.titulo.match(/\d+/)![0]) - Number(b.titulo.match(/\d+/)![0]))[0];
   if (!faseActual) return { motivo: "No quedan tickets abiertos en ninguna fase." };
   if (faseActual.abiertos === 0) {
-    return { motivo: `«${faseActual.titulo}» está completa: ciérrala (milestone y CLAUDE.md) para que Claude pase a la siguiente fase.` };
+    return { motivo: `«${faseActual.titulo}» está completa: actualiza la fase en CLAUDE.md y cierra el milestone; al cerrarlo, Claude toma solo el primer ticket de la siguiente.` };
   }
   const enCurso = new Set(e.prsDeClaude.flatMap((p) => p.cierra));
   const libre = e.issues
