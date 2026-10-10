@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { despertar } from "./despertador";
+import { despertar } from "./despertar";
 
 describe("despertador de los avisos (ADR 0028)", () => {
   it("pide a GitHub correr avisos.yml en main con aviso=auto", async () => {
