@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.2](https://github.com/jjhoncv/guardian/compare/v0.18.1...v0.18.2) (2026-10-10)
+
+
+### Correcciones
+
+* **#216:** la función despertador llega a producción ([#217](https://github.com/jjhoncv/guardian/issues/217)) ([7600eb7](https://github.com/jjhoncv/guardian/commit/7600eb768d8f9568bc0c4ae0317235d1c63d355e))
+
 ## [0.18.1](https://github.com/jjhoncv/guardian/compare/v0.18.0...v0.18.1) (2026-10-10)
 
 
