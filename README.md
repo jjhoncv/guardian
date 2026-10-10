@@ -61,7 +61,7 @@ flowchart TD
 | **5. Revisar** | Consultor (`/guardian-consultor`) | Revisa seguridad, alcance y que el preview funcione. Si la falla es de la plataforma, la arregla en el Guardián o el esqueleto; si es de Claude, la arregla en el PR con un commit `(consultor)` y deja la **lección**. Con el tiempo, cada vez menos commits `(consultor)` | Lecciones nuevas; Claude cada vez más solo |
 | **6. Aprobar** | Tú | Pruebas en el preview desde el celular → **Approve** → **Squash and merge**. Al fusionar, Claude toma el siguiente ticket solo | El ticket en *Hecho*; el siguiente, en camino |
 | **7. Release** | Tú | Fusionas el PR de release y apruebas el deploy a producción. Si el smoke test falla, vuelve atrás solo y te abre un issue | La versión nueva en producción |
-| **8. Cierre de fase** | Tú | Cuando la fase queda sin tickets, Claude se detiene y avisa. Revisas el Parking lot, cierras el milestone y abres la fase siguiente (o cierras el proyecto comparando con «cómo sé que funcionó») | La fase siguiente, o un proyecto terminado |
+| **8. Cierre de fase** | Tú | Cuando la fase queda sin tickets, Claude se detiene y avisa. Revisas el Parking lot y cierras el milestone: al cerrarlo, Claude toma solo el primer ticket de la fase siguiente (o cierras el proyecto comparando con «cómo sé que funcionó») | La fase siguiente, o un proyecto terminado |
 
 Si en el camino se te ocurre algo nuevo («¿y si avisa por WhatsApp?»), no entra al proyecto: va al **Parking lot** y lo decides al cerrar la fase.
 
