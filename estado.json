@@ -17,8 +17,12 @@
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-10T16:08:52.518Z",
+  "actualizado": "2026-10-10T16:28:39.709Z",
   "vencimientos": [
+    {
+      "secreto": "GUARDIAN_DESPERTADOR_TOKEN",
+      "vence": "2027-01-08"
+    },
     {
       "secreto": "NETLIFY_AUTH_TOKEN",
       "vence": "2027-01-02"
