@@ -31,3 +31,4 @@ Una ADR corta por decisión: qué se decidió y por qué. Copia `0000-plantilla.
 - [0025. Rol del consultor: arregla rápido y lo vuelve lección de Claude](0025-rol-del-consultor.md)
 - [0026. Visibilidad: un solo Sheet del Guardián y badges vivos en el README](0026-visibilidad.md)
 - [0027. El consultor separa fallas de orquestación y de Claude; a Claude le pide el arreglo](0027-consultor-pide-el-arreglo.md)
+- [0028. Los avisos los despierta Netlify, no el cron de GitHub](0028-despertador-netlify.md)
