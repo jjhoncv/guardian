@@ -6,12 +6,11 @@ name: Avisos
 
 on:
   schedule:
-    - cron: "0 13 * * 1-5" # ☀️ 8:00 lunes a viernes
-    - cron: "0 13 * * 6" # 📅 8:00 sábado: revisión semanal (llega siempre)
-    - cron: "0 0 * * 0,2-6" # 🌙 19:00 lunes a sábado (00:00 UTC del día siguiente)
-    - cron: "30 13 * * 1-6" # 🚨 8:30
-    - cron: "30 0 * * 0,2-6" # 🚨 19:30
-    - cron: "*/30 1-2 * * 0,2-6" # 🚨 20:00 a 21:30
+    # GitHub atrasa (o descarta) los cron en horas de carga, sobre todo en la hora en punto (#210): por eso corre
+    # cada 15 min dentro de las ventanas y fuera de la hora en punto. El script decide qué toca con la hora real:
+    # la primera corrida de la ventana manda el ☀️ (L–V) / 📅 (sábado) / 🌙 de hoy; las demás, solo emergencias.
+    - cron: "7,22,37,52 13 * * 1-6" # 8:07–8:52 Lima, lunes a sábado
+    - cron: "7,22,37,52 0-2 * * 0,2-6" # 19:07–21:52 Lima, lunes a sábado (00–02 UTC del día siguiente)
   workflow_dispatch:
     inputs:
       aviso:
@@ -73,13 +72,11 @@ jobs:
           HORARIO: ${{ github.event.schedule }}
           MANUAL: ${{ inputs.aviso }}
         run: |
-          case "$HORARIO" in
-            "0 13 * * 1-5") AVISO=manana ;;
-            "0 13 * * 6") AVISO=semanal ;;
-            "0 0 * * 0,2-6") AVISO=noche ;;
-            "") AVISO="$MANUAL"; [ "$AVISO" = prueba ] || export PRUEBA="Envío manual (vista previa: no cuenta como avisado)" ;;
-            *) AVISO=emergencias ;;
-          esac
+          if [ -n "$HORARIO" ]; then
+            AVISO=auto
+          else
+            AVISO="$MANUAL"; [ "$AVISO" = prueba ] || export PRUEBA="Envío manual (vista previa: no cuenta como avisado)"
+          fi
           node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/avisos/avisos.ts "$AVISO"
       - name: Guardar lo avisado
         working-directory: memoria

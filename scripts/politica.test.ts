@@ -30,9 +30,30 @@ describe("ventanas del dueño: L–S 8:00–9:00 y 19:00–22:00 (Lima); domingo
   it("momento según la hora: buenos días, cierre del día o solo emergencias", () => {
     expect(momentoDe(lima("2026-10-12", "08:00"))).toBe("manana");
     expect(momentoDe(lima("2026-10-12", "19:00"))).toBe("noche");
-    expect(momentoDe(lima("2026-10-12", "20:30"))).toBe("emergencias");
+    expect(momentoDe(lima("2026-10-17", "08:07"))).toBe("semanal"); // sábado
     expect(momentoDe(lima("2026-10-12", "12:00"))).toBe("nada");
     expect(momentoDe(lima("2026-10-18", "08:00"))).toBe("nada");
+  });
+
+  it("GitHub atrasa los cron: el ☀️ / 🌙 sale en la primera corrida de la ventana que aún no lo mandó (#210)", () => {
+    expect(momentoDe(lima("2026-10-12", "08:52"))).toBe("manana");
+    expect(momentoDe(lima("2026-10-12", "21:37"))).toBe("noche");
+    const yaHoy: Memoria = { ...vacia, hechos: { "2026-10-12|manana": "x", "2026-10-12|noche": "x" } };
+    expect(momentoDe(lima("2026-10-12", "08:22"), yaHoy)).toBe("emergencias");
+    expect(momentoDe(lima("2026-10-12", "20:30"), yaHoy)).toBe("emergencias");
+    // El 🌙 de las 21:00 en Lima ya es el día siguiente en UTC: cuenta para el día de Lima.
+    const yaViernes: Memoria = { ...vacia, hechos: { "2026-10-16|noche": "x" } };
+    expect(momentoDe(lima("2026-10-16", "21:07"), yaViernes)).toBe("emergencias");
+    expect(momentoDe(lima("2026-10-13", "08:07"), yaHoy)).toBe("manana"); // otro día
+  });
+
+  it("el ☀️ / 🌙 / 📅 del día se marca como hecho aunque no haya novedades (una vez por día)", () => {
+    const r = decidir([p(salud("verde"))], vacia, lima("2026-10-12", "08:07"));
+    expect(r.texto).toContain("Buenos días"); // primera vez: el cambio de color cuenta como novedad
+    const otra = decidir([p(salud("verde"))], r.memoria, lima("2026-10-13", "08:07"));
+    expect(otra.texto).toBeNull();
+    expect(otra.memoria.hechos).toHaveProperty("2026-10-13|manana");
+    expect(momentoDe(lima("2026-10-13", "08:22"), otra.memoria)).toBe("emergencias");
   });
 });
 
@@ -61,7 +82,8 @@ describe("qué se manda (y qué no)", () => {
 
   it("emergencia: un proyecto que pasa a 🔴 avisa al momento, una sola vez", () => {
     const rojo = salud("rojo", [{ gravedad: "rojo", texto: "«Fase 2» lleva 5 días de atraso", accion: "Decide" }]);
-    const memoria = { ...vacia, colores: { "jjhoncv/vitrina": "verde" as const } };
+    // El 🌙 de hoy ya salió: a las 20:30 solo toca emergencias.
+    const memoria = { ...vacia, colores: { "jjhoncv/vitrina": "verde" as const }, hechos: { "2026-10-12|noche": "x" } };
     const r = decidir([p(rojo)], memoria, lima("2026-10-12", "20:30"));
     expect(r.texto).toContain("🚨 <b>vitrina</b> pasó de 🟢 a 🔴");
     expect(r.texto).toContain("«Fase 2» lleva 5 días de atraso");

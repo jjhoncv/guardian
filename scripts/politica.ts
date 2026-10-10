@@ -14,14 +14,16 @@ export type Memoria = {
   curvas: Record<string, { desvio: number; fase: string | null }>;
   /** Desvío de cada proyecto en la última revisión semanal (para la tendencia). */
   semanal?: Record<string, number>;
+  /** ☀️ / 🌙 / 📅 ya resueltos por día de Lima («2026-10-12|manana»), aunque no hayan tenido novedades. */
+  hechos?: Record<string, string>;
 };
 export type Momento = "manana" | "noche" | "semanal" | "emergencias" | "nada";
 export type Decision = { texto: string | null; curvas: string[]; memoria: Memoria };
 
-/** Día de la semana (0 = domingo) y minutos del día en Lima (UTC−5, sin horario de verano). */
+/** Fecha, día de la semana (0 = domingo) y minutos del día en Lima (UTC−5, sin horario de verano). */
 function lima(iso: string) {
   const d = new Date(Date.parse(iso) - 5 * 3_600_000);
-  return { dia: d.getUTCDay(), minutos: d.getUTCHours() * 60 + d.getUTCMinutes() };
+  return { fecha: d.toISOString().slice(0, 10), dia: d.getUTCDay(), minutos: d.getUTCHours() * 60 + d.getUTCMinutes() };
 }
 
 export function enVentana(iso: string): boolean {
@@ -29,22 +31,35 @@ export function enVentana(iso: string): boolean {
   return dia !== 0 && ((minutos >= 8 * 60 && minutos < 9 * 60) || (minutos >= 19 * 60 && minutos < 22 * 60));
 }
 
-/** Qué toca según la hora (el workflow también lo indica según su horario). */
-export function momentoDe(iso: string): Momento {
+/**
+ * Qué toca según la hora real y lo ya hecho hoy. GitHub atrasa (o descarta) los cron en horas de carga, así que el
+ * workflow corre varias veces por ventana: la primera corrida que todavía no mandó el ☀️ / 📅 (mañana) o el 🌙 (noche)
+ * de hoy lo manda; las demás, solo emergencias (#210).
+ */
+export function momentoDe(iso: string, memoria?: Memoria): Momento {
   if (!enVentana(iso)) return "nada";
-  const { minutos } = lima(iso);
-  if (minutos < 8 * 60 + 30) return "manana";
-  if (minutos >= 19 * 60 && minutos < 19 * 60 + 30) return "noche";
-  return "emergencias";
+  const { fecha, dia, minutos } = lima(iso);
+  const toca: Momento = minutos < 9 * 60 ? (dia === 6 ? "semanal" : "manana") : "noche";
+  return memoria?.hechos?.[`${fecha}|${toca}`] ? "emergencias" : toca;
+}
+
+/** Marca el ☀️ / 🌙 / 📅 de hoy como resuelto y olvida los de hace más de 14 días. */
+function marcarHecho(memoria: Memoria, iso: string, momento: Momento): Memoria["hechos"] {
+  if (momento !== "manana" && momento !== "noche" && momento !== "semanal") return memoria.hechos;
+  const { fecha } = lima(iso);
+  const limite = new Date(Date.parse(`${fecha}T00:00:00Z`) - 14 * 86_400_000).toISOString().slice(0, 10);
+  const vigentes = Object.entries(memoria.hechos ?? {}).filter(([k]) => k.slice(0, 10) >= limite);
+  return { ...Object.fromEntries(vigentes), [`${fecha}|${momento}`]: iso };
 }
 
 const TITULO = { manana: "☀️ <b>Buenos días</b>", noche: "🌙 <b>Cierre del día</b>", semanal: "📅 <b>Revisión semanal</b>" };
 const EMOJI: Record<Color, string> = { verde: "🟢", amarillo: "🟡", rojo: "🔴", gris: "⚫" };
 const nombre = (repo: string) => repo.split("/")[1];
 
-export function decidir(proyectos: ParaResumen[], memoria: Memoria, hoy: string, momento: Momento = momentoDe(hoy)): Decision {
-  const nada: Decision = { texto: null, curvas: [], memoria };
-  if (momento === "nada" || !enVentana(hoy)) return nada;
+export function decidir(proyectos: ParaResumen[], memoria: Memoria, hoy: string, momento: Momento = momentoDe(hoy, memoria)): Decision {
+  if (momento === "nada" || !enVentana(hoy)) return { texto: null, curvas: [], memoria };
+  const hechos = marcarHecho(memoria, hoy, momento);
+  const nada: Decision = { texto: null, curvas: [], memoria: { ...memoria, hechos } };
   const activos = proyectos.filter((p) => !p.datos.estado?.salud.pausa);
   const ahora = hoy;
 
@@ -66,7 +81,7 @@ export function decidir(proyectos: ParaResumen[], memoria: Memoria, hoy: string,
     if (!emergencias.length) return nada;
     const enviados = { ...memoria.enviados, ...Object.fromEntries(emergencias.flatMap((e) => e.alertas).map((k) => [k, ahora])) };
     const colores = { ...memoria.colores, ...Object.fromEntries(emergencias.filter((e) => e.rojo).map((e) => [e.repo, "rojo" as Color])) };
-    return { texto: emergencias.flatMap((e) => e.lineas).join("\n"), curvas: emergencias.filter((e) => e.rojo).map((e) => e.repo), memoria: { ...memoria, enviados, colores } };
+    return { texto: emergencias.flatMap((e) => e.lineas).join("\n"), curvas: emergencias.filter((e) => e.rojo).map((e) => e.repo), memoria: { ...memoria, enviados, colores, hechos } };
   }
 
   // ☀️ / 🌙: el resumen sale solo si hay algo nuevo (pendiente, aviso del Foco, actividad de Claude o cambio de color).
@@ -97,7 +112,7 @@ export function decidir(proyectos: ParaResumen[], memoria: Memoria, hoy: string,
   }
   const enviados = { ...memoria.enviados, ...Object.fromEntries(claves.map((k) => [k, memoria.enviados[k] ?? ahora])) };
   const colores = { ...memoria.colores, ...Object.fromEntries(activos.filter((p) => p.datos.estado).map((p) => [p.datos.repo, p.datos.estado!.salud.color])) };
-  return { texto, curvas, memoria: { enviados, colores, curvas: memoriaCurvas, semanal: semanal ? { ...memoria.semanal, ...desviosSemana } : memoria.semanal } };
+  return { texto, curvas, memoria: { enviados, colores, curvas: memoriaCurvas, semanal: semanal ? { ...memoria.semanal, ...desviosSemana } : memoria.semanal, hechos } };
 }
 
 /** Lo propio del sábado: cómo terminó la semana (con tendencia), lo que hizo Claude en 7 días y las ideas nuevas. */
