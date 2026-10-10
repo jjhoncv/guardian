@@ -11,7 +11,8 @@ Los avisos por Telegram (Fase 5) deben salir dentro de las ventanas del dueño (
 
 - Una **función programada de Netlify** en el sitio del Guardián (`netlify/functions/despertador.mts`, cron `7,22,37,52 0-2,13 * * *` en UTC) le pide a GitHub correr `avisos.yml` con `aviso=auto`, la misma lógica que el cron: ventanas, una vez por día y emergencias.
 - **Token:** fine-grained, **solo el repo guardian**, permiso **Actions: Read and write**, 90 días. Vive en la variable secreta `GUARDIAN_DESPERTADOR_TOKEN` de Netlify (alcance Functions) y su vencimiento, en la variable `VENCE_GUARDIAN_DESPERTADOR_TOKEN` del repo, para que el Guardián avise antes.
-- Los cron de GitHub quedan **de respaldo**: si alguno corre a tiempo, la memoria (`hechos` del día) evita el duplicado.
+- Los cron de GitHub de `avisos.yml` **se retiran**: casi nunca corrían y, cuando lo hacían, caían fuera de la ventana. Estado (6:00) y Sheet (6:30) siguen con el cron de GitHub: un atraso de horas ahí no afecta a nadie.
+- Si dos intentos se cruzan, la memoria (`hechos` del día) y la concurrencia del workflow evitan el duplicado.
 
 ## Por qué
 
