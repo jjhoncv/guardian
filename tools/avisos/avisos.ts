@@ -5,7 +5,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { svgCurva } from "../../scripts/grafico.ts";
 import { curvaProyecto, desvioTexto } from "../../scripts/hoja.ts";
-import { decidir, type Memoria, type Momento } from "../../scripts/politica.ts";
+import { decidir, enVentana, momentoDe, type Memoria, type Momento } from "../../scripts/politica.ts";
 import { actividadDe, clienteGitHub, leerCrudo, leerProyecto, leerSemana, pendientesDe, reposDelDueno } from "../../scripts/proyectos.ts";
 import type { ParaResumen } from "../../scripts/resumen.ts";
 import { enviarFoto, enviarTelegram, html } from "../../scripts/telegram.ts";
@@ -47,16 +47,23 @@ const proyectos: ParaResumen[] = await Promise.all(
 
 const vacia: Memoria = { enviados: {}, colores: {}, curvas: {} };
 const memoria: Memoria = MEMORIA && existsSync(MEMORIA) ? { ...vacia, ...JSON.parse(readFileSync(MEMORIA, "utf8")) } : vacia;
-const d = decidir(proyectos, memoria, hoy, aviso as Momento);
+// Desde el cron llega «auto»: qué toca lo decide la hora real y lo ya hecho hoy (GitHub atrasa los cron, #210).
+const momento: Momento = aviso === "auto" ? momentoDe(hoy, memoria) : (aviso as Momento);
+const horaLima = new Date(Date.parse(hoy) - 5 * 3_600_000).toISOString().slice(0, 16).replace("T", " ");
+const d = decidir(proyectos, memoria, hoy, momento);
 if (!d.texto) {
-  console.log(`«${aviso}»: sin novedades, no se manda nada.`);
+  console.log(
+    momento === "nada" || !enVentana(hoy)
+      ? `«${aviso}»: ${horaLima} en Lima está fuera de las ventanas del dueño; no se manda nada.`
+      : `«${momento}» (${horaLima} en Lima): sin novedades, no se manda nada.`,
+  );
 } else {
   await enviarTelegram(`${PRUEBA ? `🧪 <i>${html(PRUEBA)}</i>\n\n` : ""}${d.texto}`, telegram);
   for (const repo of d.curvas) {
     const curva = curvaProyecto(proyectos.find((p) => p.datos.repo === repo)!.datos, hoy);
     if (curva) await enviarFoto(aPng(svgCurva(curva)), `${curva.titulo}: ${desvioTexto(curva.desvio)} vs. el plan original`, telegram);
   }
-  console.log(`«${aviso}» enviado: ${d.curvas.length} curvas.`);
+  console.log(`«${momento}» enviado (${horaLima} en Lima): ${d.curvas.length} curvas.`);
 }
 // Lo avisado se guarda solo fuera de las pruebas (así una prueba no «gasta» un aviso real).
 if (MEMORIA && !PRUEBA) writeFileSync(MEMORIA, JSON.stringify(d.memoria, null, 2) + "\n");

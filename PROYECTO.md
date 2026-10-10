@@ -162,6 +162,8 @@ El dueño atiende al Guardián en **dos ventanas, de lunes a sábado: 8:00–9:0
 | 📅 Sábado 8:00 | **Revisión semanal** (en lugar del «buenos días»): lo que espera tu acción, cómo terminó la semana con la **tendencia del desvío**, lo que hizo Claude en 7 días, las **ideas nuevas del Parking lot** (3 por proyecto y el link a todas) y las curvas | Llega igual |
 | 🚨 Dentro de las ventanas | **Emergencia:** un proyecto pasa a 🔴 o hay un rollback en producción | — (fuera de las ventanas espera a la siguiente) |
 
+Las horas son las del **primer intento** de cada ventana: GitHub atrasa los cron en horas de carga, así que el Guardián prueba cada 15 minutos (8:07–8:52 y 19:07–21:52) y manda el aviso del día en el primero que corre (#210). Si GitHub no corre ninguno dentro de la ventana, ese aviso se pierde.
+
 Cada cosa se avisa **una sola vez**; lo que sigue pendiente aparece en el siguiente resumen con su antigüedad, sin volver a sonar. Así el Guardián da **foco**, no ruido.
 
 El plan se arma con **esta capacidad real**, no con la ideal.
