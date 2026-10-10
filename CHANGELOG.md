@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.18.1](https://github.com/jjhoncv/guardian/compare/v0.18.0...v0.18.1) (2026-10-10)
+
+
+### Correcciones
+
+* **#204:** al cerrar una fase, Claude toma solo el primer ticket de la siguiente ([#213](https://github.com/jjhoncv/guardian/issues/213)) ([6a09ae4](https://github.com/jjhoncv/guardian/commit/6a09ae43108525547fdf7dcd9dea8f0312f938a7))
+* **#210:** el ☀️ llega aunque GitHub atrase el cron ([#211](https://github.com/jjhoncv/guardian/issues/211)) ([58e94b7](https://github.com/jjhoncv/guardian/commit/58e94b798b19cfe3fc9b0fb1355c3059d22aedfa))
+* **#214:** los avisos los despierta Netlify, porque GitHub no corre sus cron a tiempo ([#215](https://github.com/jjhoncv/guardian/issues/215)) ([85cd6b5](https://github.com/jjhoncv/guardian/commit/85cd6b51bfa326c42fb04160e1c79f0fa716e5c3))
+
 ## [0.18.0](https://github.com/jjhoncv/guardian/compare/v0.17.0...v0.18.0) (2026-10-09)
 
 
