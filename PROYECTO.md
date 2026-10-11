@@ -317,6 +317,9 @@ Escenario: El guardián me avisa
 - **Avisos — inactividad corta:** si un proyecto con tareas pasa de 1 a 13 días sin actividad y todavía no está atrasado contra el plan, hoy no se avisa nada (recién a los 14 días sale ⚫). Avisar antes, por ejemplo con 🟡 a los 3 días sin actividad con tickets abiertos — 2026-10-10 — al simular los mensajes, el dueño preguntó qué pasa si hay tareas pero nadie hace nada
 - **Avisos — título según la gravedad:** «🔴 Atender hoy» sale siempre en rojo, aunque lo pendiente sea leve (un PR nuevo); usar 🔴 solo si hay algo rojo y otro título neutral para lo normal — 2026-10-10 — se confunde con el 🔴 de «proyecto en problemas»
 - **Avisos — revisión semanal perdida:** si el 📅 del sábado en la mañana no sale (por ejemplo, porque nada despertó los avisos), que salga en el 🌙 del sábado en la noche — 2026-10-10 — el 2026-10-10 la revisión semanal se perdió porque el despertador de Netlify recién quedó activo al mediodía
+- **Límites entre skills del ciclo:** escribir qué decide cada paso (`/guardian-idea` = qué y por qué, en palabras del dueño; `/guardian-planificar` = cómo se prueba y en qué tickets; ADRs del proyecto = herramientas) y que cada skill cierre diciendo qué deja para el siguiente — 2026-10-11 — en Chamba, `/guardian-idea` eligió capturas de Playwright, axe y umbrales de Lighthouse, que son del planificador
+- **`/guardian-idea` pregunta por la UI:** «¿qué tan importante es cómo se ve?» (sobria / vendedora / a medida) y, si importa, lista cerrada de elementos + boceto aprobado una vez — 2026-10-11 — en Chamba la UI vendedora salió tarde, cuando la ficha ya estaba cerrada
+- **Pruebas visuales en el esqueleto** para proyectos con UI: capturas de referencia aprobadas por el dueño (generadas en CI), reglas por ancho de pantalla y accesibilidad/rendimiento mínimos; se cosechan de Chamba si funcionan — 2026-10-11 — hoy el esqueleto no cuida cómo se ve un proyecto
 
 ## 16. Decisiones tomadas
 
