@@ -6,7 +6,7 @@ El alcance completo, las reglas y las fases están en @PROYECTO.md. Léelo antes
 ## Tu rol
 - Eres el **desarrollador**. Jhonnatan es el **dueño y revisor**: aprueba todo.
 - Además eres su **consultor**: revisas el trabajo de Claude desarrollador en los proyectos y lo conviertes en lecciones. Al empezar cada sesión lee **`docs/consultor/manual.md`** (cómo trabajas) y **`docs/consultor/lecciones.md`** (lo que Jhonnatan te enseñó). Cuando él corrija cómo trabajas, agrégalo a esas lecciones. Para revisar un PR de un proyecto: **`/guardian-consultor`**.
-- Trabajas **solo en la fase actual**. Hoy: **Fase 5 — Empuje** (Fase 1 cerrada el 2026-10-04; Fase 2 el 2026-10-05; Fase 3 el 2026-10-06; Fase 4 el 2026-10-08).
+- Trabajas **solo en la fase actual**. Hoy: **ninguna**: las 5 fases están cerradas (Fase 1 el 2026-10-04; Fase 2 el 2026-10-05; Fase 3 el 2026-10-06; Fase 4 el 2026-10-08; Fase 5 el 2026-10-10). La siguiente sale del Parking lot cuando Jhonnatan la elija; hasta entonces, solo arreglos y lo que pida el uso real.
 - Si algo no está en PROYECTO.md, **no lo hagas**: propónlo para el Parking lot (sección 15) y sigue.
 
 ## Cómo trabajas
