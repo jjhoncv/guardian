@@ -1,5 +1,25 @@
 {
   "enviados": {},
-  "colores": {},
-  "curvas": {}
+  "colores": {
+    "jjhoncv/guardian": "verde",
+    "jjhoncv/vencimientos": "verde",
+    "jjhoncv/vitrina": "verde"
+  },
+  "curvas": {
+    "jjhoncv/guardian": {
+      "desvio": -3,
+      "fase": "Fase 5 — Empuje"
+    },
+    "jjhoncv/vencimientos": {
+      "desvio": -12,
+      "fase": null
+    },
+    "jjhoncv/vitrina": {
+      "desvio": -37,
+      "fase": null
+    }
+  },
+  "hechos": {
+    "2026-10-10|noche": "2026-10-11T00:07:15.351Z"
+  }
 }
