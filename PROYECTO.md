@@ -218,7 +218,7 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 
 **Valor:** sabes en qué fase estás y qué tan sano está el proyecto sin abrir el código.
 
-### Fase 5 — Empuje
+### Fase 5 — Empuje ✅ cerrada el 2026-10-10 (E6 en verde, probado con el proyecto nuevo Vencimientos)
 - Resumen diario al mediodía
 - Alerta de cambio de color
 - Recordatorio de revisión semanal
@@ -235,9 +235,9 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 | E3 Claude entrega un PR chico | ✅ (Fase 3; Vitrina: #12, #14 y #15 hechos por Claude, aprobados y fusionados) |
 | E4 Nada sube a producción sin mí | ✅ (Fase 1) |
 | E5 Veo la salud desde el celular | ✅ (Fase 4; Sheet del Guardián con Foco, Resumen y curva vs. plan original, y badges vivos en el README del Guardián y de Vitrina) |
-| E6 El guardián me avisa | ⬜ Fase 5 |
+| E6 El guardián me avisa | ✅ (Fase 5; avisos por Telegram en las ventanas del dueño, despertados por Netlify; probado con Vencimientos, creado desde cero) |
 
-**5 de 6 escenarios en verde (83 %).**
+**6 de 6 escenarios en verde (100 %): alcance del Guardián completo.**
 
 ### Criterios de aceptación del Guardián
 
@@ -306,7 +306,7 @@ Escenario: El guardián me avisa
 - **Etapa de medición** después de la última fase: el Guardián guarda la fecha y el criterio de «Cómo sé que funcionó», recuerda revisarlo y abre el issue de decisión (seguir / achicar / parar) — 2026-10-08 — en Vitrina el desarrollo terminó y nada marca cuándo medir; candidato a la Fase 4 o 5
 - **Pronóstico y «qué pasa si» por proyecto real:** con la velocidad real (tickets cerrados por día) el tablero dice «a este ritmo terminas la fase el …» y permite simular «si paro N días» o «si saco estos tickets», antes de reprogramar — 2026-10-08 — la simulación de la Fase 4 usa un proyecto inventado para probar el tablero; el dueño preguntó si sirve para sus proyectos reales: para eso hace falta este pronóstico
 - ~~Aviso al instante~~ (hecho en la Fase 5 como avisos estratégicos en las ventanas del dueño) de lo que espera al dueño (p. ej. «Claude abrió el PR #44» en el momento, sin esperar al resumen del mediodía) — 2026-10-08 — el dueño quiere actuar rápido desde el celular; hoy llega en el resumen diario
-- **Prueba de punta a punta con un proyecto nuevo desde cero:** `/guardian-idea` → `nuevo-proyecto.sh` → `/guardian-planificar` → Claude desarrolla → el proyecto aparece solo en el Sheet con su Foco, su curva vs. plan original y sus badges, sin pasos a mano — 2026-10-08 — Vitrina se adaptó a mano a la Fase 4; hay que confirmar que un proyecto nuevo nace con todo el seguimiento
+- ~~**Prueba de punta a punta con un proyecto nuevo desde cero:** `/guardian-idea` → `nuevo-proyecto.sh` → `/guardian-planificar` → Claude desarrolla → el proyecto aparece solo en el Sheet con su Foco, su curva vs. plan original y sus badges, sin pasos a mano~~ (hecha en la Fase 5 con Vencimientos) — 2026-10-08 — Vitrina se adaptó a mano a la Fase 4; hay que confirmar que un proyecto nuevo nace con todo el seguimiento
 - **Candidata a Fase 6 — Guardián desde el navegador:** crear y guiar un proyecto sin Claude Code en la terminal. Repo desde la plantilla `guardian-skeleton` → secretos en *Settings* (incluye un PAT con permiso de *Administration*, porque `GITHUB_TOKEN` no crea rulesets ni environments) → issue «Iniciar proyecto» donde Claude Guardián hace el Paso 0, crea el sitio y configura → la idea como **formulario en un issue** (no chat: cada respuesta levanta un contenedor) → PR con `PROYECTO.md` → planificar → tickets → Claude desarrollador; y el consultor revisando cada PR en la nube — 2026-10-08 — hoy solo la creación del proyecto y el consultor necesitan la terminal; se decide al cerrar la Fase 4 si va antes que la Fase 5
 - **Claude verifica su PR en el preview real, solo:** cuando el preview está desplegado, Playwright con Chrome en segundo plano recorre **el escenario del ticket contra la URL del preview** (con las credenciales y servicios reales, no con fixtures), y un job aparte lee los **logs de las funciones de Netlify** de ese deploy (CLI o API de Netlify, a confirmar) y se los pasa a Claude como entrada; el token de Netlify no llega al job de Claude. Criterios para no entrar en un círculo vicioso: (1) el único criterio es el escenario BDD del ticket más «sin errores en el log»; (2) máximo 2 correcciones automáticas por PR; (3) si la causa es configuración (403, variable faltante, API sin habilitar) no toca el código: para y le dice al dueño el paso exacto; (4) el dueño sigue aprobando el merge — 2026-10-08 — en vencimientos#13 las pruebas pasaban con datos simulados pero el preview salía vacío (Sheets API sin habilitar); el error estaba en el log y nadie lo veía
 - **El chequeo del PR deja pasar la subida de versión del Guardián** (PRs que solo cambian `@vX.Y.Z` en los callers), como ya hace con Dependabot — 2026-10-08 — vencimientos#12 salió en rojo por no tener ticket
@@ -352,6 +352,7 @@ Escenario: El guardián me avisa
 | 2026-10-08 | Fase 4: un solo Sheet del Guardián para todos los proyectos; README con badges vivos desde la rama `estado`; fecha objetivo por fase | ADR 0026 |
 | 2026-10-08 | Fechas tentativas del Guardián: unos **3 días por fase** (Fase 4 → 2026-10-11, Fase 5 → 2026-10-14). La fecha es tentativa; el avance real son los tickets y escenarios, y el tablero compara los dos | El dueño quiere ver tiempo vs. trabajo en un caso real |
 | 2026-10-08 | **Cierre de la Fase 4.** E5 probado con el Guardián y Vitrina en el Sheet de producción. Sigue la Fase 5 (Empuje); la Fase 6 (navegador) queda candidata | Avance del Guardián: 5 de 6 escenarios (83 %) |
+| 2026-10-10 | **Cierre de la Fase 5.** E6 probado con Vencimientos (proyecto nuevo de punta a punta) y el 🌙 de las 19:07 llegando solo. El alcance del Guardián queda completo; la Fase 6 sale del Parking lot cuando el dueño la elija | Avance del Guardián: 6 de 6 escenarios (100 %) |
 | 2026-10-08 | Fase 5: los avisos salen del repo del Guardián con un solo bot de Telegram (`TELEGRAM_BOT_TOKEN` secreto, `TELEGRAM_CHAT_ID` variable) y leen el estado de todos los proyectos. Resumen 12:00 de lunes a viernes y recordatorio sábado 9:00 (Lima) | Un solo lugar para las llaves, como el Sheet; las horas siguen el ritmo de la sección 12 |
 | 2026-10-08 | Avisos **estratégicos**: solo en las ventanas del dueño (L–S 8–9 y 19–22, Lima), ☀️ buenos días, 🌙 cierre del día y 🚨 emergencias; sin novedades no se manda nada; cada cosa una vez (memoria en la rama `avisos`); domingo en silencio | Si el Guardián escribe a cada rato pierde el foco; el dueño fijó sus horarios reales |
 | 2026-10-10 | Los avisos los **despierta Netlify** (función programada en el sitio del Guardián, token fine-grained solo con Actions: write), no el cron de GitHub (ADR 0028) | De 16 intentos programados, GitHub corrió uno, 7 h tarde; Netlify ya está en el stack y corre a la hora |
