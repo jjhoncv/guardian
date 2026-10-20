@@ -320,6 +320,7 @@ Escenario: El guardián me avisa
 - **Límites entre skills del ciclo:** escribir qué decide cada paso (`/guardian-idea` = qué y por qué, en palabras del dueño; `/guardian-planificar` = cómo se prueba y en qué tickets; ADRs del proyecto = herramientas) y que cada skill cierre diciendo qué deja para el siguiente — 2026-10-11 — en Chamba, `/guardian-idea` eligió capturas de Playwright, axe y umbrales de Lighthouse, que son del planificador
 - **`/guardian-idea` pregunta por la UI:** «¿qué tan importante es cómo se ve?» (sobria / vendedora / a medida) y, si importa, lista cerrada de elementos + boceto aprobado una vez — 2026-10-11 — en Chamba la UI vendedora salió tarde, cuando la ficha ya estaba cerrada
 - **Pruebas visuales en el esqueleto** para proyectos con UI: capturas de referencia aprobadas por el dueño (generadas en CI), reglas por ancho de pantalla y accesibilidad/rendimiento mínimos; se cosechan de Chamba si funcionan — 2026-10-11 — hoy el esqueleto no cuida cómo se ve un proyecto
+- **`nuevo-proyecto.sh` verifica la GitHub App de Claude** (p. ej. `gh api user/installations` → repos de la instalación de Claude) y no termina hasta que el repo esté incluido; también `/guardian` lo muestra como ⬜ — 2026-10-19 — en Chamba el script solo lo recordaba, el dueño no lo vio y el primer «siguiente ticket» falló con «Claude Code is not installed on this repository»
 
 ## 16. Decisiones tomadas
 
