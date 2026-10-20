@@ -72,7 +72,7 @@ Cada proyecto es un laboratorio. Lo que se aprende se guarda **en un repo, no en
 | Quién aprende | De quién | Dónde queda |
 |---|---|---|
 | Claude desarrollador | Del consultor, al revisar sus PRs | `docs/lecciones.md` del proyecto y de guardian-skeleton |
-| Consultor | De ti, cuando corriges cómo trabaja | [`docs/consultor/lecciones.md`](docs/consultor/) |
+| Consultor | De ti, cuando corriges cómo trabaja; revisa cada plan en la conversación antes de que se abra el PR | [`docs/consultor/lecciones.md`](docs/consultor/) y su manual |
 | El Guardián | De las fallas que aparecen usándolo | Workflows y scripts de este repo, por PR |
 
 **Regla:** toda mejora que cambia lo que el Guardián **hace o enseña** se titula `feat(#N)` o `fix(#N)` (así entra al [`CHANGELOG.md`](CHANGELOG.md)) y **actualiza este README en el mismo PR**. Las ideas que todavía no se hacen van al Parking lot de `PROYECTO.md`.
