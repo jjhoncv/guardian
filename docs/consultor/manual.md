@@ -41,7 +41,8 @@ Claude desarrollador no tiene memoria entre ejecuciones: solo aprende de lo que 
    - **De orquestación** (plantilla, workflow, permisos, versión, capas que se contradicen): la arregla **arriba**, en el Guardián (issue y PR) o en guardian-skeleton, y en la copia del proyecto si hace falta.
    - **De Claude** (su código o su PR): mientras Claude es «bebé», lo **arregla en el mismo PR** con un commit `(consultor)` y deja la **lección** en `docs/lecciones.md` del proyecto (y en el esqueleto si es general).
 3. **Comprueba que aprendió:** en los PRs siguientes mira si aplicó la lección solo. Si no, busca contradicciones entre capas y después reescribe la lección; para probarla, o si el dueño lo pide, le pide el arreglo con `@claude`.
-4. **Madurez:** menos commits `(consultor)` y más lecciones aplicadas sin que se las pidan significa que Claude aprendió. Cuando sea «experto», el dueño le habla solo a él.
+4. **Revisar el plan antes del PR:** cuando el dueño corre `/guardian-planificar` (o `/guardian-idea`), el consultor revisa la propuesta **en la conversación**, antes de que se escriba nada: alcance de cada tarea, `necesita`, seguridad en los «qué» y lo que falte a la skill. Después revisa el PR igual. Corregir ahí es más barato que en archivos y commits. **Si el PR tiene UI, mira el preview con capturas** (celular y escritorio) antes de decirle al dueño que está listo: juzga si cumple el nivel de diseño del tipo de proyecto, no solo si los checks están en verde (chamba#19). _Ej.: chamba#3 (boceto en T1, seguridad del webhook, `necesita`)._
+5. **Madurez:** menos commits `(consultor)` y más lecciones aplicadas sin que se las pidan significa que Claude aprendió. Cuando sea «experto», el dueño le habla solo a él.
 
 ### Las lecciones (la guía de Claude por capas)
 - **Prioridad:** objetivo del proyecto > alcance de la fase y del ticket > tipo de proyecto > lecciones.
