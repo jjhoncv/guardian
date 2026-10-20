@@ -1,5 +1,7 @@
 {
-  "enviados": {},
+  "enviados": {
+    "jjhoncv/guardian|release|https://github.com/jjhoncv/guardian/pull/229": "2026-10-20T13:07:13.093Z"
+  },
   "colores": {
     "jjhoncv/guardian": "verde",
     "jjhoncv/vencimientos": "verde",
@@ -8,15 +10,15 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 3,
+      "desvio": 6,
       "fase": null
     },
     "jjhoncv/vencimientos": {
-      "desvio": -6,
+      "desvio": -3,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -31,
+      "desvio": -28,
       "fase": null
     }
   },
@@ -40,6 +42,7 @@
     "2026-10-17|semanal": "2026-10-17T13:07:13.298Z",
     "2026-10-17|noche": "2026-10-18T00:07:11.454Z",
     "2026-10-19|manana": "2026-10-19T13:07:13.185Z",
-    "2026-10-19|noche": "2026-10-20T00:07:12.234Z"
+    "2026-10-19|noche": "2026-10-20T00:07:12.234Z",
+    "2026-10-20|manana": "2026-10-20T13:07:13.093Z"
   }
 }
