@@ -6,8 +6,8 @@
   },
   "avance": {
     "verdes": 6,
-    "total": 6,
-    "porcentaje": 100
+    "total": 7,
+    "porcentaje": 86
   },
   "salud": {
     "color": "verde",
@@ -17,7 +17,7 @@
     "diasAtraso": 0,
     "pausa": false
   },
-  "actualizado": "2026-10-21T02:47:36.932Z",
+  "actualizado": "2026-10-21T02:48:11.765Z",
   "vencimientos": [
     {
       "secreto": "GUARDIAN_DESPERTADOR_TOKEN",
