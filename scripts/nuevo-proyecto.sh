@@ -5,6 +5,7 @@
 #
 # Uso:  scripts/nuevo-proyecto.sh <slug> [--alcance <PROYECTO.md>] [--revisar]
 #   --alcance   el PROYECTO.md que dejó /guardian-idea: el proyecto nace con ese alcance y su título es el nombre.
+#               Si junto a él hay un convenciones.md, llega al proyecto como docs/convenciones.md.
 #   --revisar   solo el Paso 0: dice qué hay y qué falta, sin crear nada.
 # Se puede volver a correr: salta lo que ya existe.
 # Los tokens se escriben ocultos y van directo a GitHub Secrets; no se guardan en disco.
@@ -112,6 +113,12 @@ elif grep -qE '<(nombre|entregable|idea)>|Qué duele hoy y a quién\.' "$ALCANCE
   falta "el alcance todavía tiene textos de plantilla: complétalo con /guardian-idea"
 else
   ok "alcance: $ALCANCE → «${NOMBRE}»"
+fi
+# Las convenciones del dueño viajan junto al alcance (las deja /guardian-idea en la misma carpeta).
+CONVENCIONES=""
+if [ -n "$ALCANCE" ] && [ -f "$(dirname "$ALCANCE")/convenciones.md" ]; then
+  CONVENCIONES="$(dirname "$ALCANCE")/convenciones.md"
+  ok "convenciones del dueño: $CONVENCIONES → docs/convenciones.md"
 fi
 
 EXISTE_REPO=no; VACIO=si; HAY_SITIO=no; HAY_TOKEN_NETLIFY=no; HAY_PAT=no; HAY_CLAUDE=no
@@ -263,6 +270,7 @@ else
                -e "s|__SITIO__|$SITIO|g" -e "s|__GUARDIAN__|$VERSION|g" "$f" && rm -f "$f.bak"
   done
   [ -n "$ALCANCE" ] && cp "$ALCANCE" "$TMP/p/PROYECTO.md"
+  [ -n "$CONVENCIONES" ] && mkdir -p "$TMP/p/docs" && cp "$CONVENCIONES" "$TMP/p/docs/convenciones.md"
   completar_marcadores "$TMP/p"
   git -C "$TMP/p" init -q -b main
   git -C "$TMP/p" add -A
