@@ -11,6 +11,8 @@ Reglas:
 - **El dueño decide.** Tú preguntas, resumes, propones y redactas.
 - Lo que sea "estaría bueno…" o crecimiento futuro → **Parking lot** del proyecto.
 - **Muestra antes de escribir** y espera el OK.
+- **El alcance dice qué, no con qué.** Nada de versiones, librerías ni herramientas de prueba en el `PROYECTO.md`: el stack va en una línea en *Límites* y lo demás lo decide `/guardian-planificar` con ADRs. Los criterios de UI van en palabras del dueño («se ve como el diseño aprobado», «en el celular no se sale nada»).
+- **No descartes una pieza del dueño** (su librería, sus componentes, su patrón) sin preguntarle. Si algo falló, verifica la causa antes de culpar a la pieza.
 
 ## Paso 1 — Escuchar
 
@@ -36,6 +38,16 @@ Una pregunta por vez. Si el dueño no sabe, propón una respuesta razonable y qu
 | 6 | **Límites:** semanas disponibles; en un proyecto real, también presupuesto y cuentas necesarias | ✅ (solo semanas) | ✅ |
 | 7 | **Veredicto:** ¿seguir, achicar o no seguir? Un «no» a tiempo es un buen resultado | | ✅ |
 | 8 | **Nombre:** propone 3 cortos y memorables; el dueño elige o trae otro | ✅ | ✅ |
+
+**Tipo de sitio** (proyecto real; en una prueba, solo las que apliquen). Después de la pregunta 3, una por vez:
+
+| Pregunta | Qué se anota |
+|---|---|
+| ¿Tiene **administrador**? ¿Con usuarios y roles? | Alcance de las fases y Parking lot |
+| ¿Dónde viven los **datos**? (Google Sheets o una base de datos como MySQL) | *Límites* → `- **Datos:** …` |
+| ¿Se **suben archivos o imágenes**? | *Límites* (dónde se guardan) y lección de subidas |
+| ¿Tienes **convenciones** para programarlo (un repo o documento de referencia)? | `~/Projects/ideas/<slug>/convenciones.md`, que `nuevo-proyecto.sh` lleva al proyecto |
+| ¿Qué **nivel de diseño** (prueba de concepto / profesional / a medida) y 2–3 **referencias** que te gusten? | *Límites* → `- **Diseño:** …` y Decisiones |
 
 **Nombre → slug** (minúsculas y guiones: «Vitrina» → `vitrina`). Verifica que esté libre:
 - Repo: `gh repo view "$(gh api user -q .login)/<slug>"` → si existe, está ocupado.
@@ -70,4 +82,4 @@ scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md -
 scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md             # crea el proyecto
 ```
 
-Y recuerda: después, dentro del proyecto, `/guardian-planificar` convierte este alcance en escenarios y tickets.
+Y recuerda: después, dentro del proyecto, `/guardian-planificar` convierte este alcance en escenarios y tickets. Cierra con la lista corta de **lo que esta idea deja para el plan** (versiones, herramientas de prueba, ADRs técnicas, estructura de los datos).
