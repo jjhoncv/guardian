@@ -4,6 +4,11 @@ name: Guardián · Deploy
 
 on:
   workflow_call:
+    inputs:
+      base_de_datos:
+        description: "«mysql» aplica db/migraciones/ antes de publicar (ADR 0029)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -75,6 +80,40 @@ jobs:
           sparse-checkout: tools/netlify
           path: .guardian
       - run: mv .guardian/tools/netlify "$RUNNER_TEMP/netlify" && rm -rf .guardian && npm ci --prefix "$RUNNER_TEMP/netlify"
+      # Migraciones del proyecto (ADR 0029) antes de publicar: el SQL de db/migraciones/ y la herramienta de esta
+      # versión del Guardián; la conexión sale de los secretos del Environment `staging`. No corre código del proyecto.
+      - if: inputs.base_de_datos == 'mysql' && github.event_name == 'push'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: db/migraciones
+          path: .proyecto-db
+      - if: inputs.base_de_datos == 'mysql' && github.event_name == 'push'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ (job.workflow_repository == github.repository && github.event.pull_request.base.sha) || job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            tools/db
+            scripts/migraciones.ts
+          path: .guardian-db
+      - if: inputs.base_de_datos == 'mysql' && github.event_name == 'push'
+        env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_SSL: ${{ vars.MYSQL_SSL || '1' }}
+        run: |
+          if [ -z "$MYSQL_HOST" ]; then
+            echo "::error::Faltan los secretos MYSQL_* del Environment staging (Settings → Environments → staging)."; exit 1
+          fi
+          npm ci --prefix .guardian-db/tools/db --ignore-scripts
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-db/tools/db/migrar.ts .proyecto-db/db/migraciones
+          rm -rf .guardian-db .proyecto-db
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: sitio
