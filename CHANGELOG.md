@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.2](https://github.com/jjhoncv/guardian/compare/v0.19.1...v0.19.2) (2026-10-21)
+
+
+### Correcciones
+
+* **#256:** Claude en la nube con MySQL temporal en proyectos con base de datos ([#257](https://github.com/jjhoncv/guardian/issues/257)) ([dd8a197](https://github.com/jjhoncv/guardian/commit/dd8a197f0596ff2380eb9ad57660da780ac10f9c))
+
 ## [0.19.1](https://github.com/jjhoncv/guardian/compare/v0.19.0...v0.19.1) (2026-10-21)
 
 
