@@ -8,6 +8,11 @@ name: Guardián · Claude
 
 on:
   workflow_call:
+    inputs:
+      base_de_datos:
+        description: "«mysql» le da a Claude un MySQL 8 temporal con las migraciones aplicadas, como el CI (ADR 0029)"
+        type: string
+        default: ""
     secrets:
       ANTHROPIC_API_KEY:
         required: true
@@ -31,6 +36,22 @@ jobs:
       issues: write
       id-token: write
       actions: read
+    services:
+      mysql:
+        image: ${{ inputs.base_de_datos == 'mysql' && 'mysql:8.0' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: ci
+          MYSQL_DATABASE: ci
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      MYSQL_HOST: ${{ inputs.base_de_datos == 'mysql' && '127.0.0.1' || '' }}
+      MYSQL_PORT: ${{ inputs.base_de_datos == 'mysql' && '3306' || '' }}
+      MYSQL_USER: ${{ inputs.base_de_datos == 'mysql' && 'root' || '' }}
+      MYSQL_PASSWORD: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
+      MYSQL_DATABASE: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -44,6 +65,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      # Base temporal para que Claude pruebe contra MySQL: la herramienta de migraciones de esta versión del Guardián,
+      # fuera del repo (en /tmp) para que no termine en un commit.
+      - if: inputs.base_de_datos == 'mysql'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            tools/db
+            scripts/migraciones.ts
+          path: .guardian-db
+      - if: inputs.base_de_datos == 'mysql'
+        run: |
+          mv .guardian-db /tmp/guardian-db
+          npm ci --prefix /tmp/guardian-db/tools/db --ignore-scripts
+          node /tmp/guardian-db/tools/db/migrar.ts db/migraciones
       - uses: anthropics/claude-code-action@a26b07d8c778b0c43f64618e5fd29fd0f8af72e8 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -56,8 +94,8 @@ jobs:
           claude_args: >-
             --model claude-sonnet-5-5
             --max-turns 60
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*)"
-            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit. Para agregar una dependencia usa npm install --ignore-scripts --save-exact <paquete> (sin scripts de instalación) y explica en el PR por qué hace falta."
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
+            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit. Para agregar una dependencia usa npm install --ignore-scripts --save-exact <paquete> (sin scripts de instalación) y explica en el PR por qué hace falta. Si el proyecto usa MySQL, tienes una base temporal con las migraciones aplicadas; para aplicar una nueva: node /tmp/guardian-db/tools/db/migrar.ts db/migraciones."
 
   # Siguiente tarea sola: al fusionar un PR, o al cerrar el dueño una fase (milestone), elige el ticket con el
   # script de esta versión del Guardián. Al cerrar una fase, la fase actual pasa a ser la siguiente (#204).
@@ -119,6 +157,22 @@ jobs:
       issues: write
       id-token: write
       actions: read
+    services:
+      mysql:
+        image: ${{ inputs.base_de_datos == 'mysql' && 'mysql:8.0' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: ci
+          MYSQL_DATABASE: ci
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      MYSQL_HOST: ${{ inputs.base_de_datos == 'mysql' && '127.0.0.1' || '' }}
+      MYSQL_PORT: ${{ inputs.base_de_datos == 'mysql' && '3306' || '' }}
+      MYSQL_USER: ${{ inputs.base_de_datos == 'mysql' && 'root' || '' }}
+      MYSQL_PASSWORD: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
+      MYSQL_DATABASE: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -131,6 +185,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      # Base temporal para que Claude pruebe contra MySQL: la herramienta de migraciones de esta versión del Guardián,
+      # fuera del repo (en /tmp) para que no termine en un commit.
+      - if: inputs.base_de_datos == 'mysql'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            tools/db
+            scripts/migraciones.ts
+          path: .guardian-db
+      - if: inputs.base_de_datos == 'mysql'
+        run: |
+          mv .guardian-db /tmp/guardian-db
+          npm ci --prefix /tmp/guardian-db/tools/db --ignore-scripts
+          node /tmp/guardian-db/tools/db/migrar.ts db/migraciones
       - uses: anthropics/claude-code-action@a26b07d8c778b0c43f64618e5fd29fd0f8af72e8 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -144,7 +215,8 @@ jobs:
             5. Abre el PR con `gh pr create`: título `feat(#${{ needs.elegir.outputs.ticket }}): …` y el cuerpo en dos niveles según `.github/pull_request_template.md`: `Closes #${{ needs.elegir.outputs.ticket }}`; **En simple** (qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo en el preview, qué necesitas del dueño, escenarios en verde) y el **Detalle técnico** plegado.
             Para agregar una dependencia usa `npm install --ignore-scripts --save-exact <paquete>` y explica en el PR por qué hace falta.
             Si el ticket necesita algo del dueño (cuentas, credenciales, decisiones) que no está, no lo inventes: comenta en el ticket qué falta y termina sin PR.
+            Si el proyecto usa MySQL (hay `db/migraciones/`), tienes una base temporal con las migraciones ya aplicadas (variables MYSQL_*); para aplicar una migración nueva: `node /tmp/guardian-db/tools/db/migrar.ts db/migraciones`.
           claude_args: >-
             --model claude-sonnet-5-5
             --max-turns 60
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*)"
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
