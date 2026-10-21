@@ -6,6 +6,7 @@
 # Uso:  scripts/nuevo-proyecto.sh <slug> [--alcance <PROYECTO.md>] [--revisar]
 #   --alcance   el PROYECTO.md que dejó /guardian-idea: el proyecto nace con ese alcance y su título es el nombre.
 #               Si junto a él hay un convenciones.md, llega al proyecto como docs/convenciones.md.
+#               Si sus Límites dicen MySQL («Datos:» o «Stack:»), el proyecto nace con la opción de base de datos.
 #   --revisar   solo el Paso 0: dice qué hay y qué falta, sin crear nada.
 # Se puede volver a correr: salta lo que ya existe.
 # Los tokens se escriben ocultos y van directo a GitHub Secrets; no se guardan en disco.
@@ -113,6 +114,12 @@ elif grep -qE '<(nombre|entregable|idea)>|Qué duele hoy y a quién\.' "$ALCANCE
   falta "el alcance todavía tiene textos de plantilla: complétalo con /guardian-idea"
 else
   ok "alcance: $ALCANCE → «${NOMBRE}»"
+fi
+# Base de datos (ADR 0029): si Límites dice MySQL (línea «Datos:» o «Stack:»), el proyecto nace con la opción del esqueleto.
+BASE_DE_DATOS=""
+if [ -n "$ALCANCE" ] && [ -f "$ALCANCE" ] && awk '/^## [0-9]+\. Límites/{f=1; next} /^## /{f=0} f' "$ALCANCE" | grep -iE '\*\*(Datos|Stack):\*\*' | grep -qi 'mysql'; then
+  BASE_DE_DATOS=mysql
+  ok "base de datos: MySQL (Docker en local, temporal en el CI, gestionada en staging y producción)"
 fi
 # Las convenciones del dueño viajan junto al alcance (las deja /guardian-idea en la misma carpeta).
 CONVENCIONES=""
@@ -265,6 +272,14 @@ else
   # Lo propio del esqueleto (su validación y su README) no va al proyecto.
   rm -rf "$TMP/p/.github/workflows" "$TMP/p/ESQUELETO.md"
   mv "$TMP/p/.github/workflows-proyecto" "$TMP/p/.github/workflows"
+  if [ "$BASE_DE_DATOS" = mysql ]; then
+    [ -d "$TMP/p/opcional/mysql" ] || { echo "  ✗ el esqueleto no trae opcional/mysql: fusiona guardian-skeleton#25"; exit 1; }
+    cp -R "$TMP/p/opcional/mysql/." "$TMP/p/"
+    for w in ci deploy release; do
+      perl -pi -e 's|^(    uses: jjhoncv/guardian/\.github/workflows/guardian-'"$w"'\.yml@.*)$|$1\n    with:\n      base_de_datos: mysql|' "$TMP/p/.github/workflows/$w.yml"
+    done
+  fi
+  rm -rf "$TMP/p/opcional"
   grep -rl '__\(NOMBRE\|SLUG\|REPO\|SITIO\|GUARDIAN\)__' "$TMP/p" | while read -r f; do
     sed -i.bak -e "s|__NOMBRE__|$NOMBRE|g" -e "s|__SLUG__|$SLUG|g" -e "s|__REPO__|$REPO|g" \
                -e "s|__SITIO__|$SITIO|g" -e "s|__GUARDIAN__|$VERSION|g" "$f" && rm -f "$f.bak"
