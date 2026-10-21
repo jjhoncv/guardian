@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://github.com/jjhoncv/guardian/compare/v0.19.0...v0.19.1) (2026-10-21)
+
+
+### Correcciones
+
+* **#254:** sin migraciones, el deploy no exige la conexión a la base ([#253](https://github.com/jjhoncv/guardian/issues/253)) ([fd49845](https://github.com/jjhoncv/guardian/commit/fd49845b81caf78a548bdc687a45c38db25e93ee))
+
 ## [0.19.0](https://github.com/jjhoncv/guardian/compare/v0.18.2...v0.19.0) (2026-10-21)
 
 
