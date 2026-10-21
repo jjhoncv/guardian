@@ -1,25 +1,33 @@
 {
   "enviados": {
-    "jjhoncv/guardian|release|https://github.com/jjhoncv/guardian/pull/229": "2026-10-20T13:07:13.093Z"
+    "jjhoncv/guardian|release|https://github.com/jjhoncv/guardian/pull/229": "2026-10-20T13:07:13.093Z",
+    "jjhoncv/guardian|deploy-urgente|https://github.com/jjhoncv/guardian/actions/runs/39548759104": "2026-10-21T13:07:16.598Z",
+    "jjhoncv/info-site|pr|https://github.com/jjhoncv/info-site/pull/22": "2026-10-21T13:07:16.598Z",
+    "jjhoncv/info-site|claude|https://github.com/jjhoncv/info-site/pull/22": "2026-10-21T13:07:16.598Z"
   },
   "colores": {
     "jjhoncv/guardian": "verde",
     "jjhoncv/vencimientos": "verde",
     "jjhoncv/vitrina": "verde",
-    "jjhoncv/chamba": "verde"
+    "jjhoncv/chamba": "verde",
+    "jjhoncv/info-site": "verde"
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 6,
-      "fase": null
+      "desvio": -2,
+      "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": -3,
+      "desvio": -2,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -28,
+      "desvio": -27,
       "fase": null
+    },
+    "jjhoncv/info-site": {
+      "desvio": 0,
+      "fase": "Fase 1 — Servicios y demo segura"
     }
   },
   "semanal": {
@@ -44,6 +52,7 @@
     "2026-10-19|manana": "2026-10-19T13:07:13.185Z",
     "2026-10-19|noche": "2026-10-20T00:07:12.234Z",
     "2026-10-20|manana": "2026-10-20T13:07:13.093Z",
-    "2026-10-20|noche": "2026-10-21T00:07:16.281Z"
+    "2026-10-20|noche": "2026-10-21T00:07:16.281Z",
+    "2026-10-21|manana": "2026-10-21T13:07:16.598Z"
   }
 }
