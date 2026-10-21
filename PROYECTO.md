@@ -226,6 +226,16 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 
 **Valor:** el guardián te empuja aunque no entres.
 
+### Fase 6 — Base de datos (aprobada el 2026-10-20, ADR 0029)
+- `/guardian-idea` pregunta el tipo de sitio (¿admin? ¿datos? ¿archivos? ¿convenciones? ¿nivel de diseño y referencias?) y deja herramientas y versiones al plan
+- `nuevo-proyecto.sh` lleva las convenciones del dueño al proyecto (`docs/convenciones.md`)
+- CI con MySQL temporal: aplica las migraciones y corre las pruebas contra esa base
+- Migraciones en el deploy: staging al fusionar, producción al aprobar el release
+- Esqueleto con base de datos (Docker en local, MySQL gestionado en staging y producción, imágenes en Netlify Blobs)
+- Lecciones nuevas para Claude: archivos chicos, migrar adaptando versiones, admin público o de demo
+
+**Valor:** el Guardián sirve para sitios administrables con base de datos, como Info Site.
+
 ### Avance del Guardián (a mano hasta la Fase 4, ADR 0020)
 
 | Escenario | Estado |
@@ -236,8 +246,9 @@ El Guardián se construye con sus propias reglas. Si no logra sacarse a sí mism
 | E4 Nada sube a producción sin mí | ✅ (Fase 1) |
 | E5 Veo la salud desde el celular | ✅ (Fase 4; Sheet del Guardián con Foco, Resumen y curva vs. plan original, y badges vivos en el README del Guardián y de Vitrina) |
 | E6 El guardián me avisa | ✅ (Fase 5; avisos por Telegram en las ventanas del dueño, despertados por Netlify; probado con Vencimientos, creado desde cero) |
+| E7 Proyecto con base de datos | ⬜ Fase 6 |
 
-**6 de 6 escenarios en verde (100 %): alcance del Guardián completo.**
+**6 de 7 escenarios en verde (86 %).**
 
 ### Criterios de aceptación del Guardián
 
@@ -271,6 +282,12 @@ Escenario: El guardián me avisa
   Dado que es mediodía de un día laborable
   Cuando hay PRs esperando mi revisión
   Entonces recibo un resumen con lo que hizo Claude y lo que espera de mí
+
+Escenario: Proyecto con base de datos
+  Dado un proyecto con MySQL creado con nuevo-proyecto.sh
+  Cuando un PR agrega una tabla con su migración
+  Entonces el CI la prueba en una base temporal
+  Y al fusionar, staging tiene la tabla sin pasos a mano
 ```
 
 ## 15. Fuera del alcance (Parking lot inicial)
@@ -318,7 +335,7 @@ Escenario: El guardián me avisa
 - **Avisos — título según la gravedad:** «🔴 Atender hoy» sale siempre en rojo, aunque lo pendiente sea leve (un PR nuevo); usar 🔴 solo si hay algo rojo y otro título neutral para lo normal — 2026-10-10 — se confunde con el 🔴 de «proyecto en problemas»
 - **Avisos — revisión semanal perdida:** si el 📅 del sábado en la mañana no sale (por ejemplo, porque nada despertó los avisos), que salga en el 🌙 del sábado en la noche — 2026-10-10 — el 2026-10-10 la revisión semanal se perdió porque el despertador de Netlify recién quedó activo al mediodía
 - **Límites entre skills del ciclo:** escribir qué decide cada paso (`/guardian-idea` = qué y por qué, en palabras del dueño; `/guardian-planificar` = cómo se prueba y en qué tickets; ADRs del proyecto = herramientas) y que cada skill cierre diciendo qué deja para el siguiente — 2026-10-11 — en Chamba, `/guardian-idea` eligió capturas de Playwright, axe y umbrales de Lighthouse, que son del planificador
-- **`/guardian-idea` pregunta por la UI:** «¿qué tan importante es cómo se ve?» (sobria / vendedora / a medida) y, si importa, lista cerrada de elementos + boceto aprobado una vez — 2026-10-11 — en Chamba la UI vendedora salió tarde, cuando la ficha ya estaba cerrada; **segunda evidencia** (2026-10-19): el boceto de Chamba salió básico porque nadie preguntó el nivel de diseño; la pregunta debe incluir referencias (sitios que le gustan al dueño) y el nivel (prueba de concepto / profesional / a medida) se anota en Límites
+- ~~**`/guardian-idea` pregunta por la UI:** «¿qué tan importante es cómo se ve?» (sobria / vendedora / a medida) y, si importa, lista cerrada de elementos + boceto aprobado una vez~~ (pasa a la Fase 6, T1) — 2026-10-11 — en Chamba la UI vendedora salió tarde, cuando la ficha ya estaba cerrada; **segunda evidencia** (2026-10-19): el boceto de Chamba salió básico porque nadie preguntó el nivel de diseño; la pregunta debe incluir referencias (sitios que le gustan al dueño) y el nivel (prueba de concepto / profesional / a medida) se anota en Límites
 - **Pruebas visuales en el esqueleto** para proyectos con UI: capturas de referencia aprobadas por el dueño (generadas en CI), reglas por ancho de pantalla y accesibilidad/rendimiento mínimos; se cosechan de Chamba si funcionan — 2026-10-11 — hoy el esqueleto no cuida cómo se ve un proyecto
 - **`nuevo-proyecto.sh` verifica la GitHub App de Claude** (p. ej. `gh api user/installations` → repos de la instalación de Claude) y no termina hasta que el repo esté incluido; también `/guardian` lo muestra como ⬜ — 2026-10-19 — en Chamba el script solo lo recordaba, el dueño no lo vio y el primer «siguiente ticket» falló con «Claude Code is not installed on this repository»
 - **Estado «pausado» de un proyecto:** un comando que pause (sin avisos ni Sheet, workflow Claude apagado, decisión registrada) y otro que lo reanude — 2026-10-19 — Chamba se pausó a mano: quitar el topic `guardian-proyecto`, desactivar el workflow Claude (si no, un merge lanza el siguiente ticket) y una fila en Decisiones
@@ -359,6 +376,7 @@ Escenario: El guardián me avisa
 | 2026-10-08 | Fechas tentativas del Guardián: unos **3 días por fase** (Fase 4 → 2026-10-11, Fase 5 → 2026-10-14). La fecha es tentativa; el avance real son los tickets y escenarios, y el tablero compara los dos | El dueño quiere ver tiempo vs. trabajo en un caso real |
 | 2026-10-08 | **Cierre de la Fase 4.** E5 probado con el Guardián y Vitrina en el Sheet de producción. Sigue la Fase 5 (Empuje); la Fase 6 (navegador) queda candidata | Avance del Guardián: 5 de 6 escenarios (83 %) |
 | 2026-10-10 | **Cierre de la Fase 5.** E6 probado con Vencimientos (proyecto nuevo de punta a punta) y el 🌙 de las 19:07 llegando solo. El alcance del Guardián queda completo; la Fase 6 sale del Parking lot cuando el dueño la elija | Avance del Guardián: 6 de 6 escenarios (100 %) |
+| 2026-10-20 | **Fase 6 — Base de datos**, pedida por un proyecto real (Info Site: sitio administrable con MySQL). Agrega E7 al alcance del Guardián | ADR 0029; el Guardián solo manejaba proyectos con Google Sheets |
 | 2026-10-08 | Fase 5: los avisos salen del repo del Guardián con un solo bot de Telegram (`TELEGRAM_BOT_TOKEN` secreto, `TELEGRAM_CHAT_ID` variable) y leen el estado de todos los proyectos. Resumen 12:00 de lunes a viernes y recordatorio sábado 9:00 (Lima) | Un solo lugar para las llaves, como el Sheet; las horas siguen el ritmo de la sección 12 |
 | 2026-10-08 | Avisos **estratégicos**: solo en las ventanas del dueño (L–S 8–9 y 19–22, Lima), ☀️ buenos días, 🌙 cierre del día y 🚨 emergencias; sin novedades no se manda nada; cada cosa una vez (memoria en la rama `avisos`); domingo en silencio | Si el Guardián escribe a cada rato pierde el foco; el dueño fijó sus horarios reales |
 | 2026-10-10 | Los avisos los **despierta Netlify** (función programada en el sitio del Guardián, token fine-grained solo con Actions: write), no el cron de GitHub (ADR 0028) | De 16 intentos programados, GitHub corrió uno, 7 h tarde; Netlify ya está en el stack y corre a la hora |
