@@ -102,7 +102,7 @@ Rollback: **automático** si falla el smoke test después de un release (abre un
    scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md --revisar   # Paso 0: qué falta
    scripts/nuevo-proyecto.sh <slug> --alcance ~/Projects/ideas/<slug>/PROYECTO.md             # crea todo
    ```
-   Pide el token de Netlify (oculto) y crea el sitio; crea el repo; pide un PAT solo para ese repo y la llave de Claude; recién entonces sube **guardian-skeleton** con tu alcance, configura protecciones y tablero, y verifica staging. Si se corta, vuelve a correrlo: salta lo hecho.
+   Pide el token de Netlify (oculto) y crea el sitio; crea el repo; pide un PAT solo para ese repo y la llave de Claude; recién entonces sube **guardian-skeleton** con tu alcance (y tus convenciones, si dejaste un `convenciones.md` junto al `PROYECTO.md`: llegan como `docs/convenciones.md` y Claude las sigue en cada ticket), configura protecciones y tablero, y verifica staging. Si se corta, vuelve a correrlo: salta lo hecho.
 3. **Escenarios y tickets.** En el tablero, *Workflows*: activa *Auto-add* (filtro `is:issue is:open`) y cambia *Pull request linked to issue* a **En revisión**. Luego, en Claude Code dentro del proyecto, corre **`/guardian-planificar`**: abre un PR con los escenarios BDD (en rojo) y el plan; al fusionarlo se crean los tickets y Claude toma el primero solo (espera a que existan).
 
 El proyecto **usa** los workflows del Guardián en una versión fija (`uses: jjhoncv/guardian/.github/workflows/guardian-ci.yml@vX.Y.Z`); para recibir mejoras se sube la versión (Dependabot lo propone).
