@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.19.0](https://github.com/jjhoncv/guardian/compare/v0.18.2...v0.19.0) (2026-10-21)
+
+
+### Funcionalidades
+
+* **#227:** el consultor revisa el plan antes del PR ([#228](https://github.com/jjhoncv/guardian/issues/228)) ([d02e043](https://github.com/jjhoncv/guardian/commit/d02e0433486a8a52f883f788e1a3b57ac2b80981))
+* **#234:** /guardian-idea pregunta el tipo de sitio y deja las herramientas al plan ([#244](https://github.com/jjhoncv/guardian/issues/244)) ([471cbc0](https://github.com/jjhoncv/guardian/commit/471cbc0fd6bdacfe50d51cd337763ecbe63f9050))
+* **#235:** nuevo-proyecto.sh lleva las convenciones del dueño al proyecto ([#245](https://github.com/jjhoncv/guardian/issues/245)) ([6b9dcc1](https://github.com/jjhoncv/guardian/commit/6b9dcc1bb49cc531e450e089300f2539ce36e1f8))
+* **#236:** CI con MySQL temporal y migraciones ([#246](https://github.com/jjhoncv/guardian/issues/246)) ([2491331](https://github.com/jjhoncv/guardian/commit/2491331e8c2707016a44fa1060149427a0473b47))
+* **#237:** migraciones en staging al fusionar y en producción al aprobar el release ([#251](https://github.com/jjhoncv/guardian/issues/251)) ([1cb9040](https://github.com/jjhoncv/guardian/commit/1cb9040dc4974209255fa65eacc52bb178b41170))
+* **#238:** nuevo-proyecto.sh crea proyectos con base de datos MySQL ([#252](https://github.com/jjhoncv/guardian/issues/252)) ([192d8a4](https://github.com/jjhoncv/guardian/commit/192d8a4620c8e3f16a985530a5b6af1a7812fa88))
+
 ## [0.18.2](https://github.com/jjhoncv/guardian/compare/v0.18.1...v0.18.2) (2026-10-10)
 
 
