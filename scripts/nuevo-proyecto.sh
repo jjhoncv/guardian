@@ -275,7 +275,7 @@ else
   if [ "$BASE_DE_DATOS" = mysql ]; then
     [ -d "$TMP/p/opcional/mysql" ] || { echo "  ✗ el esqueleto no trae opcional/mysql: fusiona guardian-skeleton#25"; exit 1; }
     cp -R "$TMP/p/opcional/mysql/." "$TMP/p/"
-    for w in ci deploy release; do
+    for w in ci deploy release claude; do
       perl -pi -e 's|^(    uses: jjhoncv/guardian/\.github/workflows/guardian-'"$w"'\.yml@.*)$|$1\n    with:\n      base_de_datos: mysql|' "$TMP/p/.github/workflows/$w.yml"
     done
   fi
