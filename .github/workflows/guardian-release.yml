@@ -134,6 +134,9 @@ jobs:
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
           MYSQL_SSL: ${{ vars.MYSQL_SSL || '1' }}
         run: |
+          if ! ls .proyecto-db/db/migraciones/*.sql >/dev/null 2>&1; then
+            echo "Sin migraciones todavía: no hace falta la conexión."; rm -rf .guardian-db .proyecto-db; exit 0
+          fi
           if [ -z "$MYSQL_HOST" ]; then
             echo "::error::Faltan los secretos MYSQL_* del Environment production (Settings → Environments → production)."; exit 1
           fi
