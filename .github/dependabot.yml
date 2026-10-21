@@ -38,6 +38,24 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
+  # mysql2 de las migraciones (ADR 0029): mismas reglas.
+  - package-ecosystem: npm
+    directory: /tools/db
+    schedule:
+      interval: weekly
+      day: saturday
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      db:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

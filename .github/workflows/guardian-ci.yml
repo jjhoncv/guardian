@@ -4,6 +4,11 @@ name: Guardián · CI
 
 on:
   workflow_call:
+    inputs:
+      base_de_datos:
+        description: "«mysql» levanta un MySQL 8 temporal, aplica db/migraciones/ y deja MYSQL_* para las pruebas (ADR 0029)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -13,6 +18,23 @@ jobs:
     name: lint, typecheck, pruebas y build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Base temporal solo para este run: se borra al terminar, con datos inventados (ADR 0029).
+    services:
+      mysql:
+        image: ${{ inputs.base_de_datos == 'mysql' && 'mysql:8.0' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: ci
+          MYSQL_DATABASE: ci
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      MYSQL_HOST: ${{ inputs.base_de_datos == 'mysql' && '127.0.0.1' || '' }}
+      MYSQL_PORT: ${{ inputs.base_de_datos == 'mysql' && '3306' || '' }}
+      MYSQL_USER: ${{ inputs.base_de_datos == 'mysql' && 'root' || '' }}
+      MYSQL_PASSWORD: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
+      MYSQL_DATABASE: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -22,6 +44,22 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Migraciones con la herramienta de esta versión del Guardián, antes de cualquier prueba.
+      - if: inputs.base_de_datos == 'mysql'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            tools/db
+            scripts/migraciones.ts
+          path: .guardian-db
+      - if: inputs.base_de_datos == 'mysql'
+        run: |
+          npm ci --prefix .guardian-db/tools/db --ignore-scripts
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-db/tools/db/migrar.ts db/migraciones
+          rm -rf .guardian-db
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
