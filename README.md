@@ -133,7 +133,7 @@ npm run e2e && npm run avance   # escenarios BDD en Chrome y % del alcance en ve
 
 | Workflow | Qué hace |
 |---|---|
-| `guardian-ci.yml` | Lint, typecheck, pruebas, build, escenarios BDD en Chrome y % de avance |
+| `guardian-ci.yml` | Lint, typecheck, pruebas, build, escenarios BDD en Chrome y % de avance. Con `base_de_datos: mysql` levanta un MySQL 8 temporal y aplica `db/migraciones/` antes de las pruebas (ADR 0029) |
 | `guardian-chequeo-pr.yml` | Ticket con escenario (bloquea), tamaño (avisa) y plan válido si el PR trae `plan/tareas.json` |
 | `guardian-deploy.yml` | Preview por PR y staging en `main` (build sin secretos; deploy sin código del proyecto) |
 | `guardian-release.yml` | release-please → producción con aprobación (el build se guarda 14 días) → smoke test → rollback y alerta si falla |

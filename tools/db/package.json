@@ -1,0 +1,9 @@
+{
+  "name": "herramientas-db",
+  "private": true,
+  "type": "module",
+  "description": "Aplica las migraciones de los proyectos con base de datos (ADR 0029). mysql2 fijada por lockfile: el protocolo de MySQL no se escribe a mano.",
+  "dependencies": {
+    "mysql2": "3.24.6"
+  }
+}
