@@ -28,7 +28,7 @@
 | Comando | Dónde lo usas | Para qué |
 |---|---|---|
 | `/guardian` | Aquí o en un proyecto | **Menú:** en qué paso estás, qué falta y el siguiente paso |
-| `/guardian-idea` | Aquí | Idea → ficha → alcance (`PROYECTO.md`) y nombre. No crea nada |
+| `/guardian-idea` | Aquí | Idea → ficha → tipo de sitio (admin, datos, archivos, convenciones, diseño) → alcance (`PROYECTO.md`) y nombre. No crea nada; las herramientas las decide el plan |
 | `scripts/nuevo-proyecto.sh` | Terminal, aquí | Crea el sitio, el repo, los secretos y las protecciones, y sube el esqueleto con tu alcance |
 | `/guardian-planificar` | En el proyecto | Alcance → escenarios BDD + plan de tickets |
 | `@claude` | Comentario en un ticket o PR | Le pides algo a Claude desarrollador (solo te obedece a ti) |
