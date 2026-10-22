@@ -59,6 +59,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # En un PR, la rama del PR: así npm ci instala sus dependencias y no las de main.
+          ref: ${{ github.event.issue.pull_request && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
           fetch-depth: 1
           # Sin el GITHUB_TOKEN en git: así Claude empuja con el token de la App y sus commits disparan CI.
           persist-credentials: false
@@ -98,9 +100,9 @@ jobs:
           # Sonnet 5.5, tope de turnos y solo las herramientas necesarias (ADR 0024).
           claude_args: >-
             --model claude-sonnet-5-5
-            --max-turns 60
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
-            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit. Para agregar una dependencia usa npm install --ignore-scripts --save-exact <paquete> (sin scripts de instalación) y explica en el PR por qué hace falta. Si el proyecto usa MySQL, tienes una base temporal con las migraciones aplicadas; para aplicar una nueva: node /tmp/guardian-db/tools/db/migrar.ts db/migraciones."
+            --max-turns 120
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci:*),Bash(git mv:*),Bash(git rm:*),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
+            --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit. Para agregar una dependencia usa npm install --ignore-scripts --save-exact <paquete> (sin scripts de instalación) y explica en el PR por qué hace falta. Para preparar el commit usa git add -A (no nombres rutas con paréntesis como app/(sitio), el control de permisos las bloquea). Si el proyecto usa MySQL, tienes una base temporal con las migraciones aplicadas; para aplicar una nueva: node /tmp/guardian-db/tools/db/migrar.ts db/migraciones."
 
   # Siguiente tarea sola: al fusionar un PR, o al cerrar el dueño una fase (milestone), elige el ticket con el
   # script de esta versión del Guardián. Al cerrar una fase, la fase actual pasa a ser la siguiente (#204).
@@ -220,13 +222,13 @@ jobs:
             3. Pruebas primero; implementa lo mínimo para poner su escenario en verde. Corre `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` y `npm run e2e`.
             4. Un solo cambio lógico, idealmente menos de 300 líneas.
             5. Abre el PR con `gh pr create`: título `feat(#${{ needs.elegir.outputs.ticket }}): …` y el cuerpo en dos niveles según `.github/pull_request_template.md`: `Closes #${{ needs.elegir.outputs.ticket }}`; **En simple** (qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo en el preview, qué necesitas del dueño, escenarios en verde) y el **Detalle técnico** plegado.
-            Para agregar una dependencia usa `npm install --ignore-scripts --save-exact <paquete>` y explica en el PR por qué hace falta.
+            Para agregar una dependencia usa `npm install --ignore-scripts --save-exact <paquete>` y explica en el PR por qué hace falta. Para preparar el commit usa `git add -A` (no nombres rutas con paréntesis como `app/(sitio)`: el control de permisos las bloquea).
             Si el ticket necesita algo del dueño (cuentas, credenciales, decisiones) que no está, no lo inventes: comenta en el ticket qué falta y termina sin PR.
             Si el proyecto usa MySQL (hay `db/migraciones/`), tienes una base temporal con las migraciones ya aplicadas (variables MYSQL_*); para aplicar una migración nueva: `node /tmp/guardian-db/tools/db/migrar.ts db/migraciones`.
           claude_args: >-
             --model claude-sonnet-5-5
-            --max-turns 60
-            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
+            --max-turns 120
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci:*),Bash(git mv:*),Bash(git rm:*),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
       # Si Claude terminó sin PR o con error, el motivo queda en el ticket (comandos negados, límite de uso…).
       - if: always() && steps.claude.outcome != 'skipped'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
