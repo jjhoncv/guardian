@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/jjhoncv/guardian/compare/v0.19.2...v0.20.0) (2026-10-22)
+
+
+### Funcionalidades
+
+* **#259:** Claude en la nube con la suscripción del dueño ([#260](https://github.com/jjhoncv/guardian/issues/260)) ([160b46e](https://github.com/jjhoncv/guardian/commit/160b46e268a703d042dc81df0a50d022f60e8320))
+
 ## [0.19.2](https://github.com/jjhoncv/guardian/compare/v0.19.1...v0.19.2) (2026-10-21)
 
 
