@@ -207,7 +207,8 @@ jobs:
           mv .guardian-db /tmp/guardian-db
           npm ci --prefix /tmp/guardian-db/tools/db --ignore-scripts
           node /tmp/guardian-db/tools/db/migrar.ts db/migraciones
-      - uses: anthropics/claude-code-action@db77d4d3c98f3f6380e7cd45ffba2342a3dbde3c # v1
+      - id: claude
+        uses: anthropics/claude-code-action@db77d4d3c98f3f6380e7cd45ffba2342a3dbde3c # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
@@ -226,3 +227,25 @@ jobs:
             --model claude-sonnet-5-5
             --max-turns 60
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
+      # Si Claude terminó sin PR o con error, el motivo queda en el ticket (comandos negados, límite de uso…).
+      - if: always() && steps.claude.outcome != 'skipped'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: scripts/informe-claude.ts
+          path: .guardian-informe
+      - if: always() && steps.claude.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TICKET: ${{ needs.elegir.outputs.ticket }}
+        run: |
+          salida="$RUNNER_TEMP/claude-execution-output.json"
+          [ -f "$salida" ] || { echo "Sin salida de Claude."; exit 0; }
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --search "head:feat/$TICKET-" --json number -q 'length')
+          [ "$prs" -gt 0 ] && hay=si || hay=no
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-informe/scripts/informe-claude.ts "$salida" "$TICKET" "$hay" > /tmp/informe.md
+          if [ -s /tmp/informe.md ]; then
+            gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file /tmp/informe.md
+          fi
