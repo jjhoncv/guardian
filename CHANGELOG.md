@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/jjhoncv/guardian/compare/v0.20.0...v0.20.1) (2026-10-22)
+
+
+### Correcciones
+
+* **#262:** si Claude termina un ticket sin PR, el motivo queda en el ticket ([#263](https://github.com/jjhoncv/guardian/issues/263)) ([a093b6b](https://github.com/jjhoncv/guardian/commit/a093b6b432bd9b6f454dfe58a672985901b09863))
+
 ## [0.20.0](https://github.com/jjhoncv/guardian/compare/v0.19.2...v0.20.0) (2026-10-22)
 
 
