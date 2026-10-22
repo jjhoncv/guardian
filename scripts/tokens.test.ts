@@ -35,6 +35,15 @@ describe("tokens por vencer (T5)", () => {
     ]);
   });
 
+  it("el token de suscripción de Claude se renueva con claude setup-token", () => {
+    const p = tokensPorVencer(datos([{ secreto: "CLAUDE_CODE_OAUTH_TOKEN", vence: "2026-11-04" }]), "2026-10-30T13:00:00Z");
+    expect(p[0]).toMatchObject({
+      texto: "CLAUDE_CODE_OAUTH_TOKEN vence en 5 días (2026-11-04)",
+      accion: "En tu terminal: claude setup-token → gh secret set CLAUDE_CODE_OAUTH_TOKEN -R jjhoncv/vitrina y gh variable set VENCE_CLAUDE_CODE_OAUTH_TOKEN",
+      url: "https://code.claude.com/docs/en/github-actions",
+    });
+  });
+
   it("vencido: lo dice", () => {
     const p = tokensPorVencer(datos([{ secreto: "NETLIFY_AUTH_TOKEN", vence: "2026-10-28" }]), "2026-10-30T13:00:00Z");
     expect(p[0]).toMatchObject({ urgente: true, texto: "NETLIFY_AUTH_TOKEN venció hace 2 días (2026-10-28)" });

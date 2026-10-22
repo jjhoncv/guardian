@@ -26,6 +26,8 @@ function renovar(secreto: string, repo: string): { accion: string; url: string }
       return { accion: `Nuevo token en Netlify → gh secret set NETLIFY_AUTH_TOKEN -R ${repo} y gh variable set VENCE_NETLIFY_AUTH_TOKEN`, url: "https://app.netlify.com/user/applications#personal-access-tokens" };
     case "ANTHROPIC_API_KEY":
       return { accion: `Nueva key en el workspace con tope → gh secret set ANTHROPIC_API_KEY -R ${repo} y gh variable set VENCE_ANTHROPIC_API_KEY`, url: "https://console.anthropic.com/settings/keys" };
+    case "CLAUDE_CODE_OAUTH_TOKEN":
+      return { accion: `En tu terminal: claude setup-token → gh secret set CLAUDE_CODE_OAUTH_TOKEN -R ${repo} y gh variable set VENCE_CLAUDE_CODE_OAUTH_TOKEN`, url: "https://code.claude.com/docs/en/github-actions" };
     default:
       return { accion: `Renuévalo → gh secret set ${secreto} -R ${repo}`, url: `https://github.com/${repo}/settings/secrets/actions` };
   }
