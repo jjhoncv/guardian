@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.2](https://github.com/jjhoncv/guardian/compare/v0.20.1...v0.20.2) (2026-10-22)
+
+
+### Correcciones
+
+* **#265:** Claude puede ajustar un PR cuando se lo pides ([#266](https://github.com/jjhoncv/guardian/issues/266)) ([730c785](https://github.com/jjhoncv/guardian/commit/730c7850c110d04746eb7cfa80652228af1c9bbb))
+
 ## [0.20.1](https://github.com/jjhoncv/guardian/compare/v0.20.0...v0.20.1) (2026-10-22)
 
 
