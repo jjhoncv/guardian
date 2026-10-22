@@ -135,7 +135,7 @@ if gh repo view "$REPO" >/dev/null 2>&1; then
   SECRETOS=$(gh secret list -R "$REPO" 2>/dev/null | cut -f1)
   echo "$SECRETOS" | grep -qx NETLIFY_AUTH_TOKEN && HAY_TOKEN_NETLIFY=si
   echo "$SECRETOS" | grep -qx RELEASE_PLEASE_TOKEN && HAY_PAT=si
-  echo "$SECRETOS" | grep -qx ANTHROPIC_API_KEY && HAY_CLAUDE=si
+  echo "$SECRETOS" | grep -qxE "ANTHROPIC_API_KEY|CLAUDE_CODE_OAUTH_TOKEN" && HAY_CLAUDE=si
   SITE_ID=$(gh variable get NETLIFY_SITE_ID -R "$REPO" 2>/dev/null || true)
   [ -n "$SITE_ID" ] && HAY_SITIO=si
   if [ "$VACIO" = no ] && ! gh api "repos/$REPO/contents/.github/workflows/ci.yml" -q .content 2>/dev/null | base64 -d 2>/dev/null | grep -q "$GUARDIAN/.github/workflows/"; then
@@ -157,7 +157,7 @@ printf '  %-22s %-46s %s\n' "Qué" "Dónde se saca" "Empieza con"
   || printf '  %-22s %-46s %s\n' "PAT (solo este repo)" "GitHub → Settings → Developer settings → Fine-grained" "github_pat_"
 [ "$HAY_CLAUDE" = si ] \
   && info "Llave de Claude: ya está en el repo" \
-  || printf '  %-22s %-46s %s\n' "Llave de Claude (API)" "console.anthropic.com → workspace con tope → API Keys" "sk-ant-"
+  || printf '  %-22s %-46s %s\n' "Acceso de Claude" "claude setup-token (suscripción) o API key con tope" "sk-ant-"
 info "El sitio de Netlify ($SITIO) lo crea el script con tu token."
 info "Claude en la nube necesita la GitHub App de Claude con acceso al repo: github.com/apps/claude (te lo recuerdo al final)."
 
@@ -243,23 +243,37 @@ TXT
   unset PAT
 fi
 
-# ───────────────────────── 4b. Llave de Claude (ADR 0024) ─────────────────────────
-titulo "4b · Llave de Claude en la nube (ADR 0024)"
+# ───────────────────────── 4b. Acceso de Claude (ADR 0024 y 0030) ─────────────────────────
+titulo "4b · Acceso de Claude en la nube (ADR 0024 y 0030)"
 if [ "$HAY_CLAUDE" = si ]; then ok "ya estaba"
 else
   cat <<TXT
-  Usa una API key de un workspace con tope de gasto mensual (console.anthropic.com → Workspaces → Limits).
-  Puede ser la misma key en todos tus proyectos: el tope es del workspace.
+  Dos formas (ADR 0030):
+    1) Tu suscripción de Claude (Pro/Max): sin cobro extra; comparte el límite de uso con tu Claude Code local.
+       En otra terminal corre:  claude setup-token   y copia el token (dura 1 año).
+    2) Una API key de un workspace con tope de gasto (console.anthropic.com): se cobra por uso.
 TXT
-  while :; do
-    read -rsp "  Pega la API key de Claude (sk-ant-…, no se ve al escribir; Enter vacío para saltar): " CLAUDE_KEY; echo
-    [ -z "$CLAUDE_KEY" ] && { info "sin llave: @claude no funcionará hasta que guardes ANTHROPIC_API_KEY en el repo"; break; }
-    CODIGO=$(curl -s -o /dev/null -w '%{http_code}' -H "x-api-key: $CLAUDE_KEY" -H "anthropic-version: 2023-06-01" https://api.anthropic.com/v1/models)
-    if [ "$CODIGO" = 200 ]; then
-      printf '%s' "$CLAUDE_KEY" | gh secret set ANTHROPIC_API_KEY -R "$REPO" && ok "ANTHROPIC_API_KEY guardada (válida)"; anotar_vence ANTHROPIC_API_KEY; break
-    fi
-    echo "  ❌ Anthropic rechazó esa llave (HTTP $CODIGO). Prueba de nuevo."
-  done
+  read -rp "  ¿Cuál usas? [1 = suscripción / 2 = API key / Enter = saltar]: " MODO_CLAUDE
+  case "$MODO_CLAUDE" in
+    1)
+      read -rsp "  Pega el token de suscripción (sk-ant-oat…, no se ve al escribir): " CLAUDE_KEY; echo
+      if [ -n "$CLAUDE_KEY" ]; then
+        printf '%s' "$CLAUDE_KEY" | gh secret set CLAUDE_CODE_OAUTH_TOKEN -R "$REPO" && ok "CLAUDE_CODE_OAUTH_TOKEN guardado"
+        VENCE=$(date -v+1y +%F 2>/dev/null || date -d '+1 year' +%F)
+        gh variable set VENCE_CLAUDE_CODE_OAUTH_TOKEN -R "$REPO" --body "$VENCE" >/dev/null && ok "VENCE_CLAUDE_CODE_OAUTH_TOKEN = $VENCE (te avisaré 7 días antes)"
+      else info "sin token: @claude no funcionará hasta que guardes CLAUDE_CODE_OAUTH_TOKEN en el repo"; fi ;;
+    2)
+      while :; do
+        read -rsp "  Pega la API key de Claude (sk-ant-…, no se ve al escribir; Enter vacío para saltar): " CLAUDE_KEY; echo
+        [ -z "$CLAUDE_KEY" ] && { info "sin llave: @claude no funcionará hasta que guardes ANTHROPIC_API_KEY en el repo"; break; }
+        CODIGO=$(curl -s -o /dev/null -w '%{http_code}' -H "x-api-key: $CLAUDE_KEY" -H "anthropic-version: 2023-06-01" https://api.anthropic.com/v1/models)
+        if [ "$CODIGO" = 200 ]; then
+          printf '%s' "$CLAUDE_KEY" | gh secret set ANTHROPIC_API_KEY -R "$REPO" && ok "ANTHROPIC_API_KEY guardada (válida)"; anotar_vence ANTHROPIC_API_KEY; break
+        fi
+        echo "  ❌ Anthropic rechazó esa llave (HTTP $CODIGO). Prueba de nuevo."
+      done ;;
+    *) info "sin acceso de Claude: @claude no funcionará hasta que guardes CLAUDE_CODE_OAUTH_TOKEN o ANTHROPIC_API_KEY" ;;
+  esac
   unset CLAUDE_KEY
 fi
 

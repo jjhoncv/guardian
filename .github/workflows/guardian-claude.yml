@@ -13,9 +13,13 @@ on:
         description: "«mysql» le da a Claude un MySQL 8 temporal con las migraciones aplicadas, como el CI (ADR 0029)"
         type: string
         default: ""
+    # Uno de los dos (ADR 0030): el token de la suscripción del dueño (claude setup-token) o una API key con tope.
+    # Si están los dos, manda la suscripción.
     secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: false
       ANTHROPIC_API_KEY:
-        required: true
+        required: false
 
 permissions:
   contents: read
@@ -84,7 +88,8 @@ jobs:
           node /tmp/guardian-db/tools/db/migrar.ts db/migraciones
       - uses: anthropics/claude-code-action@a26b07d8c778b0c43f64618e5fd29fd0f8af72e8 # v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
           trigger_phrase: "@claude"
           include_comments_by_actor: ${{ github.repository_owner }}
           branch_prefix: "feat/"
@@ -204,7 +209,8 @@ jobs:
           node /tmp/guardian-db/tools/db/migrar.ts db/migraciones
       - uses: anthropics/claude-code-action@a26b07d8c778b0c43f64618e5fd29fd0f8af72e8 # v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
           branch_prefix: "feat/"
           prompt: |
             Desarrolla el ticket #${{ needs.elegir.outputs.ticket }} de este repo, siguiendo CLAUDE.md:
