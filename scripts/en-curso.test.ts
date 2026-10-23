@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comentarioEnCurso, opcionEnCurso } from "./en-curso";
+import { columnaAlTerminar, comentarioEnCurso, opcionDe, opcionEnCurso } from "./en-curso";
 
 describe("tarjeta en curso", () => {
   const opciones = [
@@ -22,5 +22,17 @@ describe("tarjeta en curso", () => {
     const c = comentarioEnCurso(6, "https://github.com/jjhoncv/info-site/actions/runs/1");
     expect(c).toContain("Claude está trabajando en el ticket #6");
     expect(c).toContain("https://github.com/jjhoncv/info-site/actions/runs/1");
+  });
+
+  it("encuentra las columnas «En revisión» y «Por hacer» (o sus nombres en inglés)", () => {
+    expect(opcionDe(opciones, "en-revision")).toBe("c");
+    expect(opcionDe(opciones, "por-hacer")).toBe("a");
+    expect(opcionDe([{ id: "r", name: "In review" }, { id: "t", name: "Todo" }], "en-revision")).toBe("r");
+    expect(opcionDe([{ id: "r", name: "In review" }, { id: "t", name: "Todo" }], "por-hacer")).toBe("t");
+  });
+
+  it("al terminar: con PR va a «En revisión»; sin PR (o con error) vuelve a «Por hacer»", () => {
+    expect(columnaAlTerminar(true)).toBe("en-revision");
+    expect(columnaAlTerminar(false)).toBe("por-hacer");
   });
 });

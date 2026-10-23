@@ -258,7 +258,9 @@ jobs:
           repository: ${{ job.workflow_repository }}
           ref: ${{ job.workflow_sha }}
           persist-credentials: false
-          sparse-checkout: scripts/informe-claude.ts
+          sparse-checkout: |
+            scripts/informe-claude.ts
+            scripts/en-curso.ts
           path: .guardian-informe
       - if: always() && steps.claude.outcome != 'skipped'
         env:
@@ -273,8 +275,15 @@ jobs:
           if [ -s /tmp/informe.md ]; then
             gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file /tmp/informe.md
           fi
+      # Claude terminó: fuera la etiqueta y, con PROJECT_TOKEN, la tarjeta a «En revisión» (abrió PR) o de vuelta a «Por hacer».
       - if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           TICKET: ${{ needs.elegir.outputs.ticket }}
-        run: gh issue edit "$TICKET" --repo "$GITHUB_REPOSITORY" --remove-label en-curso || true
+        run: |
+          gh issue edit "$TICKET" --repo "$GITHUB_REPOSITORY" --remove-label en-curso || true
+          [ -f .guardian-informe/scripts/en-curso.ts ] || exit 0
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --search "head:feat/$TICKET-" --json number -q 'length' || echo 0)
+          [ "$prs" -gt 0 ] && hay=si || hay=no
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-informe/scripts/en-curso.ts --terminar "$TICKET" "$hay"
