@@ -22,7 +22,7 @@ export function exento(pr: Omit<PR, "cuerpo">): string | null {
 
 export function tieneEscenario(cuerpoTicket: string): boolean {
   if (/\*\*Escenario:\*\*\s*\S/.test(cuerpoTicket)) return true;
-  const seccion = cuerpoTicket.match(/###\s*Escenario BDD\s*\n([\s\S]*?)(?=\n###\s|$)/i)?.[1] ?? "";
+  const seccion = cuerpoTicket.match(/###\s*Escenarios? BDD\s*\n([\s\S]*?)(?=\n###\s|$)/i)?.[1] ?? "";
   return /\S/.test(seccion.replace(/_No response_/g, ""));
 }
 

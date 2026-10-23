@@ -16,6 +16,14 @@ export type Tarea = {
   que: string;
   hecho: string;
   necesita?: string;
+  // Opcionales (#271): un ticket completo para que Claude no adivine. Los planes viejos siguen siendo válidos.
+  historia?: string;
+  depende?: string[];
+  reglas?: string[];
+  diseno?: string;
+  datos?: string;
+  pruebas?: string;
+  fuera?: string;
 };
 export type Plan = { fases: Fase[]; tareas: Tarea[] };
 
@@ -34,20 +42,49 @@ export function validarPlan(plan: Plan): string[] {
     vistos.add(t.id);
     if (!t.escenarios.length) errores.push(`${t.id}: tarea sin escenario (regla 1).`);
     if (!fases.has(t.fase)) errores.push(`${t.id}: apunta a la fase ${t.fase}, que no existe en el plan.`);
+    if (t.escenarios.length > 6) errores.push(`${t.id}: tiene ${t.escenarios.length} escenarios; máximo 6 por ticket (pártelo en dos para que el PR siga chico).`);
+    for (const d of t.depende ?? []) {
+      if (d === t.id) errores.push(`${t.id}: depende de sí misma.`);
+      else if (!plan.tareas.some((o) => o.id === d)) errores.push(`${t.id}: depende de ${d}, que no existe en el plan.`);
+    }
   }
   return errores;
 }
 
-export function cuerpoTicket(t: Tarea, f: Fase): string {
+/** `numeros`: id de tarea → número de issue ya creado; `titulos`: id → título (para nombrar dependencias sin ticket). */
+export function cuerpoTicket(t: Tarea, f: Fase, numeros = new Map<string, number>(), titulos = new Map<string, string>()): string {
   const escenarios = t.escenarios.map((e) => "```gherkin\n" + e.gherkin.trim() + "\n```\nEn `" + e.archivo + "`").join("\n\n");
+  const depende = (t.depende ?? []).map((d) => {
+    const n = numeros.get(d);
+    return n ? `- #${n} — ${titulos.get(d) ?? d}` : `- ${d} — ${titulos.get(d) ?? d} (todavía sin ticket)`;
+  });
+  const opcional = (titulo: string, texto?: string) => (texto?.trim() ? [`### ${titulo}\n${texto.trim()}`] : []);
   return [
     `### Fase\nFase ${f.numero} — ${f.nombre}`,
-    `### Escenario BDD\n${escenarios}`,
+    ...opcional("Historia", t.historia),
+    ...opcional("Depende de", depende.join("\n")),
+    `### Escenarios BDD\n${escenarios}`,
     `### Qué se hace\n${t.que}`,
+    ...opcional("Reglas", (t.reglas ?? []).map((r) => `- ${r}`).join("\n")),
+    ...opcional("Diseño", t.diseno),
+    ...opcional("Datos", t.datos),
+    ...opcional("Pruebas esperadas", t.pruebas),
+    ...opcional("Fuera de alcance", t.fuera),
     `### Criterio de hecho\n${t.hecho}`,
     `### Qué necesita del dueño\n${t.necesita?.trim() || "Nada."}`,
     `_Creado desde el plan aprobado (\`plan/tareas.json\`, tarea ${t.id})._\n${marca(t.id)}`,
   ].join("\n\n");
+}
+
+/** El plan es la fuente: si cambió, los tickets abiertos se reescriben (los cerrados quedan como historia). */
+export function cuerposAActualizar(
+  issues: { number: number; state: string; body?: string | null }[],
+  cuerpos: Map<string, string>,
+): { number: number; body: string }[] {
+  return [...cuerpos].flatMap(([id, body]) => {
+    const i = issues.find((x) => (x.body ?? "").includes(marca(id)));
+    return i && i.state === "open" && i.body !== body ? [{ number: i.number, body }] : [];
+  });
 }
 
 /** Fecha objetivo de cada fase (ADR 0026), repartiendo las semanas de PROYECTO.md → Límites. */
@@ -87,7 +124,7 @@ async function main() {
     console.log(`Plan válido: ${plan.fases.length} fases, ${plan.tareas.length} tareas.`);
     return;
   }
-  type Issue = { number: number; body?: string; milestone?: { number: number } | null; pull_request?: unknown };
+  type Issue = { number: number; state: string; body?: string; milestone?: { number: number } | null; pull_request?: unknown };
   const issues: Issue[] = [];
   for (let pagina = 1; ; pagina++) {
     const lote = await api<Issue[]>(`issues?state=all&per_page=100&page=${pagina}`);
@@ -127,15 +164,27 @@ async function main() {
       await api(`issues/${issue.number}`, { method: "PATCH", body: JSON.stringify({ milestone: ms }) });
     }
   }
+  const numeros = new Map<string, number>();
+  for (const t of plan.tareas) {
+    const issue = issues.find((i) => (i.body ?? "").includes(marca(t.id)));
+    if (issue) numeros.set(t.id, issue.number);
+  }
+  const titulos = new Map(plan.tareas.map((t) => [t.id, t.titulo]));
+  const faseDe = (t: Tarea) => plan.fases.find((f) => f.numero === t.fase)!;
   const nuevas = pendientes(plan.tareas, existentes);
   for (const t of nuevas) {
-    const fase = plan.fases.find((f) => f.numero === t.fase)!;
     const issue = await api<{ number: number }>("issues", {
       method: "POST",
-      body: JSON.stringify({ title: t.titulo, body: cuerpoTicket(t, fase), labels: [`fase-${t.fase}`], milestone: milestones.get(t.fase) }),
+      body: JSON.stringify({ title: t.titulo, body: cuerpoTicket(t, faseDe(t), numeros, titulos), labels: [`fase-${t.fase}`], milestone: milestones.get(t.fase) }),
     });
+    numeros.set(t.id, issue.number);
     lineas.push(`- #${issue.number} ${t.id} — ${t.titulo}`);
   }
+  // Con todos los números ya conocidos, los tickets abiertos quedan iguales al plan (dependencias incluidas).
+  const cuerpos = new Map(plan.tareas.map((t) => [t.id, cuerpoTicket(t, faseDe(t), numeros, titulos)]));
+  const cambios = cuerposAActualizar(issues, cuerpos);
+  for (const c of cambios) await api(`issues/${c.number}`, { method: "PATCH", body: JSON.stringify({ body: c.body }) });
+  if (cambios.length) lineas.push(`Actualizados con el plan: ${cambios.map((c) => `#${c.number}`).join(", ")}`);
   lineas.push(`\n${nuevas.length} creados; ${plan.tareas.length - nuevas.length} ya existían.`);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, lineas.join("\n") + "\n");
   console.log(lineas.join("\n"));
