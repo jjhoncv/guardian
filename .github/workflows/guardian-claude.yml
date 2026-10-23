@@ -20,6 +20,9 @@ on:
         required: false
       ANTHROPIC_API_KEY:
         required: false
+      # Opcional: token clásico con permiso «project» para mover la tarjeta del ticket a «En curso».
+      PROJECT_TOKEN:
+        required: false
 
 permissions:
   contents: read
@@ -181,6 +184,25 @@ jobs:
       MYSQL_PASSWORD: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
       MYSQL_DATABASE: ${{ inputs.base_de_datos == 'mysql' && 'ci' || '' }}
     steps:
+      # El dueño ve que Claude empezó: comentario con el link al run, etiqueta en-curso y, con PROJECT_TOKEN, la tarjeta en «En curso».
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: scripts/en-curso.ts
+          path: .guardian-en-curso
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          TICKET: ${{ needs.elegir.outputs.ticket }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create en-curso --repo "$GITHUB_REPOSITORY" --color FBCA04 --description "Claude está trabajando en este ticket" 2>/dev/null || true
+          gh issue edit "$TICKET" --repo "$GITHUB_REPOSITORY" --add-label en-curso
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-en-curso/scripts/en-curso.ts "$TICKET" "$RUN" > /tmp/en-curso.md
+          gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file /tmp/en-curso.md
+          rm -rf .guardian-en-curso
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
@@ -251,3 +273,8 @@ jobs:
           if [ -s /tmp/informe.md ]; then
             gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file /tmp/informe.md
           fi
+      - if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TICKET: ${{ needs.elegir.outputs.ticket }}
+        run: gh issue edit "$TICKET" --repo "$GITHUB_REPOSITORY" --remove-label en-curso || true
