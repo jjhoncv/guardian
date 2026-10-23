@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { elegirSiguiente, type Estado } from "./siguiente-ticket";
+import { dependencias, elegirSiguiente, type Estado } from "./siguiente-ticket";
 
 const base: Estado = {
   milestones: [
@@ -44,5 +44,29 @@ describe("elegirSiguiente", () => {
 
   it("no hay nada que hacer si no quedan tickets abiertos", () => {
     expect(elegirSiguiente({ ...base, milestones: [], issues: [] })).toEqual({ motivo: "No quedan tickets abiertos en ninguna fase." });
+  });
+
+  it("salta los tickets cuyas dependencias siguen abiertas (#11 espera a #10)", () => {
+    const e = { ...base, issues: [{ numero: 2, milestone: 1, depende: [9] }, { numero: 3, milestone: 1 }, { numero: 9, milestone: 2 }] };
+    expect(elegirSiguiente(e)).toEqual({ ticket: 3 });
+  });
+
+  it("una dependencia cerrada (ya no está entre los abiertos) no bloquea", () => {
+    const e = { ...base, issues: [{ numero: 2, milestone: 1, depende: [1] }, { numero: 3, milestone: 1 }] };
+    expect(elegirSiguiente(e)).toEqual({ ticket: 2 });
+  });
+
+  it("si todos esperan a otro ticket, lo dice en vez de tomar uno", () => {
+    const e = { ...base, issues: [{ numero: 2, milestone: 1, depende: [3] }, { numero: 3, milestone: 1 }], prsDeClaude: [{ cierra: [3] }] };
+    expect(elegirSiguiente(e)).toEqual({ motivo: "Los tickets libres de «Fase 1 — Catálogo» esperan a otros: #2 espera a #3." });
+  });
+});
+
+describe("dependencias", () => {
+  it("lee los #N de la sección «Depende de» del ticket, y nada más", () => {
+    const cuerpo = "### Historia\nVer #4\n\n### Depende de\n- #10 — Subida\n- #12 — Tope\n\n### Escenarios BDD\nver #99";
+    expect(dependencias(cuerpo)).toEqual([10, 12]);
+    expect(dependencias("### Depende de\n- T8 — sin ticket (todavía sin ticket)")).toEqual([]);
+    expect(dependencias(null)).toEqual([]);
   });
 });
