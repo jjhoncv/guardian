@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.22.0](https://github.com/jjhoncv/guardian/compare/v0.21.0...v0.22.0) (2026-10-23)
+
+
+### Funcionalidades
+
+* **#271:** tickets completos para que Claude no adivine ([#274](https://github.com/jjhoncv/guardian/issues/274)) ([aeed201](https://github.com/jjhoncv/guardian/commit/aeed201941567ecd31743d43908cd0b518fa3269))
+* **#272:** Claude no toma un ticket cuyas dependencias siguen abiertas ([#275](https://github.com/jjhoncv/guardian/issues/275)) ([2aa068c](https://github.com/jjhoncv/guardian/commit/2aa068cd4a9b0a1872c1d23fd1f421260bf97648))
+* **#273:** la tarjeta pasa a «En revisión» o a «Por hacer» al terminar Claude ([#276](https://github.com/jjhoncv/guardian/issues/276)) ([c8b5752](https://github.com/jjhoncv/guardian/commit/c8b5752e123fd4f893f613636b4fbf92869c7025))
+
 ## [0.21.0](https://github.com/jjhoncv/guardian/compare/v0.20.2...v0.21.0) (2026-10-23)
 
 
