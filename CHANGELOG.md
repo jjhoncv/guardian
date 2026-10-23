@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/jjhoncv/guardian/compare/v0.20.2...v0.21.0) (2026-10-23)
+
+
+### Funcionalidades
+
+* **#268:** el ticket y el tablero muestran cuándo Claude está trabajando ([#269](https://github.com/jjhoncv/guardian/issues/269)) ([61067e4](https://github.com/jjhoncv/guardian/commit/61067e42ae714a7d20c78beebcae1fd3625af543))
+
 ## [0.20.2](https://github.com/jjhoncv/guardian/compare/v0.20.1...v0.20.2) (2026-10-22)
 
 
