@@ -25,6 +25,7 @@ describe("tieneEscenario", () => {
   it("acepta el formulario de tarea y la línea **Escenario:**", () => {
     expect(tieneEscenario("### Escenario BDD\n\n```gherkin\nEscenario: Agregar\n  Dado x\n```")).toBe(true);
     expect(tieneEscenario("**Escenario:** E1 — Proyecto nuevo")).toBe(true);
+    expect(tieneEscenario("### Escenarios BDD\n```gherkin\nEscenario: Agregar\n```")).toBe(true);
   });
   it("rechaza un ticket sin escenario o con la sección vacía", () => {
     expect(tieneEscenario("Hacer el login")).toBe(false);
