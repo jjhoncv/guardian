@@ -2,7 +2,8 @@
 # - «@claude» del dueño en un ticket (o en un PR, para pedir ajustes) → Claude desarrolla en la nube siguiendo el
 #   CLAUDE.md del proyecto (pruebas primero) y abre el PR con «Closes #N».
 # - Al fusionar un PR en main → si hay menos de 2 PRs de Claude esperando revisión, toma solo el siguiente
-#   ticket de la fase actual.
+#   ticket de la fase actual. Al cerrar el dueño una fase, se relanza como workflow_dispatch y toma el primero
+#   de la siguiente (el llamador necesita workflow_dispatch y actions: write).
 # Claude no puede aprobar ni fusionar: main exige la aprobación del dueño.
 name: Guardián · Claude
 
@@ -107,13 +108,33 @@ jobs:
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(npm ci:*),Bash(git mv:*),Bash(git rm:*),Bash(npm install --ignore-scripts:*),Bash(npm run:*),Bash(npm test:*),Bash(npx bddgen:*),Bash(npx playwright:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh issue view:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(node /tmp/guardian-db/tools/db/migrar.ts:*)"
             --append-system-prompt "Si te activaron en un issue y subiste cambios a una rama, abre tú el PR con gh pr create: título feat(#N): … y el cuerpo en dos niveles según .github/pull_request_template.md (Closes #N; En simple: qué cambia para el usuario, diagrama si hay un flujo, cómo probarlo, qué necesitas del dueño; y el Detalle técnico plegado). No dejes solo un enlace para crearlo. Si cambias el código de un PR, actualiza su descripción con gh pr edit. Para agregar una dependencia usa npm install --ignore-scripts --save-exact <paquete> (sin scripts de instalación) y explica en el PR por qué hace falta. Para preparar el commit usa git add -A (no nombres rutas con paréntesis como app/(sitio), el control de permisos las bloquea). Si el proyecto usa MySQL, tienes una base temporal con las migraciones aplicadas; para aplicar una nueva: node /tmp/guardian-db/tools/db/migrar.ts db/migraciones."
 
-  # Siguiente tarea sola: al fusionar un PR, o al cerrar el dueño una fase (milestone), elige el ticket con el
+  # Al cerrar el dueño una fase (milestone), la acción de Claude no acepta ese evento («Unsupported event type:
+  # milestone», #279): se relanza este mismo workflow como workflow_dispatch, que sí acepta, y ahí se elige el ticket.
+  relanzar:
+    name: relanzar para la fase siguiente
+    if: github.event_name == 'milestone' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # GITHUB_WORKFLOW_REF es el del llamador del proyecto: dueño/repo/.github/workflows/claude.yml@refs/...
+          archivo=$(basename "${GITHUB_WORKFLOW_REF%@*}")
+          if ! gh workflow run "$archivo" -R "$GITHUB_REPOSITORY" --ref "${{ github.event.repository.default_branch }}"; then
+            echo "::error::No pude relanzar $archivo. Su llamador necesita «workflow_dispatch:» en «on:» y «actions: write» en «permissions:» (Guardián #279)."
+            exit 1
+          fi
+
+  # Siguiente tarea sola: al fusionar un PR, o al relanzarse tras cerrar el dueño una fase, elige el ticket con el
   # script de esta versión del Guardián. Al cerrar una fase, la fase actual pasa a ser la siguiente (#204).
   elegir:
     name: siguiente ticket
     if: >-
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      (github.event_name == 'milestone' && github.event.action == 'closed')
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
