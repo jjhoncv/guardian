@@ -1,5 +1,6 @@
 # Guardián · Deploy reutilizable: preview por PR (pr-N) y staging en main, en el sitio de Netlify del proyecto
-# (ADR 0008). El build (código del proyecto) corre sin secretos; el deploy usa el token y no ejecuta código del repo.
+# (ADR 0008). Con base_de_datos: mysql, cada preview tiene su propia base (#282); el llamador del proyecto
+# escucha también pull_request «closed» para borrarla. El build (código del proyecto) corre sin secretos; el deploy usa el token y no ejecuta código del repo.
 name: Guardián · Deploy
 
 on:
@@ -14,15 +15,114 @@ permissions:
   contents: read
 
 jobs:
+  # Base propia por PR (#282): <repo>_pr_<N> en el cluster de staging, vacía y migrada con el SQL del PR en cada
+  # deploy. Usa el usuario «preview» del Environment `preview`, que solo puede tocar bases <repo>_pr_*. Sin esos
+  # secretos, el preview sigue con la base de staging. No corre código del proyecto: solo su SQL.
+  base_preview:
+    name: base del preview
+    if: >-
+      inputs.base_de_datos == 'mysql' && vars.NETLIFY_SITE_ID != '' &&
+      github.event_name == 'pull_request' && github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: preview
+    outputs:
+      nombre: ${{ steps.base.outputs.nombre }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          sparse-checkout: db/migraciones
+          path: .proyecto-db
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ (job.workflow_repository == github.repository && github.event.pull_request.base.sha) || job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            tools/db
+            scripts/migraciones.ts
+            scripts/base-preview.ts
+          path: .guardian-db
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - id: base
+        env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_SSL: ${{ vars.MYSQL_SSL || '1' }}
+          PR: ${{ github.event.number }}
+        run: |
+          if [ -z "$MYSQL_HOST" ]; then
+            echo "::notice::El Environment preview no tiene MYSQL_*: este preview usa la base de staging (sus tablas nuevas no existen ahí)."
+            exit 0
+          fi
+          nombre=$(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --input-type=module -e \
+            "import { nombreBasePreview } from './.guardian-db/scripts/base-preview.ts'; console.log(nombreBasePreview(process.env.GITHUB_REPOSITORY, process.env.PR))")
+          npm ci --prefix .guardian-db/tools/db --ignore-scripts
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-db/tools/db/base-preview.ts crear "$nombre"
+          if ls .proyecto-db/db/migraciones/*.sql >/dev/null 2>&1; then
+            MYSQL_DATABASE="$nombre" node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-db/tools/db/migrar.ts .proyecto-db/db/migraciones
+          fi
+          echo "nombre=$nombre" >> "$GITHUB_OUTPUT"
+
+  # Al cerrar el PR (fusionado o no), su base de preview se borra.
+  borrar_base_preview:
+    name: borrar la base del preview
+    if: >-
+      inputs.base_de_datos == 'mysql' && github.event_name == 'pull_request' && github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: preview
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            tools/db
+            scripts/base-preview.ts
+          path: .guardian-db
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_SSL: ${{ vars.MYSQL_SSL || '1' }}
+          PR: ${{ github.event.number }}
+        run: |
+          [ -n "$MYSQL_HOST" ] || { echo "Sin base de preview: nada que borrar."; exit 0; }
+          nombre=$(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --input-type=module -e \
+            "import { nombreBasePreview } from './.guardian-db/scripts/base-preview.ts'; console.log(nombreBasePreview(process.env.GITHUB_REPOSITORY, process.env.PR))")
+          npm ci --prefix .guardian-db/tools/db --ignore-scripts
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .guardian-db/tools/db/base-preview.ts borrar "$nombre"
+
   build:
     name: build para Netlify
+    needs: base_preview
     # Sin NETLIFY_SITE_ID no hay a dónde desplegar. Forks y Dependabot no tienen acceso a los secretos.
+    # Corre aunque base_preview se salte (push a main, o sin base de datos); no si falló.
     if: >-
-      vars.NETLIFY_SITE_ID != '' && (
+      !cancelled() && needs.base_preview.result != 'failure' &&
+      vars.NETLIFY_SITE_ID != '' && github.event.action != 'closed' && (
         github.event_name == 'push' ||
         (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Solo el nombre de la base del PR (no es secreto): el proyecto lo deja fijo en el build del preview
+      # (next.config → env). Vacío en staging y producción.
+      MYSQL_DATABASE_PREVIEW: ${{ needs.base_preview.outputs.nombre }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
