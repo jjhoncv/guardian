@@ -24,7 +24,11 @@
     "jjhoncv/info-site|deploy-urgente|https://github.com/jjhoncv/info-site/actions/runs/39960341533": "2026-10-24T00:07:22.337Z",
     "jjhoncv/info-site|pr|https://github.com/jjhoncv/info-site/pull/61": "2026-10-24T00:07:22.337Z",
     "jjhoncv/info-site|pregunta|https://github.com/jjhoncv/info-site/issues/13#issuecomment-6366346858": "2026-10-24T00:07:22.337Z",
-    "jjhoncv/info-site|claude|https://github.com/jjhoncv/info-site/pull/61": "2026-10-24T00:07:22.337Z"
+    "jjhoncv/info-site|claude|https://github.com/jjhoncv/info-site/pull/61": "2026-10-24T00:07:22.337Z",
+    "jjhoncv/guardian|release|https://github.com/jjhoncv/guardian/pull/281": "2026-10-24T13:07:16.941Z",
+    "jjhoncv/info-site|pr|https://github.com/jjhoncv/info-site/pull/64": "2026-10-24T13:07:16.941Z",
+    "jjhoncv/info-site|release|https://github.com/jjhoncv/info-site/pull/65": "2026-10-24T13:07:16.941Z",
+    "jjhoncv/info-site|claude|https://github.com/jjhoncv/info-site/pull/64": "2026-10-24T13:07:16.941Z"
   },
   "colores": {
     "jjhoncv/guardian": "verde",
@@ -35,7 +39,7 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 0,
+      "desvio": 1,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
@@ -52,9 +56,10 @@
     }
   },
   "semanal": {
-    "jjhoncv/guardian": 3,
-    "jjhoncv/vencimientos": -6,
-    "jjhoncv/vitrina": -31
+    "jjhoncv/guardian": 1,
+    "jjhoncv/vencimientos": 1,
+    "jjhoncv/vitrina": -24,
+    "jjhoncv/info-site": -8
   },
   "hechos": {
     "2026-10-10|noche": "2026-10-11T00:07:15.351Z",
@@ -79,6 +84,7 @@
     "2026-10-22|manana": "2026-10-22T13:07:18.376Z",
     "2026-10-22|noche": "2026-10-23T00:07:21.989Z",
     "2026-10-23|manana": "2026-10-23T13:07:19.780Z",
-    "2026-10-23|noche": "2026-10-24T00:07:22.337Z"
+    "2026-10-23|noche": "2026-10-24T00:07:22.337Z",
+    "2026-10-24|semanal": "2026-10-24T13:07:16.941Z"
   }
 }
