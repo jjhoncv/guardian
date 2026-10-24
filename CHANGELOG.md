@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.1](https://github.com/jjhoncv/guardian/compare/v0.22.0...v0.22.1) (2026-10-24)
+
+
+### Correcciones
+
+* **#279:** al cerrar una fase, Claude arranca ([#280](https://github.com/jjhoncv/guardian/issues/280)) ([ce68967](https://github.com/jjhoncv/guardian/commit/ce689672d0d1f4368d0b0b3a78d25fb022001fbf))
+
 ## [0.22.0](https://github.com/jjhoncv/guardian/compare/v0.21.0...v0.22.0) (2026-10-23)
 
 
