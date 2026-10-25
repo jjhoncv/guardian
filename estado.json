@@ -10,14 +10,22 @@
     "porcentaje": 86
   },
   "salud": {
-    "color": "verde",
-    "emoji": "🟢",
-    "motivos": [],
-    "alertas": [],
-    "diasAtraso": 0,
+    "color": "amarillo",
+    "emoji": "🟡",
+    "motivos": [
+      "«Fase 6 — Base de datos» lleva 1 día de atraso"
+    ],
+    "alertas": [
+      {
+        "gravedad": "amarillo",
+        "texto": "«Fase 6 — Base de datos» lleva 1 día de atraso",
+        "accion": "Decide: achicar el alcance de la fase o reprogramar su fecha"
+      }
+    ],
+    "diasAtraso": 1,
     "pausa": false
   },
-  "actualizado": "2026-10-24T14:22:28.009Z",
+  "actualizado": "2026-10-25T14:54:30.866Z",
   "vencimientos": [
     {
       "secreto": "GUARDIAN_DESPERTADOR_TOKEN",
