@@ -28,30 +28,32 @@
     "jjhoncv/guardian|release|https://github.com/jjhoncv/guardian/pull/281": "2026-10-24T13:07:16.941Z",
     "jjhoncv/info-site|pr|https://github.com/jjhoncv/info-site/pull/64": "2026-10-24T13:07:16.941Z",
     "jjhoncv/info-site|release|https://github.com/jjhoncv/info-site/pull/65": "2026-10-24T13:07:16.941Z",
-    "jjhoncv/info-site|claude|https://github.com/jjhoncv/info-site/pull/64": "2026-10-24T13:07:16.941Z"
+    "jjhoncv/info-site|claude|https://github.com/jjhoncv/info-site/pull/64": "2026-10-24T13:07:16.941Z",
+    "jjhoncv/guardian|foco|«Fase # — Base de datos»: el plazo va más rápido que el trabajo (# % del tiempo, # % hecho)": "2026-10-25T00:07:16.555Z",
+    "jjhoncv/info-site|pr-urgente|https://github.com/jjhoncv/info-site/pull/61": "2026-10-25T00:07:16.555Z"
   },
   "colores": {
     "jjhoncv/guardian": "verde",
     "jjhoncv/vencimientos": "verde",
     "jjhoncv/vitrina": "verde",
     "jjhoncv/chamba": "verde",
-    "jjhoncv/info-site": "verde"
+    "jjhoncv/info-site": "amarillo"
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 1,
+      "desvio": 2,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 1,
+      "desvio": 2,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -24,
+      "desvio": -23,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": -8,
+      "desvio": -7,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
@@ -85,6 +87,7 @@
     "2026-10-22|noche": "2026-10-23T00:07:21.989Z",
     "2026-10-23|manana": "2026-10-23T13:07:19.780Z",
     "2026-10-23|noche": "2026-10-24T00:07:22.337Z",
-    "2026-10-24|semanal": "2026-10-24T13:07:16.941Z"
+    "2026-10-24|semanal": "2026-10-24T13:07:16.941Z",
+    "2026-10-24|noche": "2026-10-25T00:07:16.555Z"
   }
 }
