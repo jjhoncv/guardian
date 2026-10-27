@@ -32,7 +32,8 @@
     "jjhoncv/guardian|foco|«Fase # — Base de datos»: el plazo va más rápido que el trabajo (# % del tiempo, # % hecho)": "2026-10-25T00:07:16.555Z",
     "jjhoncv/info-site|pr-urgente|https://github.com/jjhoncv/info-site/pull/61": "2026-10-25T00:07:16.555Z",
     "jjhoncv/guardian|foco|«Fase # — Base de datos» lleva # día de atraso": "2026-10-26T13:07:22.901Z",
-    "jjhoncv/info-site|pr-urgente|https://github.com/jjhoncv/info-site/pull/64": "2026-10-26T13:07:22.901Z"
+    "jjhoncv/info-site|pr-urgente|https://github.com/jjhoncv/info-site/pull/64": "2026-10-26T13:07:22.901Z",
+    "jjhoncv/guardian|foco|«Fase # — Base de datos» lleva # días de atraso": "2026-10-27T00:07:14.249Z"
   },
   "colores": {
     "jjhoncv/guardian": "amarillo",
@@ -43,19 +44,19 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 3,
+      "desvio": 4,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 3,
+      "desvio": 4,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -22,
+      "desvio": -21,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": -6,
+      "desvio": -5,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
@@ -90,6 +91,7 @@
     "2026-10-23|noche": "2026-10-24T00:07:22.337Z",
     "2026-10-24|semanal": "2026-10-24T13:07:16.941Z",
     "2026-10-24|noche": "2026-10-25T00:07:16.555Z",
-    "2026-10-26|manana": "2026-10-26T13:07:22.901Z"
+    "2026-10-26|manana": "2026-10-26T13:07:22.901Z",
+    "2026-10-26|noche": "2026-10-27T00:07:14.249Z"
   }
 }
