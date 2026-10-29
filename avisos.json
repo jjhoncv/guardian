@@ -37,7 +37,7 @@
     "jjhoncv/info-site|foco|«Fase # — Portada y proyectos»: el plazo va más rápido que el trabajo (# % del tiempo, # % hecho)": "2026-10-27T13:07:17.555Z"
   },
   "colores": {
-    "jjhoncv/guardian": "amarillo",
+    "jjhoncv/guardian": "rojo",
     "jjhoncv/vencimientos": "verde",
     "jjhoncv/vitrina": "verde",
     "jjhoncv/chamba": "verde",
@@ -45,19 +45,19 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 4,
+      "desvio": 6,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 4,
+      "desvio": 6,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -21,
+      "desvio": -19,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": -5,
+      "desvio": -3,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
@@ -92,6 +92,7 @@
     "2026-10-26|noche": "2026-10-27T00:07:14.249Z",
     "2026-10-27|manana": "2026-10-27T13:07:17.555Z",
     "2026-10-27|noche": "2026-10-28T00:07:31.520Z",
-    "2026-10-28|manana": "2026-10-28T13:07:16.221Z"
+    "2026-10-28|manana": "2026-10-28T13:07:16.221Z",
+    "2026-10-28|noche": "2026-10-29T00:07:15.566Z"
   }
 }
