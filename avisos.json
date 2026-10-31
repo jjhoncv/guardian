@@ -36,7 +36,9 @@
     "jjhoncv/guardian|foco|«Fase # — Base de datos» lleva # días de atraso": "2026-10-27T00:07:14.249Z",
     "jjhoncv/info-site|foco|«Fase # — Portada y proyectos»: el plazo va más rápido que el trabajo (# % del tiempo, # % hecho)": "2026-10-27T13:07:17.555Z",
     "jjhoncv/info-site|token|https://console.anthropic.com/settings/keys": "2026-10-29T13:07:15.933Z",
-    "jjhoncv/vencimientos|token|https://console.anthropic.com/settings/keys": "2026-10-29T13:07:15.933Z"
+    "jjhoncv/vencimientos|token|https://console.anthropic.com/settings/keys": "2026-10-29T13:07:15.933Z",
+    "jjhoncv/info-site|token|https://app.netlify.com/user/applications#personal-access-tokens": "2026-10-31T13:07:15.217Z",
+    "jjhoncv/vencimientos|token|https://app.netlify.com/user/applications#personal-access-tokens": "2026-10-31T13:07:15.217Z"
   },
   "colores": {
     "jjhoncv/guardian": "rojo",
@@ -47,31 +49,29 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 6,
+      "desvio": 8,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 6,
+      "desvio": 8,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -19,
+      "desvio": -17,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": -3,
+      "desvio": -1,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
   "semanal": {
-    "jjhoncv/guardian": 1,
-    "jjhoncv/vencimientos": 1,
-    "jjhoncv/vitrina": -24,
-    "jjhoncv/info-site": -8
+    "jjhoncv/guardian": 8,
+    "jjhoncv/vencimientos": 8,
+    "jjhoncv/vitrina": -17,
+    "jjhoncv/info-site": -1
   },
   "hechos": {
-    "2026-10-16|manana": "2026-10-16T13:07:14.218Z",
-    "2026-10-16|noche": "2026-10-17T00:07:15.476Z",
     "2026-10-17|semanal": "2026-10-17T13:07:13.298Z",
     "2026-10-17|noche": "2026-10-18T00:07:11.454Z",
     "2026-10-19|manana": "2026-10-19T13:07:13.185Z",
@@ -95,6 +95,7 @@
     "2026-10-29|manana": "2026-10-29T13:07:15.933Z",
     "2026-10-29|noche": "2026-10-30T00:07:19.646Z",
     "2026-10-30|manana": "2026-10-30T13:07:15.306Z",
-    "2026-10-30|noche": "2026-10-31T00:07:17.331Z"
+    "2026-10-30|noche": "2026-10-31T00:07:17.331Z",
+    "2026-10-31|semanal": "2026-10-31T13:07:15.217Z"
   }
 }
