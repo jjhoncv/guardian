@@ -13,19 +13,19 @@
     "color": "rojo",
     "emoji": "🔴",
     "motivos": [
-      "«Fase 6 — Base de datos» lleva 9 días de atraso"
+      "«Fase 6 — Base de datos» lleva 10 días de atraso"
     ],
     "alertas": [
       {
         "gravedad": "rojo",
-        "texto": "«Fase 6 — Base de datos» lleva 9 días de atraso",
+        "texto": "«Fase 6 — Base de datos» lleva 10 días de atraso",
         "accion": "Decide: achicar el alcance de la fase o reprogramar su fecha"
       }
     ],
-    "diasAtraso": 9,
+    "diasAtraso": 10,
     "pausa": false
   },
-  "actualizado": "2026-11-02T20:40:12.394Z",
+  "actualizado": "2026-11-03T18:18:17.502Z",
   "vencimientos": [
     {
       "secreto": "GUARDIAN_DESPERTADOR_TOKEN",
