@@ -38,7 +38,9 @@
     "jjhoncv/info-site|token|https://console.anthropic.com/settings/keys": "2026-10-29T13:07:15.933Z",
     "jjhoncv/vencimientos|token|https://console.anthropic.com/settings/keys": "2026-10-29T13:07:15.933Z",
     "jjhoncv/info-site|token|https://app.netlify.com/user/applications#personal-access-tokens": "2026-10-31T13:07:15.217Z",
-    "jjhoncv/vencimientos|token|https://app.netlify.com/user/applications#personal-access-tokens": "2026-10-31T13:07:15.217Z"
+    "jjhoncv/vencimientos|token|https://app.netlify.com/user/applications#personal-access-tokens": "2026-10-31T13:07:15.217Z",
+    "jjhoncv/info-site|token-urgente|https://console.anthropic.com/settings/keys": "2026-11-03T13:07:15.218Z",
+    "jjhoncv/vencimientos|token-urgente|https://console.anthropic.com/settings/keys": "2026-11-03T13:07:15.218Z"
   },
   "colores": {
     "jjhoncv/guardian": "rojo",
@@ -49,19 +51,19 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 8,
+      "desvio": 11,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 8,
+      "desvio": 11,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -17,
+      "desvio": -14,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": -1,
+      "desvio": 2,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
@@ -72,8 +74,6 @@
     "jjhoncv/info-site": -1
   },
   "hechos": {
-    "2026-10-19|manana": "2026-10-19T13:07:13.185Z",
-    "2026-10-19|noche": "2026-10-20T00:07:12.234Z",
     "2026-10-20|manana": "2026-10-20T13:07:13.093Z",
     "2026-10-20|noche": "2026-10-21T00:07:16.281Z",
     "2026-10-21|manana": "2026-10-21T13:07:16.598Z",
@@ -97,6 +97,7 @@
     "2026-10-31|semanal": "2026-10-31T13:07:15.217Z",
     "2026-10-31|noche": "2026-11-01T00:07:16.588Z",
     "2026-11-02|manana": "2026-11-02T13:07:16.941Z",
-    "2026-11-02|noche": "2026-11-03T00:07:16.336Z"
+    "2026-11-02|noche": "2026-11-03T00:07:16.336Z",
+    "2026-11-03|manana": "2026-11-03T13:07:15.218Z"
   }
 }
