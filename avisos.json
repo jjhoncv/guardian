@@ -43,7 +43,8 @@
     "jjhoncv/vencimientos|token-urgente|https://console.anthropic.com/settings/keys": "2026-11-03T13:07:15.218Z",
     "jjhoncv/info-site|token-urgente|https://app.netlify.com/user/applications#personal-access-tokens": "2026-11-05T13:07:16.891Z",
     "jjhoncv/vencimientos|token-urgente|https://app.netlify.com/user/applications#personal-access-tokens": "2026-11-05T13:07:16.891Z",
-    "jjhoncv/info-site|foco|«Fase # — Portada y proyectos» lleva # día de atraso": "2026-11-13T00:07:18.430Z"
+    "jjhoncv/info-site|foco|«Fase # — Portada y proyectos» lleva # día de atraso": "2026-11-13T00:07:18.430Z",
+    "jjhoncv/info-site|foco|«Fase # — Portada y proyectos» lleva # días de atraso": "2026-11-14T00:07:16.188Z"
   },
   "colores": {
     "jjhoncv/guardian": "rojo",
@@ -54,19 +55,19 @@
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 21,
+      "desvio": 22,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 21,
+      "desvio": 22,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -4,
+      "desvio": -3,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": 12,
+      "desvio": 13,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
@@ -101,6 +102,7 @@
     "2026-11-11|noche": "2026-11-12T00:07:15.501Z",
     "2026-11-12|manana": "2026-11-12T13:07:18.342Z",
     "2026-11-12|noche": "2026-11-13T00:07:18.430Z",
-    "2026-11-13|manana": "2026-11-13T13:07:18.466Z"
+    "2026-11-13|manana": "2026-11-13T13:07:18.466Z",
+    "2026-11-13|noche": "2026-11-14T00:07:16.188Z"
   }
 }
