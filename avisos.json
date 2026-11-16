@@ -51,23 +51,23 @@
     "jjhoncv/vencimientos": "verde",
     "jjhoncv/vitrina": "verde",
     "jjhoncv/chamba": "verde",
-    "jjhoncv/info-site": "amarillo"
+    "jjhoncv/info-site": "rojo"
   },
   "curvas": {
     "jjhoncv/guardian": {
-      "desvio": 22,
+      "desvio": 24,
       "fase": "Fase 6 — Base de datos"
     },
     "jjhoncv/vencimientos": {
-      "desvio": 22,
+      "desvio": 24,
       "fase": null
     },
     "jjhoncv/vitrina": {
-      "desvio": -3,
+      "desvio": -1,
       "fase": null
     },
     "jjhoncv/info-site": {
-      "desvio": 13,
+      "desvio": 15,
       "fase": "Fase 2 — Portada y proyectos"
     }
   },
@@ -78,8 +78,6 @@
     "jjhoncv/info-site": 13
   },
   "hechos": {
-    "2026-10-31|semanal": "2026-10-31T13:07:15.217Z",
-    "2026-10-31|noche": "2026-11-01T00:07:16.588Z",
     "2026-11-02|manana": "2026-11-02T13:07:16.941Z",
     "2026-11-02|noche": "2026-11-03T00:07:16.336Z",
     "2026-11-03|manana": "2026-11-03T13:07:15.218Z",
@@ -103,6 +101,7 @@
     "2026-11-13|manana": "2026-11-13T13:07:18.466Z",
     "2026-11-13|noche": "2026-11-14T00:07:16.188Z",
     "2026-11-14|semanal": "2026-11-14T13:07:15.835Z",
-    "2026-11-14|noche": "2026-11-15T00:07:13.795Z"
+    "2026-11-14|noche": "2026-11-15T00:07:13.795Z",
+    "2026-11-16|manana": "2026-11-16T13:07:15.541Z"
   }
 }
